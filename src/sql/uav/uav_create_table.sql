@@ -12,7 +12,7 @@ CREATE TABLE "uav" (
     -- скорость полёта м/c
     "uav_flight_speed" DECIMAL(4, 3) NOT NULL CHECK (uav_flight_speed >= 0),
     -- минимальная высота полёта м.
-    "uav_minimum_altitude" DECIMAL(4, 3) DEFAULT 0 NOT NULL CHECK (uav_minimum_altitude >= 0),
+    "uav_min_altitude" DECIMAL(4, 3) DEFAULT 0 NOT NULL CHECK (uav_minimum_altitude >= 0),
     -- максимальная высота полёта м.
     "uav_max_altitude" DECIMAL(4, 3) DEFAULT 0 NOT NULL CHECK (uav_max_altitude >= 0),
-);
+)
