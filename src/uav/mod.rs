@@ -9,7 +9,7 @@ pub mod uav_mod {
         pub flight_duration: u64,
         pub takeoff_speed: f64,
         pub flight_speed: f64,
-        pub minimum_altitude: f64,
+        pub min_altitude: f64,
         pub max_altitude: f64,
     }
 
@@ -20,7 +20,7 @@ pub mod uav_mod {
             flight_duration: u64,
             takeoff_speed: f64,
             flight_speed: f64,
-            minimum_altitude: f64,
+            min_altitude: f64,
             max_altitude: f64,
         ) -> Uav {
             Uav {
@@ -30,7 +30,7 @@ pub mod uav_mod {
                 flight_duration,
                 takeoff_speed,
                 flight_speed,
-                minimum_altitude,
+                min_altitude,
                 max_altitude,
             }
         }
@@ -42,9 +42,10 @@ pub mod uav_mod {
         pub fn land(&self) {
             println!("{} is landing!", self.name);
         }
+        
         pub fn sql_create_table(conn: &Connection) {
             conn.execute(
-                "CREATE TABLE uav (
+                "CREATE TABLE IF NOT EXISTS uav (
                     uav_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                     uav_name TEXT NOT NULL,
                     uav_max_payload_mass INTEGER NOT NULL CHECK (uav_max_payload_mass >= 0),
@@ -60,8 +61,6 @@ pub mod uav_mod {
         }
 
         pub fn sql_add_to_db(&self, conn: &Connection) -> Result<()> {
-            
-            
             conn.execute(
                 "INSERT INTO uav (
                     uav_name,
@@ -78,8 +77,35 @@ pub mod uav_mod {
                     &self.flight_duration,
                     &self.takeoff_speed,
                     &self.flight_speed,
-                    &self.minimum_altitude,
+                    &self.min_altitude,
                     &self.max_altitude,
+                ),
+            )
+            .unwrap();
+            Ok(())
+        }
+
+        pub fn sql_update(&self, conn: &Connection) -> Result<()> {
+            conn.execute(
+                "
+                    UPDATE uav SET
+                        uav_name = ?1,
+                        uav_max_payload_mass = ?2,
+                        uav_flight_duration = ?3,
+                        uav_takeoff_speed = ?4,
+                        uav_flight_speed = ?5,
+                        uav_min_altitude = ?6,
+                        uav_max_altitude = ?7
+                    WHERE uav_id = ?8",
+                (
+                    &self.name,
+                    &self.max_payload_mass,
+                    &self.flight_duration,
+                    &self.takeoff_speed,
+                    &self.flight_speed,
+                    &self.min_altitude,
+                    &self.max_altitude,
+                    &self.id,
                 ),
             )
             .unwrap();
@@ -113,7 +139,7 @@ pub mod uav_mod {
                         flight_duration: row.get(3)?,
                         takeoff_speed: row.get(4)?,
                         flight_speed: row.get(5)?,
-                        minimum_altitude: row.get(6)?,
+                        min_altitude: row.get(6)?,
                         max_altitude: row.get(7)?,
                     })
                 })
