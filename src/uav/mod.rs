@@ -3,14 +3,14 @@ pub mod uav_mod {
 
     #[derive(Debug)]
     pub struct Uav {
-        id: u64,
-        pub name: String,
-        pub max_payload_mass: u64,
-        pub flight_duration: u64,
-        pub takeoff_speed: f64,
-        pub flight_speed: f64,
-        pub min_altitude: f64,
-        pub max_altitude: f64,
+        id: u64,                   // uav id
+        pub name: String,          // uav name
+        pub max_payload_mass: u64, // maximum payload in grams
+        pub flight_duration: u64,  // average flight duration in seconds
+        pub takeoff_speed: f64,    // average takeoff speed in meters per second
+        pub flight_speed: f64,     // average flight speed in meters per second
+        pub min_altitude: f64,     // minimum safe flight altitude in meters
+        pub max_altitude: f64,     // maximum safe flight altitude in meters
     }
 
     impl Uav {
@@ -42,7 +42,7 @@ pub mod uav_mod {
         pub fn land(&self) {
             println!("{} is landing!", self.name);
         }
-        
+
         pub fn sql_create_table(conn: &Connection) {
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS uav (

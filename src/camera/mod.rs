@@ -3,20 +3,15 @@ pub mod camera_mod {
 
     #[derive(Debug)]
     pub struct Camera {
-        id: u64,
-        pub name: String,
-        pub mass: u64,
-        pub fov_x: u16,
-        pub fov_y: u16,
+        id: u64,          // id
+        pub name: String, // name
+        pub mass: u64,    // mass in grams
+        pub fov_x: u16,   // x-axis viewing angle in degrees
+        pub fov_y: u16,   // y-axis viewing angle in degrees
     }
 
     impl Camera {
-        pub fn new(
-            name: String,
-            mass: u64,
-            fov_x: u16,
-            fov_y: u16,
-        ) -> Camera {
+        pub fn new(name: String, mass: u64, fov_x: u16, fov_y: u16) -> Camera {
             Camera {
                 id: 0,
                 name,
@@ -58,12 +53,7 @@ pub mod camera_mod {
                     camera_fov_x,
                     camera_fov_y
                 ) VALUES (?1, ?2, ?3, ?4)",
-                (
-                    &self.name,
-                    &self.mass,
-                    &self.fov_x,
-                    &self.fov_y,
-                ),
+                (&self.name, &self.mass, &self.fov_x, &self.fov_y),
             )
             .unwrap();
             Ok(())
@@ -78,13 +68,7 @@ pub mod camera_mod {
                         camera_fov_x = ?3,
                         camera_fov_y = ?4
                     WHERE uav_id = ?5",
-                (
-                    &self.name,
-                    &self.mass,
-                    &self.fov_x,
-                    &self.fov_y,
-                    &self.id,
-                ),
+                (&self.name, &self.mass, &self.fov_x, &self.fov_y, &self.id),
             )
             .unwrap();
             Ok(())

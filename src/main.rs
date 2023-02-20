@@ -1,9 +1,9 @@
-mod uav;
 mod camera;
+mod uav;
 
+use camera::camera_mod::Camera;
 use rusqlite::{Connection, Result};
 use uav::uav_mod::Uav;
-use camera::camera_mod::Camera;
 
 fn main() -> Result<()> {
     // let conn = Connection::open_in_memory()?;
@@ -34,8 +34,6 @@ fn main() -> Result<()> {
     //     println!("{:?}", uav_item);
     // }
 
-    
-    
     // let mut my_camera = Camera::new(
     //     String::from("Camera 1"),
     //     1000,
@@ -44,7 +42,7 @@ fn main() -> Result<()> {
     // );
 
     // my_camera.sql_add_to_db(&conn).unwrap();
-    
+
     // my_camera.name = "Camera 2".to_string();
     // my_camera.sql_add_to_db(&conn).unwrap();
 
@@ -59,10 +57,6 @@ fn main() -> Result<()> {
     for uav_item in uav_iter {
         println!("{:?}", uav_item);
     }
-
-
-
-
 
     Ok(())
 }
