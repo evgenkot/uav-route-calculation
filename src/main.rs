@@ -47,7 +47,7 @@ fn main() -> Result<()> {
     };
 
     let my_camera = Camera::new(
-        String::from("Camera 12"),
+        String::from("Camera 132"),
         10003,
         150,
         360,

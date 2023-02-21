@@ -107,9 +107,8 @@ pub mod uav_mod {
             )
         }
 
-        pub fn sql_get_uavs(conn: &Connection) -> Result<Vec<Uav>> {
-            let mut stmt = conn
-                .prepare(
+        pub fn sql_get_uavs(conn: &Connection) -> Result<Vec<Result<Uav>>> {
+            let mut stmt = conn.prepare(
                     "SELECT
                         uav_id,
                         uav_name,
@@ -120,21 +119,27 @@ pub mod uav_mod {
                         uav_min_altitude,
                         uav_max_altitude 
                     FROM uav",
-                )
-                .unwrap();
+                )?;
+            
+            let uav_iter = stmt.query_map([], |row| {
+                Ok(Uav {
+                    id: row.get(0)?,
+                    name: row.get(1)?,
+                    max_payload_mass: row.get(2)?,
+                    flight_duration: row.get(3)?,
+                    takeoff_speed: row.get(4)?,
+                    flight_speed: row.get(5)?,
+                    min_altitude: row.get(6)?,
+                    max_altitude: row.get(7)?,
+                })
+            })?;
 
-            let mut uav_vector: Vec<Uav> = stmt.query_map([], |row| {
-                    Ok(Uav {
-                        id: row.get(0)?,
-                        name: row.get(1)?,
-                        max_payload_mass: row.get(2)?,
-                        flight_duration: row.get(3)?,
-                        takeoff_speed: row.get(4)?,
-                        flight_speed: row.get(5)?,
-                        min_altitude: row.get(6)?,
-                        max_altitude: row.get(7)?,
-                    })
-                })?.map(Result::unwrap).collect();
+
+            let mut uav_vector: Vec<Result<Uav>> = Vec::new();
+            for uav_item in uav_iter {
+                uav_vector.push(uav_item);
+            }
+        
             Ok(uav_vector)
         }
     }

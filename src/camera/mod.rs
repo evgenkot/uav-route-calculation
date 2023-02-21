@@ -75,29 +75,32 @@ pub mod camera_mod {
             )
         }
 
-        pub fn sql_get_cameras(conn: &Connection) -> Result<Vec<Camera>> {
-            let mut stmt = conn
-                .prepare(
-                    "SELECT
+        pub fn sql_get_cameras(conn: &Connection) -> Result<Vec<Result<Camera>>> {
+            let mut stmt = conn.prepare(
+                "SELECT
                     camera_id,
                     camera_name,
                     camera_mass,
                     camera_fov_x,
                     camera_fov_y
-                    FROM camera",
-                )
-                .unwrap();
-            
-            let camera_vector: Vec<Camera> = stmt.query_map([], |row| {
+                FROM camera",
+            )?;
+        
+            let camera_iter = stmt.query_map([], |row| {
                 Ok(Camera {
                     id: row.get(0)?,
-                        name: row.get(1)?,
-                        mass: row.get(2)?,
-                        fov_x: row.get(3)?,
-                        fov_y: row.get(4)?,
+                    name: row.get(1)?,
+                    mass: row.get(2)?,
+                    fov_x: row.get(3)?,
+                    fov_y: row.get(4)?,
                 })
-            })?.map(Result::unwrap).collect();
-
+            })?;
+        
+            let mut camera_vector: Vec<Result<Camera>> = Vec::new();
+            for camera_item in camera_iter {
+                camera_vector.push(camera_item);
+            }
+        
             Ok(camera_vector)
         }
     }
