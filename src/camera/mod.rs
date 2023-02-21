@@ -25,7 +25,7 @@ pub mod camera_mod {
             println!("{} Click!", self.name);
         }
 
-        pub fn sql_create_table(conn: &Connection) {
+        pub fn sql_create_table(conn: &Connection) -> Result<usize> {
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS camera (
                     camera_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -42,10 +42,9 @@ pub mod camera_mod {
                     )",
                 (),
             )
-            .unwrap();
         }
 
-        pub fn sql_add_to_db(&self, conn: &Connection) -> Result<()> {
+        pub fn sql_add_to_db(&self, conn: &Connection) -> Result<usize> {
             conn.execute(
                 "INSERT INTO camera (
                     camera_name,
@@ -55,11 +54,9 @@ pub mod camera_mod {
                 ) VALUES (?1, ?2, ?3, ?4)",
                 (&self.name, &self.mass, &self.fov_x, &self.fov_y),
             )
-            .unwrap();
-            Ok(())
         }
 
-        pub fn sql_update(&self, conn: &Connection) -> Result<()> {
+        pub fn sql_update(&self, conn: &Connection) -> Result<usize> {
             conn.execute(
                 "
                     UPDATE camera SET
@@ -70,8 +67,6 @@ pub mod camera_mod {
                     WHERE uav_id = ?5",
                 (&self.name, &self.mass, &self.fov_x, &self.fov_y, &self.id),
             )
-            .unwrap();
-            Ok(())
         }
 
         pub fn sql_get_cameras(conn: &Connection) -> Result<Vec<Camera>> {
@@ -84,8 +79,7 @@ pub mod camera_mod {
                     camera_fov_x,
                     camera_fov_y
                     FROM camera",
-                )
-                .unwrap();
+                ).unwrap();
 
             let mut camera_vector: Vec<Camera> = Vec::new();
 
