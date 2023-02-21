@@ -65,7 +65,13 @@ pub mod camera_mod {
                         camera_fov_x = ?3,
                         camera_fov_y = ?4
                     WHERE uav_id = ?5",
-                (&self.name, &self.mass, &self.fov_x, &self.fov_y, &self.id),
+                (
+                    &self.name,
+                    &self.mass,
+                    &self.fov_x, 
+                    &self.fov_y, 
+                    &self.id,
+                ),
             )
         }
 
@@ -79,25 +85,19 @@ pub mod camera_mod {
                     camera_fov_x,
                     camera_fov_y
                     FROM camera",
-                ).unwrap();
-
-            let mut camera_vector: Vec<Camera> = Vec::new();
-
-            let camera_iter = stmt
-                .query_map([], |row| {
-                    Ok(Camera {
-                        id: row.get(0)?,
+                )
+                .unwrap();
+            
+            let camera_vector: Vec<Camera> = stmt.query_map([], |row| {
+                Ok(Camera {
+                    id: row.get(0)?,
                         name: row.get(1)?,
                         mass: row.get(2)?,
                         fov_x: row.get(3)?,
                         fov_y: row.get(4)?,
-                    })
                 })
-                .unwrap();
+            })?.map(Result::unwrap).collect();
 
-            for camera_item in camera_iter {
-                camera_vector.push(camera_item.unwrap());
-            }
             Ok(camera_vector)
         }
     }

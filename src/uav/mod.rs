@@ -43,7 +43,7 @@ pub mod uav_mod {
             println!("{} is landing!", self.name);
         }
 
-        pub fn sql_create_table(conn: &Connection) {
+        pub fn sql_create_table(conn: &Connection) -> Result<usize> {
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS uav (
                     uav_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -57,10 +57,9 @@ pub mod uav_mod {
                     )",
                 (), // empty list of parameters.
             )
-            .unwrap();
         }
 
-        pub fn sql_add_to_db(&self, conn: &Connection) -> Result<()> {
+        pub fn sql_add_to_db(&self, conn: &Connection) -> Result<usize> {
             conn.execute(
                 "INSERT INTO uav (
                     uav_name,
@@ -81,11 +80,9 @@ pub mod uav_mod {
                     &self.max_altitude,
                 ),
             )
-            .unwrap();
-            Ok(())
         }
 
-        pub fn sql_update(&self, conn: &Connection) -> Result<()> {
+        pub fn sql_update(&self, conn: &Connection) -> Result<usize> {
             conn.execute(
                 "
                     UPDATE uav SET
@@ -108,8 +105,6 @@ pub mod uav_mod {
                     &self.id,
                 ),
             )
-            .unwrap();
-            Ok(())
         }
 
         pub fn sql_get_uavs(conn: &Connection) -> Result<Vec<Uav>> {
@@ -128,10 +123,7 @@ pub mod uav_mod {
                 )
                 .unwrap();
 
-            let mut uav_vector: Vec<Uav> = Vec::new();
-
-            let uav_iter = stmt
-                .query_map([], |row| {
+            let mut uav_vector: Vec<Uav> = stmt.query_map([], |row| {
                     Ok(Uav {
                         id: row.get(0)?,
                         name: row.get(1)?,
@@ -142,12 +134,7 @@ pub mod uav_mod {
                         min_altitude: row.get(6)?,
                         max_altitude: row.get(7)?,
                     })
-                })
-                .unwrap();
-
-            for uav_item in uav_iter {
-                uav_vector.push(uav_item.unwrap());
-            }
+                })?.map(Result::unwrap).collect();
             Ok(uav_vector)
         }
     }
