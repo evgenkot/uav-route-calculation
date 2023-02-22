@@ -9,75 +9,23 @@ fn main() -> Result<()> {
     // let conn = Connection::open_in_memory()?;
     let conn = Connection::open("mydatabase.db")?;
 
+    Uav::sql_create_table(&conn);
 
-    // UAV
-    match Uav::sql_create_table(&conn)
-    {
-        Ok(_) => {println!("Table uav created")},
-        Err(e) => {println!("Table uav not created {}", e)}
-    };
+    Camera::sql_create_table(&conn);
 
-    let my_uav = Uav::new(
-        String::from("Fake Drone 1"), 
-        1000, 
-        6000, 
-        10.0, 
-        50.0, 
-        20.000000001, 
-        500.0);
+    // match Camera::sql_create_table(&conn)
+    // {
+    //     Ok(_) => {println!("Table created")},
+    //     Err(e) => {println!("{}", e)},
+    // };
 
-    match my_uav.sql_add_to_db(&conn)
-    {
-        Ok(_) => {println!("Added to db")},
-        Err(e) => {println!("{}", e)}
-    };
-
-    let uav_iter = Uav::sql_get_uavs(&conn).unwrap();
-
-
-    for uav_item in uav_iter {
-        println!("{:?}", uav_item);
-    }
-
-    // Camera
-    match Camera::sql_create_table(&conn)
-    {
-        Ok(_) => {println!("Table camera created")},
-        Err(e) => {println!("Table camera not created {}", e)}
-    };
-
-    let my_camera = Camera::new(
-        String::from("Camera 132"),
-        10003,
-        150,
-        360,
-    );
-
-    match my_camera.sql_add_to_db(&conn)
-    {
-        Ok(_) => {println!("Added to db")},
-        Err(e) => {println!("{}", e)}
-    };
-
-    let camera_iter = Camera::sql_get_cameras(&conn).unwrap();
-
-
-    for camera_item in camera_iter {
-        println!("{:?}", camera_item);
-    }
+    // let mut my_uav = Uav::new(String::from("Fake Drone 2"), 1000, 6000, 10.0, 50.0, 20.000000001, 500.0);
 
     // match my_uav.sql_add_to_db(&conn)
     // {
-    //     Ok(_) => {print!()}
+    //     Ok(_) => {println!("Added to db")},
+    //     Err(e) => {println!("{}", e)},
     // };
-
-
-
-    
-
-    // let mut my_uav = Uav::new(String::from("Fake Drone 1"), 1000, 6000, 10.0, 50.0, 20.000000001, 500.0);
-
-    
 
     // my_uav.name = "Drone 2".to_string();
 
@@ -91,18 +39,40 @@ fn main() -> Result<()> {
     //     }
     // }
 
-    // let uav_iter = Uav::sql_get_uavs(&conn).unwrap();
+    let uav_iter = Uav::sql_get_uavs(&conn).unwrap();
 
-    // for uav_item in uav_iter {
-    //     println!("{:?}", uav_item);
-    // }
+    for uav_item in uav_iter {
+        match uav_item {
+            Ok(uav) => uav.print_uav(),
+            Err(_) => println!("Error =("),
+        };
+    }
 
-    
+    // let mut my_camera = Camera::new(
+    //     String::from("Camera 12"),
+    //     10003,
+    //     150,
+    //     360,
+    // );
+
+    // match my_camera.sql_add_to_db(&conn)
+    // {
+    //     Ok(_) => {println!("Added to db")},
+    //     Err(e) => {println!("{}", e)},
+    // };
 
     // my_camera.name = "Camera 2".to_string();
     // my_camera.sql_add_to_db(&conn).unwrap();
 
-    
+    let camera_iter = Camera::sql_get_cameras(&conn).unwrap();
+
+    for camera_item in camera_iter {
+        match camera_item
+        {
+            Ok(camera) => camera.print_camera(),
+            Err(_) => println!("err =("),
+        }
+    }
 
     // let uav_iter = Uav::sql_get_uavs(&conn).unwrap();
 

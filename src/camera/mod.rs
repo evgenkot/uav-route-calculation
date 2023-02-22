@@ -25,6 +25,14 @@ pub mod camera_mod {
             println!("{} Click!", self.name);
         }
 
+        pub fn print_camera(&self) {
+            println!("id: :{}", &self.id);
+            println!("name:{}", &self.name);
+            println!("mass:{}", &self.mass);
+            println!("fov_x:{}", &self.fov_x);
+            println!("fov_y:{}", &self.fov_y);
+        }
+
         pub fn sql_create_table(conn: &Connection) -> Result<usize> {
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS camera (
@@ -65,13 +73,7 @@ pub mod camera_mod {
                         camera_fov_x = ?3,
                         camera_fov_y = ?4
                     WHERE uav_id = ?5",
-                (
-                    &self.name,
-                    &self.mass,
-                    &self.fov_x, 
-                    &self.fov_y, 
-                    &self.id,
-                ),
+                (&self.name, &self.mass, &self.fov_x, &self.fov_y, &self.id),
             )
         }
 
@@ -85,7 +87,7 @@ pub mod camera_mod {
                     camera_fov_y
                 FROM camera",
             )?;
-        
+
             let camera_iter = stmt.query_map([], |row| {
                 Ok(Camera {
                     id: row.get(0)?,
@@ -95,12 +97,12 @@ pub mod camera_mod {
                     fov_y: row.get(4)?,
                 })
             })?;
-        
+
             let mut camera_vector: Vec<Result<Camera>> = Vec::new();
             for camera_item in camera_iter {
                 camera_vector.push(camera_item);
             }
-        
+
             Ok(camera_vector)
         }
     }

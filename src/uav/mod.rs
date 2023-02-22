@@ -43,6 +43,17 @@ pub mod uav_mod {
             println!("{} is landing!", self.name);
         }
 
+        pub fn print_uav(&self) {
+            println!("id: :{}", &self.id);
+            println!("name :{}", &self.name);
+            println!("max_payload_mass :{}", &self.max_payload_mass);
+            println!("flight_duration :{}", &self.flight_duration);
+            println!("takeoff_speed :{}", &self.takeoff_speed);
+            println!("flight_speed :{}", &self.flight_speed);
+            println!("min_altitude :{}", &self.min_altitude);
+            println!("max_altitude :{}", &self.max_altitude);
+        }
+
         pub fn sql_create_table(conn: &Connection) -> Result<usize> {
             conn.execute(
                 "CREATE TABLE IF NOT EXISTS uav (
@@ -109,7 +120,7 @@ pub mod uav_mod {
 
         pub fn sql_get_uavs(conn: &Connection) -> Result<Vec<Result<Uav>>> {
             let mut stmt = conn.prepare(
-                    "SELECT
+                "SELECT
                         uav_id,
                         uav_name,
                         uav_max_payload_mass,
@@ -119,8 +130,8 @@ pub mod uav_mod {
                         uav_min_altitude,
                         uav_max_altitude 
                     FROM uav",
-                )?;
-            
+            )?;
+
             let uav_iter = stmt.query_map([], |row| {
                 Ok(Uav {
                     id: row.get(0)?,
@@ -134,12 +145,11 @@ pub mod uav_mod {
                 })
             })?;
 
-
             let mut uav_vector: Vec<Result<Uav>> = Vec::new();
             for uav_item in uav_iter {
                 uav_vector.push(uav_item);
             }
-        
+
             Ok(uav_vector)
         }
     }
