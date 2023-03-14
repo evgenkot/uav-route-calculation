@@ -75,9 +75,23 @@
 </div>
 
 <style>
-	@import 'ol/ol.css';
+	@import '../styles/map-style.css';
 	@import "../global.css";
-
+	.toolbar {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 50px;
+		display: flex;
+		align-items: center;
+		justify-content: space-evenly;
+		pointer-events: none;
+	}
+	.toolbar button {
+		pointer-events: auto;
+		z-index: 1;
+	}
 	.map {
 		margin: 0;
 		padding: 0;
@@ -85,14 +99,6 @@
 		height: 100%;
 	}
 
-	.toolbar {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 50px;
-		display: flex;
-		align-items: center;
-		justify-content: space-evenly;
-	}
+	
+		
 </style>
