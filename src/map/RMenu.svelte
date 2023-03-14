@@ -39,7 +39,7 @@
   .sidenav {
     position: fixed;
     top: 0;
-    left: 0;
+    right: 0;
     height: 100%;
     width: 0;
     z-index: 1;
@@ -52,7 +52,7 @@
   .toggle-container {
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     padding: 16px;
     z-index: 2;
   }
