@@ -1,0 +1,55 @@
+.sidenav {
+    position: fixed;
+    top: 0;
+    /* left: 0; */
+    height: 100%;
+    width: 0;
+    z-index: 1;
+    background-color: #ffffff;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+.toggle-container {
+    position: absolute;
+    top: 0;
+    /* left: 0; */
+    padding: 16px;
+    z-index: 2;
+}
+.toggle-button {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+@media screen and (max-height: 450px), screen and (max-width: 600px) {
+    .sidenav {
+        padding-top: 15px;
+        width: 150px;
+    }
+    .toggle-container {
+        padding: 8px;
+    }
+}
+
+.block {
+    margin-bottom: 20px;
+}
+.parameters {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+.label {
+    display: inline-block;
+    width: 150px;
+    font-weight: bold;
+    margin-right: 10px;
+}
+.input {
+    width: 200px;
+    padding: 5px;
+    margin-right: 10px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+}

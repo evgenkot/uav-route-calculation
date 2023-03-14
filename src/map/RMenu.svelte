@@ -36,38 +36,11 @@
 </div>
 
 <style>
+  @import "../styles/side-menu.css";
   .sidenav {
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 0;
-    z-index: 1;
-    background-color: #111;
-    overflow-x: hidden;
-    transition: 0.5s;
-    padding-top: 60px;
-  }
-  
-  .toggle-container {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 16px;
-    z-index: 2;
-  }
-  .toggle-button {
-    font-size: 20px;
-    cursor: pointer;
-  }
-  
-  @media screen and (max-height: 450px), screen and (max-width: 600px) {
-    .sidenav {
-      padding-top: 15px;
-      width: 150px;
-    }
-    .toggle-container {
-      padding: 8px;
-    }
-  }
+		right: 0;
+	}
+	.toggle-container {
+		right: 0;
+	}
 </style>
