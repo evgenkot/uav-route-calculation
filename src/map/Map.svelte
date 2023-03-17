@@ -9,6 +9,8 @@
 	import { Circle, Geometry, GeometryCollection, Polygon } from 'ol/geom';
 	import { onMount } from 'svelte';
 
+	import { invoke } from '@tauri-apps/api/tauri';
+
 	let viewMap = 'main-map';
 	let map: Map;
 	let draw: Draw;
@@ -37,7 +39,7 @@
 			source: source,
 			type: 'Polygon'
 		});
-		map.addInteraction(draw);
+		// map.addInteraction(draw);
 
 		modify = new Modify({ source: source });
 		map.addInteraction(modify);
@@ -65,6 +67,21 @@
 		map.addInteraction(modify);
 		map.addInteraction(snap);
 	}
+
+	async function displayVertices() {
+		const vectorLayer = map
+			.getLayers()
+			.getArray()
+			.find((layer) => layer instanceof VectorLayer) as VectorLayer;
+		const source = vectorLayer.getSource() as VectorSource;
+		const features = source.getFeatures();
+		const vertices = features
+			.filter((feature) => feature.getGeometry() instanceof Polygon)
+			.map((feature) => feature.getGeometry().getCoordinates()[0]);
+
+		// Send the coordinates to the Rust backend
+		await invoke('receive_polygon_coordinates', { vertices });
+	}
 </script>
 
 <div id={viewMap} class="map" />
@@ -72,11 +89,12 @@
 	<button on:click={undo}>Undo</button>
 	<button on:click={enableDrawing}>Draw</button>
 	<button on:click={enableNavigation}>Navigation</button>
+	<button on:click={displayVertices}>Display Vertices</button>
 </div>
 
 <style>
 	@import '../styles/map-style.css';
-	@import "../global.css";
+	@import '../global.css';
 	.toolbar {
 		position: absolute;
 		bottom: 0;
@@ -98,7 +116,4 @@
 		width: 100%;
 		height: 100%;
 	}
-
-	
-		
 </style>
