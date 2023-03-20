@@ -29,16 +29,15 @@
 	let selectedUav: Uav | null = null;
 
 	async function fetchUavs() {
-	try {
-		const result = await invoke<Uav[]>('get_uavs_vec');
-		uavs = result;
-		selectedUav = uavs.length > 0 ? uavs[0] : null;
-		console.log(uavs);
-	} catch (error) {
-		console.error('Failed to fetch UAVs:', error);
+		try {
+			const result = await invoke<Uav[]>('get_uavs_vec');
+			uavs = result;
+			selectedUav = uavs.length > 0 ? uavs[0] : null;
+			console.log(uavs);
+		} catch (error) {
+			console.error('Failed to fetch UAVs:', error);
+		}
 	}
-	}
-
 
 	// const uavs = writable<Uav[]>([]);
 
@@ -63,6 +62,11 @@
 				block.style.display = 'none';
 			}
 		}
+	}
+
+	let isEditModeUAV = false;
+	function toggleEditModeUAV() {
+		isEditModeUAV = !isEditModeUAV;
 	}
 
 	function toggleCameraBlock() {
@@ -96,42 +100,92 @@
 	<h1>Menu</h1>
 	<select bind:value={selectedUav} on:change={() => {}}>
 		{#each uavs as uav (uav.id)}
-		  <option value={uav}>{uav.name}</option>
+			<option value={uav}>{uav.name}</option>
 		{/each}
-	  </select>
+	</select>
 	<button on:click={toggleUAVBlock} class="toggle-display">UAV detatils</button>
+	<input type="checkbox" on:change={toggleEditModeUAV} class="edit-mode-checkbox" />
+	<label for="edit-mode-uav" class="edit-mode-label">Edit Mode</label>
 	<div class="block" id="uav">
 		<div class="parameters">
 			<label for="uav_id" class="label">ID:</label>
-			<input type="number" class="input" id="uav_id" value={selectedUav ? selectedUav.id : ''}/>
+			<input
+				type="number"
+				class="input"
+				id="uav_id"
+				value={selectedUav ? selectedUav.id : ''}
+				readonly
+			/>
 		</div>
 		<div class="parameters">
 			<label for="uav_name" class="label">Name:</label>
-			<input type="text" class="input" id="uav_name" value={selectedUav ? selectedUav.name : ''} />
+			<input
+				type="text"
+				class="input"
+				id="uav_name"
+				value={selectedUav ? selectedUav.name : ''}
+				readonly={!isEditModeUAV}
+			/>
 		</div>
 		<div class="parameters">
 			<label for="uav_max_payload_mass" class="label">Max Payload Mass:</label>
-			<input type="number" class="input" id="uav_max_payload_mass" value={selectedUav ? selectedUav.max_payload_mass : ''} />
+			<input
+				type="number"
+				class="input"
+				id="uav_max_payload_mass"
+				value={selectedUav ? selectedUav.max_payload_mass : ''}
+				readonly={!isEditModeUAV}
+			/>
 		</div>
 		<div class="parameters">
 			<label for="uav_flight_duration" class="label">Flight Duration:</label>
-			<input type="number" class="input" id="uav_flight_duration" value={selectedUav ? selectedUav.flight_duration : ''} />
+			<input
+				type="number"
+				class="input"
+				id="uav_flight_duration"
+				value={selectedUav ? selectedUav.flight_duration : ''}
+				readonly={!isEditModeUAV}
+			/>
 		</div>
 		<div class="parameters">
 			<label for="takeoff_speed" class="label">Takeoff speed:</label>
-			<input type="number" class="input" id="uav_takeoff_speed"  value={selectedUav ? selectedUav.takeoff_speed : ''}/>
+			<input
+				type="number"
+				class="input"
+				id="uav_takeoff_speed"
+				value={selectedUav ? selectedUav.takeoff_speed : ''}
+				readonly={!isEditModeUAV}
+			/>
 		</div>
 		<div class="parameters">
 			<label for="flight_speed" class="label">Flight speed:</label>
-			<input type="number" class="input" id="uav_flight_speed" value={selectedUav ? selectedUav.flight_speed : ''} />
+			<input
+				type="number"
+				class="input"
+				id="uav_flight_speed"
+				value={selectedUav ? selectedUav.flight_speed : ''}
+				readonly={!isEditModeUAV}
+			/>
 		</div>
 		<div class="parameters">
 			<label for="min_altitude" class="label">Min altitude:</label>
-			<input type="number" class="input" id="uav_min_altitude" value={selectedUav ? selectedUav.min_altitude : ''} />
+			<input
+				type="number"
+				class="input"
+				id="uav_min_altitude"
+				value={selectedUav ? selectedUav.min_altitude : ''}
+				readonly={!isEditModeUAV}
+			/>
 		</div>
 		<div class="parameters">
 			<label for="max_altitude" class="label">Max altitude:</label>
-			<input type="number" class="input" id="uav_max_altitude" value={selectedUav ? selectedUav.max_altitude : ''} />
+			<input
+				type="number"
+				class="input"
+				id="uav_max_altitude"
+				value={selectedUav ? selectedUav.max_altitude : ''}
+				readonly={!isEditModeUAV}
+			/>
 		</div>
 	</div>
 
