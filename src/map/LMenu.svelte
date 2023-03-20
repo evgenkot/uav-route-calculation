@@ -1,6 +1,47 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import { writable } from 'svelte/store';
+	import { invoke } from '@tauri-apps/api/tauri';
+	// import { Vec } from '@tauri-apps/api/rust';
+
+	interface Uav {
+		id: number;
+		name: string;
+		max_payload_mass: number;
+		flight_duration: number;
+		takeoff_speed: number;
+		flight_speed: number;
+		min_altitude: number;
+		max_altitude: number;
+	}
+
+	// async function fetchUavs() {
+	// 	try {
+	// 		const result = await invoke<Uav[]>('get_uavs_vec');
+	// 		// Handle the result, e.g., update the UI or populate a variable with the data
+	// 		console.log(result);
+	// 	} catch (error) {
+	// 		console.error('Failed to fetch UAVs:', error);
+	// 	}
+	// }
+	let uavs: Uav[] = [];
+	let selectedUav: Uav | null = null;
+
+	async function fetchUavs() {
+	try {
+		const result = await invoke<Uav[]>('get_uavs_vec');
+		uavs = result;
+		selectedUav = uavs.length > 0 ? uavs[0] : null;
+		console.log(uavs);
+	} catch (error) {
+		console.error('Failed to fetch UAVs:', error);
+	}
+	}
+
+
+	// const uavs = writable<Uav[]>([]);
+
 	let isActive = false;
 	let sidenavWidth = 0;
 
@@ -46,44 +87,51 @@
 		}
 	}
 
-	onMount(() => {});
+	onMount(() => {
+		fetchUavs();
+	});
 </script>
 
 <div class="sidenav" style={`width: ${sidenavWidth}px`}>
 	<h1>Menu</h1>
+	<select bind:value={selectedUav} on:change={() => {}}>
+		{#each uavs as uav (uav.id)}
+		  <option value={uav}>{uav.name}</option>
+		{/each}
+	  </select>
 	<button on:click={toggleUAVBlock} class="toggle-display">UAV detatils</button>
 	<div class="block" id="uav">
 		<div class="parameters">
 			<label for="uav_id" class="label">ID:</label>
-			<input type="text" class="input" id="uav_id" />
+			<input type="number" class="input" id="uav_id" value={selectedUav ? selectedUav.id : ''}/>
 		</div>
 		<div class="parameters">
 			<label for="uav_name" class="label">Name:</label>
-			<input type="text" class="input" id="uav_name" />
+			<input type="text" class="input" id="uav_name" value={selectedUav ? selectedUav.name : ''} />
 		</div>
 		<div class="parameters">
 			<label for="uav_max_payload_mass" class="label">Max Payload Mass:</label>
-			<input type="text" class="input" id="uav_max_payload_mass" />
+			<input type="number" class="input" id="uav_max_payload_mass" value={selectedUav ? selectedUav.max_payload_mass : ''} />
 		</div>
 		<div class="parameters">
 			<label for="uav_flight_duration" class="label">Flight Duration:</label>
-			<input type="text" class="input" id="uav_flight_duration" />
+			<input type="number" class="input" id="uav_flight_duration" value={selectedUav ? selectedUav.flight_duration : ''} />
 		</div>
 		<div class="parameters">
 			<label for="takeoff_speed" class="label">Takeoff speed:</label>
-			<input type="text" class="input" id="takeoff_speed" />
+			<input type="number" class="input" id="uav_takeoff_speed"  value={selectedUav ? selectedUav.takeoff_speed : ''}/>
 		</div>
 		<div class="parameters">
 			<label for="flight_speed" class="label">Flight speed:</label>
-			<input type="text" class="input" id="flight_speed" />
+			<input type="number" class="input" id="uav_flight_speed" value={selectedUav ? selectedUav.flight_speed : ''} />
 		</div>
 		<div class="parameters">
 			<label for="min_altitude" class="label">Min altitude:</label>
-			<input type="text" class="input" id="min_altitude" />
+			<input type="number" class="input" id="uav_min_altitude" value={selectedUav ? selectedUav.min_altitude : ''} />
 		</div>
 		<div class="parameters">
 			<label for="max_altitude" class="label">Max altitude:</label>
-			<input type="text" class="input" id="max_altitude" />
+			<input type="number" class="input" id="uav_max_altitude" value={selectedUav ? selectedUav.max_altitude : ''} />
 		</div>
 	</div>
 
@@ -150,5 +198,4 @@
 	.toggle-container {
 		left: 0;
 	}
-	
 </style>

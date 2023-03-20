@@ -1,7 +1,8 @@
 use rand::Rng;
 use rusqlite::{Connection, Result};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Uav {
     id: u64,                   // uav id
     pub name: String,          // uav name

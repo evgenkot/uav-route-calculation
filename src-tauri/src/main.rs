@@ -13,21 +13,23 @@ fn greet(name: &str) -> String {
 }
 
 fn main() {
+    {
     let conn = Connection::open("mydatabase.db").expect("Cant open base");
 
     mission::uav::Uav::sql_create_table(&conn).expect("cant create uav table");
     mission::camera::Camera::sql_create_table(&conn).expect("Cant create camera table");
-
-    match Uav::get_uavs(&conn) {
-        Ok(uavs) => {
-            for uav in uavs {
-                println!("UAV: {:?}", uav);
-            }
-        }
-        Err(err) => {
-            eprintln!("Error fetching UAVs: {}", err);
-        }
     }
+
+    // match Uav::get_uavs(&conn) {
+    //     Ok(uavs) => {
+    //         for uav in uavs {
+    //             println!("UAV: {:?}", uav);
+    //         }
+    //     }
+    //     Err(err) => {
+    //         eprintln!("Error fetching UAVs: {}", err);
+    //     }
+    // }
 
 
     // let camera_iter = Camera::sql_get_cameras(&conn).unwrap();
@@ -44,7 +46,8 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             greet,
-            mission::receive_polygon_coordinates
+            mission::receive_polygon_coordinates,
+            mission::get_uavs_vec,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
