@@ -39,7 +39,98 @@
 		}
 	}
 
-	// const uavs = writable<Uav[]>([]);
+	let uavOnEdit = false;
+
+	function onUavFieldChange() {
+		uavOnEdit = true;
+	}
+	function isUavValid(uav: Uav): boolean {
+		// Check if the UAV name is not empty
+		if (!uav.name || uav.name.trim() === '') {
+			alert('UAV name cannot be empty');
+			return false;
+		}
+
+		// Check if the maximum payload mass is within a reasonable range (e.g., 100g to 10kg)
+		if (uav.max_payload_mass < 100 || uav.max_payload_mass > 10000) {
+			alert('Max payload mass should be between 100g and 10kg');
+			return false;
+		}
+
+		// Check if the flight duration is within a reasonable range (e.g., 1 minute to 8 hours)
+		if (uav.flight_duration < 60 || uav.flight_duration > 28800) {
+			alert('Flight duration should be between 1 minute and 8 hours');
+			return false;
+		}
+
+		// Check if the takeoff and flight speeds are within reasonable ranges (e.g., 0.5m/s to 50m/s)
+		if (
+			uav.takeoff_speed < 0.5 ||
+			uav.takeoff_speed > 50 ||
+			uav.flight_speed < 0.5 ||
+			uav.flight_speed > 50
+		) {
+			alert('Takeoff and flight speeds should be between 0.5m/s and 50m/s');
+			return false;
+		}
+
+		// Check if the minimum and maximum altitudes are within reasonable ranges (e.g., 2m to 5000m)
+		if (
+			uav.min_altitude < 2 ||
+			uav.min_altitude > 5000 ||
+			uav.max_altitude < 5 ||
+			uav.max_altitude > 5000
+		) {
+			alert('Minimum and maximum altitudes should be between 2m and 5000m');
+			return false;
+		}
+
+		// Check if the minimum altitude is less than or equal to the maximum altitude
+		if (uav.min_altitude >= uav.max_altitude) {
+			alert('Minimum altitude should be less than the maximum altitude');
+			return false;
+		}
+
+		return true;
+	}
+
+	async function saveUav() {
+		const uav: Uav = {
+			id: parseInt((document.getElementById('uav_id') as HTMLInputElement).value),
+			name: (document.getElementById('uav_name') as HTMLInputElement).value,
+			max_payload_mass: parseInt(
+				(document.getElementById('uav_max_payload_mass') as HTMLInputElement).value
+			),
+			flight_duration: parseInt(
+				(document.getElementById('uav_flight_duration') as HTMLInputElement).value
+			),
+			takeoff_speed: parseFloat(
+				(document.getElementById('uav_takeoff_speed') as HTMLInputElement).value
+			),
+			flight_speed: parseFloat(
+				(document.getElementById('uav_flight_speed') as HTMLInputElement).value
+			),
+			min_altitude: parseFloat(
+				(document.getElementById('uav_min_altitude') as HTMLInputElement).value
+			),
+			max_altitude: parseFloat(
+				(document.getElementById('uav_max_altitude') as HTMLInputElement).value
+			)
+		};
+
+		if (isUavValid(uav)) {
+			// await invoke('update_uav', uav);
+			const response = await invoke<string>('update_uav', { uav }); // Update the payload here
+			// const response = await invoke<string>('update_uav', { payload: uav });
+			console.log('norm');
+			console.log(uav)
+
+			uavOnEdit = false;
+		} else {
+			console.error('Invalid UAV data');
+			// alert('UAV validation failed. Please check the input values and try again.');
+		}
+	}
 
 	let isActive = false;
 	let sidenavWidth = 0;
@@ -125,6 +216,7 @@
 				id="uav_name"
 				value={selectedUav ? selectedUav.name : ''}
 				readonly={!isEditModeUAV}
+				on:input={onUavFieldChange}
 			/>
 		</div>
 		<div class="parameters">
@@ -135,6 +227,7 @@
 				id="uav_max_payload_mass"
 				value={selectedUav ? selectedUav.max_payload_mass : ''}
 				readonly={!isEditModeUAV}
+				on:input={onUavFieldChange}
 			/>
 		</div>
 		<div class="parameters">
@@ -145,6 +238,7 @@
 				id="uav_flight_duration"
 				value={selectedUav ? selectedUav.flight_duration : ''}
 				readonly={!isEditModeUAV}
+				on:input={onUavFieldChange}
 			/>
 		</div>
 		<div class="parameters">
@@ -155,6 +249,7 @@
 				id="uav_takeoff_speed"
 				value={selectedUav ? selectedUav.takeoff_speed : ''}
 				readonly={!isEditModeUAV}
+				on:input={onUavFieldChange}
 			/>
 		</div>
 		<div class="parameters">
@@ -165,6 +260,7 @@
 				id="uav_flight_speed"
 				value={selectedUav ? selectedUav.flight_speed : ''}
 				readonly={!isEditModeUAV}
+				on:input={onUavFieldChange}
 			/>
 		</div>
 		<div class="parameters">
@@ -175,6 +271,7 @@
 				id="uav_min_altitude"
 				value={selectedUav ? selectedUav.min_altitude : ''}
 				readonly={!isEditModeUAV}
+				on:input={onUavFieldChange}
 			/>
 		</div>
 		<div class="parameters">
@@ -185,8 +282,10 @@
 				id="uav_max_altitude"
 				value={selectedUav ? selectedUav.max_altitude : ''}
 				readonly={!isEditModeUAV}
+				on:input={onUavFieldChange}
 			/>
 		</div>
+		<button class="save-uav" on:click={saveUav} disabled={!uavOnEdit}>Save</button>
 	</div>
 
 	<button on:click={toggleCameraBlock} class="toggle-display">Camera detatils</button>

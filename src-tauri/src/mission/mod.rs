@@ -29,6 +29,7 @@ pub fn get_uavs_vec() -> Vec<uav::Uav> {
     }
 }
 
+
 pub enum DroneAction {
     TakeOff,
     TakePhoto,
