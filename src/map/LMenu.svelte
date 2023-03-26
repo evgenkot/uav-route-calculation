@@ -40,7 +40,7 @@
 	}
 
 	let uavOnEdit = false;
-
+	
 	function onUavFieldChange() {
 		uavOnEdit = true;
 	}
@@ -94,7 +94,7 @@
 		return true;
 	}
 
-	async function saveUav() {
+	async function updateUav() {
 		const uav: Uav = {
 			id: parseInt((document.getElementById('uav_id') as HTMLInputElement).value),
 			name: (document.getElementById('uav_name') as HTMLInputElement).value,
@@ -119,16 +119,62 @@
 		};
 
 		if (isUavValid(uav)) {
-			// await invoke('update_uav', uav);
-			const response = await invoke<string>('update_uav', { uav }); // Update the payload here
-			// const response = await invoke<string>('update_uav', { payload: uav });
-			console.log('norm');
-			console.log(uav)
+			let response = await invoke<string>('update_uav', { uav }); // Update the payload here
+			if (response != 'Ok') {
+				alert(response);
+			} else {
+				console.log('norm');
+				console.log(uav);
 
-			uavOnEdit = false;
+				// Find the index of the UAV in the local list with the same ID
+				const index = uavs.findIndex((item) => item.id === uav.id);
+
+				// Update the local UAV list
+				if (index !== -1) {
+					uavs[index] = uav;
+					uavs = [...uavs]; // Trigger reactivity by creating a new array reference
+				}
+
+				uavOnEdit = false;
+			}
 		} else {
 			console.error('Invalid UAV data');
-			// alert('UAV validation failed. Please check the input values and try again.');
+		}
+	}
+
+	async function newUav() {
+		const uav: Uav = {
+			id: 0,
+			name: (document.getElementById('uav_name') as HTMLInputElement).value,
+			max_payload_mass: parseInt(
+				(document.getElementById('uav_max_payload_mass') as HTMLInputElement).value
+			),
+			flight_duration: parseInt(
+				(document.getElementById('uav_flight_duration') as HTMLInputElement).value
+			),
+			takeoff_speed: parseFloat(
+				(document.getElementById('uav_takeoff_speed') as HTMLInputElement).value
+			),
+			flight_speed: parseFloat(
+				(document.getElementById('uav_flight_speed') as HTMLInputElement).value
+			),
+			min_altitude: parseFloat(
+				(document.getElementById('uav_min_altitude') as HTMLInputElement).value
+			),
+			max_altitude: parseFloat(
+				(document.getElementById('uav_max_altitude') as HTMLInputElement).value
+			)
+		};
+
+		if (isUavValid(uav)) {
+			let response = await invoke<string>('new_uav', { uav }); // Update the payload here
+			if (response != 'Ok') {
+				alert(response);
+			} else {
+				fetchUavs();
+			}
+		} else {
+			console.error('Invalid UAV data');
 		}
 	}
 
@@ -285,7 +331,8 @@
 				on:input={onUavFieldChange}
 			/>
 		</div>
-		<button class="save-uav" on:click={saveUav} disabled={!uavOnEdit}>Save</button>
+		<button class="update-uav" on:click={updateUav} disabled={!uavOnEdit || uavs.length == 0}>Update</button>
+		<button class="new-uav" on:click={newUav} disabled={!uavOnEdit}>New</button>
 	</div>
 
 	<button on:click={toggleCameraBlock} class="toggle-display">Camera detatils</button>

@@ -5,7 +5,7 @@
 
 use rusqlite::{Connection, Result};
 mod mission;
-mod handle;
+mod uav_handle;
 use mission::{camera::Camera, uav::Uav};
 
 #[tauri::command]
@@ -48,8 +48,9 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             greet,
             mission::receive_polygon_coordinates,
-            mission::get_uavs_vec,
-            handle::update_uav,
+            uav_handle::new_uav,
+            uav_handle::update_uav,
+            uav_handle::get_uavs_vec,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

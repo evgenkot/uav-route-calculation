@@ -19,15 +19,7 @@ pub fn receive_polygon_coordinates(vertices: Vec<Vec<[f64; 2]>>) {
     println!("Received polygon coordinates: {:?}", vertices);
 }
 
-#[tauri::command]
-pub fn get_uavs_vec() -> Vec<uav::Uav> {
-    let conn = Connection::open("mydatabase.db").expect("Cant open base");
-    match uav::Uav::get_uavs(&conn) {
-        Ok(result) => result,
-        Err(_) => vec![],
 
-    }
-}
 
 
 pub enum DroneAction {
