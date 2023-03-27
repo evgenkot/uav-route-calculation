@@ -31,6 +31,16 @@ pub fn update_uav(uav: Uav) -> String {
 }
 
 #[tauri::command]
+pub fn delete_uav(uav: Uav) -> String {
+    let conn = Connection::open("mydatabase.db").expect("Cant open base");
+    println!("Received delete UAV: {:?}", uav);
+    match uav.sql_delete(&conn) {
+        Ok(_) => "Ok".to_string(),
+        Err(e) => e.to_string(),
+    }
+}
+
+#[tauri::command]
 pub fn get_uavs_vec() -> Vec<mission::uav::Uav> {
     let conn = Connection::open("mydatabase.db").expect("Cant open base");
     match mission::uav::Uav::get_uavs(&conn) {

@@ -40,7 +40,7 @@
 	}
 
 	let uavOnEdit = false;
-	
+
 	function onUavFieldChange() {
 		uavOnEdit = true;
 	}
@@ -135,6 +135,7 @@
 					uavs = [...uavs]; // Trigger reactivity by creating a new array reference
 				}
 
+				selectedUav = uavs.length > 0 ? uavs[index] : null;
 				uavOnEdit = false;
 			}
 		} else {
@@ -172,10 +173,43 @@
 				alert(response);
 			} else {
 				fetchUavs();
+				selectedUav = uavs.length > 0 ? uavs[uavs.length - 1] : null;
+				uavOnEdit = false;
 			}
 		} else {
 			console.error('Invalid UAV data');
 		}
+	}
+
+	async function deleteUav() {
+		const uav: Uav = {
+			id: parseInt((document.getElementById('uav_id') as HTMLInputElement).value),
+			name: 'uav_name',
+			max_payload_mass: 0,
+			flight_duration: 0,
+			takeoff_speed: 0,
+			flight_speed: 0,
+			min_altitude: 0,
+			max_altitude: 0
+		};
+		let response = await invoke<string>('delete_uav', { uav });
+		if (response != 'Ok') {
+			alert(response);
+		} else {
+			fetchUavs();
+			selectedUav = uavs.length > 0 ? uavs[0] : null;
+			uavOnEdit = false;
+		}
+	}
+	
+	function undoUav()
+	{
+		if (uavOnEdit)
+		{
+			selectedUav = selectedUav;
+			uavOnEdit = !uavOnEdit;
+		}
+		
 	}
 
 	let isActive = false;
@@ -235,7 +269,7 @@
 
 <div class="sidenav" style={`width: ${sidenavWidth}px`}>
 	<h1>Menu</h1>
-	<select bind:value={selectedUav} on:change={() => {}}>
+	<select bind:value={selectedUav} on:change={() => {}} disabled={uavOnEdit}>
 		{#each uavs as uav (uav.id)}
 			<option value={uav}>{uav.name}</option>
 		{/each}
@@ -331,8 +365,16 @@
 				on:input={onUavFieldChange}
 			/>
 		</div>
-		<button class="update-uav" on:click={updateUav} disabled={!uavOnEdit || uavs.length == 0}>Update</button>
+		<button class="update-uav" on:click={updateUav} disabled={!uavOnEdit || uavs.length == 0}
+			>Update</button
+		>
 		<button class="new-uav" on:click={newUav} disabled={!uavOnEdit}>New</button>
+		<button
+			class="delete-uav"
+			on:click={deleteUav}
+			disabled={uavOnEdit || uavs.length == 0 || !selectedUav || !selectedUav.id}>Delete</button
+		>
+		<button class="undo-uav" on:click={undoUav} disabled={!uavOnEdit}>Undo</button>
 	</div>
 
 	<button on:click={toggleCameraBlock} class="toggle-display">Camera detatils</button>

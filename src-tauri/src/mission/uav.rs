@@ -140,6 +140,16 @@ impl Uav {
         )
     }
 
+    pub fn sql_delete(&self, conn: &Connection) -> Result<usize> {
+        conn.execute(
+            "DELETE FROM uav 
+            WHERE uav_id = ?1",
+            (
+                &self.id,
+            ),
+        )
+    }
+
     pub fn sql_get_uavs(conn: &Connection) -> Result<Vec<Result<Uav>>> {
         let mut stmt = conn.prepare(
             "SELECT
@@ -175,16 +185,16 @@ impl Uav {
         // Ok(uav_vector)
         Ok(uav_iter.collect())
     }
-   
+
     pub fn get_uavs(conn: &Connection) -> Result<Vec<Uav>> {
         let uav_results = Self::sql_get_uavs(conn)?;
-    
+
         let mut uavs: Vec<Uav> = Vec::new();
         for uav_result in uav_results {
-            match uav_result{
-                Ok(uav) =>uavs.push(uav),
+            match uav_result {
+                Ok(uav) => uavs.push(uav),
                 Err(err) => eprintln!("Error processing a UAV: {}", err),
-            }   
+            }
         }
         Ok(uavs)
     }

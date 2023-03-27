@@ -50,6 +50,7 @@ fn main() {
             mission::receive_polygon_coordinates,
             uav_handle::new_uav,
             uav_handle::update_uav,
+            uav_handle::delete_uav,
             uav_handle::get_uavs_vec,
         ])
         .run(tauri::generate_context!())
