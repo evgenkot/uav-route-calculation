@@ -3,7 +3,6 @@
 
 	import { writable } from 'svelte/store';
 	import { invoke } from '@tauri-apps/api/tauri';
-	// import { Vec } from '@tauri-apps/api/rust';
 
 	interface Uav {
 		id: number;
@@ -16,15 +15,6 @@
 		max_altitude: number;
 	}
 
-	// async function fetchUavs() {
-	// 	try {
-	// 		const result = await invoke<Uav[]>('get_uavs_vec');
-	// 		// Handle the result, e.g., update the UI or populate a variable with the data
-	// 		console.log(result);
-	// 	} catch (error) {
-	// 		console.error('Failed to fetch UAVs:', error);
-	// 	}
-	// }
 	let uavs: Uav[] = [];
 	let selectedUav: Uav | null = null;
 
@@ -123,9 +113,6 @@
 			if (response != 'Ok') {
 				alert(response);
 			} else {
-				console.log('norm');
-				console.log(uav);
-
 				// Find the index of the UAV in the local list with the same ID
 				const index = uavs.findIndex((item) => item.id === uav.id);
 
@@ -172,7 +159,7 @@
 			if (response != 'Ok') {
 				alert(response);
 			} else {
-				fetchUavs();
+				await fetchUavs();
 				selectedUav = uavs.length > 0 ? uavs[uavs.length - 1] : null;
 				uavOnEdit = false;
 			}
@@ -196,20 +183,34 @@
 		if (response != 'Ok') {
 			alert(response);
 		} else {
+			const index = uavs.findIndex((item) => item.id === uav.id);
+
+			// Update the local UAV list
+
 			fetchUavs();
+
 			selectedUav = uavs.length > 0 ? uavs[0] : null;
 			uavOnEdit = false;
 		}
 	}
-	
-	function undoUav()
-	{
-		if (uavOnEdit)
-		{
-			selectedUav = selectedUav;
-			uavOnEdit = !uavOnEdit;
+
+	function undoUav() {
+		if (uavOnEdit && selectedUav) {
+			(document.getElementById('uav_name') as HTMLInputElement).value = selectedUav.name;
+			(document.getElementById('uav_max_payload_mass') as HTMLInputElement).value =
+				selectedUav.max_payload_mass.toString();
+			(document.getElementById('uav_flight_duration') as HTMLInputElement).value =
+				selectedUav.flight_duration.toString();
+			(document.getElementById('uav_takeoff_speed') as HTMLInputElement).value =
+				selectedUav.takeoff_speed.toString();
+			(document.getElementById('uav_flight_speed') as HTMLInputElement).value =
+				selectedUav.flight_speed.toString();
+			(document.getElementById('uav_min_altitude') as HTMLInputElement).value =
+				selectedUav.min_altitude.toString();
+			(document.getElementById('uav_max_altitude') as HTMLInputElement).value =
+				selectedUav.max_altitude.toString();
+			uavOnEdit = false;
 		}
-		
 	}
 
 	let isActive = false;
@@ -274,10 +275,16 @@
 			<option value={uav}>{uav.name}</option>
 		{/each}
 	</select>
+	<button on:click={fetchUavs} class="fetch-uav">Fetch</button>
 	<button on:click={toggleUAVBlock} class="toggle-display">UAV detatils</button>
-	<input type="checkbox" on:change={toggleEditModeUAV} class="edit-mode-checkbox" />
-	<label for="edit-mode-uav" class="edit-mode-label">Edit Mode</label>
 	<div class="block" id="uav">
+		<input
+			type="checkbox"
+			on:change={toggleEditModeUAV}
+			class="edit-mode-checkbox"
+			disabled={uavOnEdit}
+		/>
+		<label for="edit-mode-uav" class="edit-mode-label">Edit Mode</label>
 		<div class="parameters">
 			<label for="uav_id" class="label">ID:</label>
 			<input
@@ -365,16 +372,20 @@
 				on:input={onUavFieldChange}
 			/>
 		</div>
-		<button class="update-uav" on:click={updateUav} disabled={!uavOnEdit || uavs.length == 0}
-			>Update</button
+		<button
+			class="update-uav"
+			on:click={updateUav}
+			disabled={!uavOnEdit || uavs.length == 0 || !isEditModeUAV}>Update</button
 		>
-		<button class="new-uav" on:click={newUav} disabled={!uavOnEdit}>New</button>
+		<button class="new-uav" on:click={newUav} disabled={!uavOnEdit || !isEditModeUAV}>New</button>
 		<button
 			class="delete-uav"
 			on:click={deleteUav}
-			disabled={uavOnEdit || uavs.length == 0 || !selectedUav || !selectedUav.id}>Delete</button
+			disabled={uavOnEdit || uavs.length == 0 || !selectedUav || !selectedUav.id || !isEditModeUAV}
+			>Delete</button
 		>
-		<button class="undo-uav" on:click={undoUav} disabled={!uavOnEdit}>Undo</button>
+		<button class="undo-uav" on:click={undoUav} disabled={!uavOnEdit || !isEditModeUAV}>Undo</button
+		>
 	</div>
 
 	<button on:click={toggleCameraBlock} class="toggle-display">Camera detatils</button>
