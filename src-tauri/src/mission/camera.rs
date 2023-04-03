@@ -1,7 +1,8 @@
 use rand::Rng;
 use rusqlite::{Connection, Result};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Camera {
     id: u64,               // id
     pub name: String,      // name
@@ -118,6 +119,16 @@ impl Camera {
                 &self.fov_y,
                 &self.resolution_x,
                 &self.resolution_y,
+                &self.id,
+            ),
+        )
+    }
+
+    pub fn sql_delete(&self, conn: &Connection) -> Result<usize> {
+        conn.execute(
+            "DELETE FROM camera 
+            WHERE camera_id = ?1",
+            (
                 &self.id,
             ),
         )
