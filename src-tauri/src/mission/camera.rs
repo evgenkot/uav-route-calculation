@@ -7,8 +7,8 @@ pub struct Camera {
     id: u64,               // id
     pub name: String,      // name
     pub mass: u64,         // mass in grams
-    pub fov_x: u16,        // x-axis viewing angle in degrees
-    pub fov_y: u16,        // y-axis viewing angle in degrees
+    pub fov_x: f64,        // x-axis viewing angle in degrees
+    pub fov_y: f64,        // y-axis viewing angle in degrees
     pub resolution_x: u16, // camera resolution x
     pub resolution_y: u16, // camera resolution y
 }
@@ -17,8 +17,8 @@ impl Camera {
     pub fn new(
         name: String,
         mass: u64,
-        fov_x: u16,
-        fov_y: u16,
+        fov_x: f64,
+        fov_y: f64,
         resolution_x: u16,
         resolution_y: u16,
     ) -> Camera {
@@ -37,8 +37,8 @@ impl Camera {
         let mut rng = rand::thread_rng();
         let name = format!("Fake Camera {}", rng.gen_range(1..100));
         let mass = rng.gen_range(100..1000);
-        let fov_x = rng.gen_range(30..180);
-        let fov_y = rng.gen_range(30..180);
+        let fov_x = rng.gen_range(30.0..180.0);
+        let fov_y = rng.gen_range(30.0..180.0);
         let resolution_x = rng.gen_range(1000..6000);
         let resolution_y = rng.gen_range(800..4000);
 
@@ -65,13 +65,13 @@ impl Camera {
                     camera_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                     camera_name TEXT NOT NULL,
                     camera_mass INTEGER NOT NULL CHECK (camera_mass >= 0),
-                    camera_fov_x INTEGER NOT NULL CHECK (
+                    camera_fov_x REAL NOT NULL CHECK (
                         camera_fov_x >= 0
-                        AND camera_fov_x <= 360
+                        AND camera_fov_x <= 180
                     ),
-                    camera_fov_y INTEGER NOT NULL CHECK (
+                    camera_fov_y REAL NOT NULL CHECK (
                         camera_fov_y >= 0
-                        AND camera_fov_y <= 360
+                        AND camera_fov_y <= 180
                     ),
                     camera_resolution_x INTEGER NOT NULL CHECK (camera_resolution_x >= 0),
                     camera_resolution_y INTEGER NOT NULL CHECK (camera_resolution_y >= 0)
