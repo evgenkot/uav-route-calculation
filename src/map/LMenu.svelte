@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import UavForm from './UAVForm.svelte';
+	import UAVForm from './UAVForm.svelte';
+	import CameraForm from './CameraForm.svelte';
+
 
 	import { writable } from 'svelte/store';
 	import { invoke } from '@tauri-apps/api/tauri';
@@ -45,9 +47,13 @@
 </script>
 
 <div class="sidenav" style={`width: ${sidenavWidth}px`}>
-	<!-- <h1>Menu</h1> -->
-	<UavForm/>
-	<button on:click={toggleCameraBlock} class="toggle-display">Camera detatils</button>
+<!-- <div style={padding: 60px} ></div> -->
+
+		
+	<h1 style={`padding-top: 40px`}>Menu</h1>
+	<UAVForm/>
+	<CameraForm/>
+	<!-- <button on:click={toggleCameraBlock} class="toggle-display">Camera detatils</button>
 	<div class="block" id="camera">
 		<div class="parameters">
 			<label for="camera_id" class="label">ID:</label>
@@ -77,7 +83,7 @@
 			<label for="camera_resolution_y" class="label">Resolution Y:</label>
 			<input type="text" class="input" id="camera_resolution_y" />
 		</div>
-	</div>
+	</div> -->
 
 	<button on:click={toggleAltitudeBlock} class="toggle-display">Altitude detatils</button>
 	<div class="block" id="altitude">
