@@ -4,7 +4,7 @@
     import LMenu from '../map/LMenu.svelte';
     import RMenu from '../map/RMenu.svelte';
     // import "../global.css"
-    import Sidebar from '../map/Sidebar.svelte';
+    
 </script>
 
 <Map/>

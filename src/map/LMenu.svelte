@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import UavForm from './UavForm.svelte';
+	import UavForm from './UAVForm.svelte';
 
 	import { writable } from 'svelte/store';
 	import { invoke } from '@tauri-apps/api/tauri';
