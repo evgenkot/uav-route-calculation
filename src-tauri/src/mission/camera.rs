@@ -8,7 +8,6 @@ pub struct Camera {
     pub name: String,      // name
     pub mass: u64,         // mass in grams
     pub fov_x: f64,        // x-axis viewing angle in degrees
-    pub fov_y: f64,        // y-axis viewing angle in degrees
     pub resolution_x: u16, // camera resolution x
     pub resolution_y: u16, // camera resolution y
 }
@@ -18,7 +17,6 @@ impl Camera {
         name: String,
         mass: u64,
         fov_x: f64,
-        fov_y: f64,
         resolution_x: u16,
         resolution_y: u16,
     ) -> Camera {
@@ -27,7 +25,6 @@ impl Camera {
             name,
             mass,
             fov_x,
-            fov_y,
             resolution_x,
             resolution_y,
         }
@@ -38,11 +35,10 @@ impl Camera {
         let name = format!("Fake Camera {}", rng.gen_range(1..100));
         let mass = rng.gen_range(100..1000);
         let fov_x = rng.gen_range(30.0..180.0);
-        let fov_y = rng.gen_range(30.0..180.0);
         let resolution_x = rng.gen_range(1000..6000);
         let resolution_y = rng.gen_range(800..4000);
 
-        Camera::new(name, mass, fov_x, fov_y, resolution_x, resolution_y)
+        Camera::new(name, mass, fov_x, resolution_x, resolution_y)
     }
 
     pub fn take_picture(&self) {
@@ -54,7 +50,6 @@ impl Camera {
         println!("name: {}", &self.name);
         println!("mass: {}", &self.mass);
         println!("fov_x: {}", &self.fov_x);
-        println!("fov_y: {}", &self.fov_y);
         println!("resolution_x: {}", &self.resolution_x);
         println!("resolution_y: {}", &self.resolution_y);
     }
@@ -69,10 +64,6 @@ impl Camera {
                         camera_fov_x >= 0
                         AND camera_fov_x <= 180
                     ),
-                    camera_fov_y REAL NOT NULL CHECK (
-                        camera_fov_y >= 0
-                        AND camera_fov_y <= 180
-                    ),
                     camera_resolution_x INTEGER NOT NULL CHECK (camera_resolution_x >= 0),
                     camera_resolution_y INTEGER NOT NULL CHECK (camera_resolution_y >= 0)
                     )",
@@ -86,15 +77,13 @@ impl Camera {
                     camera_name,
                     camera_mass,
                     camera_fov_x,
-                    camera_fov_y,
                     camera_resolution_x,
                     camera_resolution_y
-                ) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                ) VALUES (?1, ?2, ?3, ?4, ?5)",
             (
                 &self.name,
                 &self.mass,
                 &self.fov_x,
-                &self.fov_y,
                 &self.resolution_x,
                 &self.resolution_y,
             ),
@@ -108,15 +97,13 @@ impl Camera {
                         camera_name = ?1,
                         camera_mass = ?2,
                         camera_fov_x = ?3,
-                        camera_fov_y = ?4,
-                        camera_resolution_x = ?5,
-                        camera_resolution_y = ?6
-                    WHERE camera_id = ?7",
+                        camera_resolution_x = ?4,
+                        camera_resolution_y = ?5
+                    WHERE camera_id = ?6",
             (
                 &self.name,
                 &self.mass,
                 &self.fov_x,
-                &self.fov_y,
                 &self.resolution_x,
                 &self.resolution_y,
                 &self.id,
@@ -141,7 +128,6 @@ impl Camera {
                     camera_name,
                     camera_mass,
                     camera_fov_x,
-                    camera_fov_y,
                     camera_resolution_x,
                     camera_resolution_y
                 FROM camera",
@@ -153,9 +139,8 @@ impl Camera {
                 name: row.get(1)?,
                 mass: row.get(2)?,
                 fov_x: row.get(3)?,
-                fov_y: row.get(4)?,
-                resolution_x: row.get(5)?,
-                resolution_y: row.get(6)?,
+                resolution_x: row.get(4)?,
+                resolution_y: row.get(5)?,
             })
         })?;
 

@@ -25,37 +25,40 @@ fn main() {
 
         
 
-        // for i in 1..10 {
-        //     let mut ccamera = Camera::new_random();
-        //     ccamera.sql_add_to_db( &conn).expect("Allo");
-        // }
+        for i in 1..10 {
+            let mut ccamera = Camera::new_random();
+            ccamera.sql_add_to_db( &conn).expect("Allo");
+        }
+        for i in 1..10 {
+            let mut ccamera = Uav::new_random();
+            ccamera.sql_add_to_db( &conn).expect("Allo");
+        }
+
+        match Uav::get_uavs(&conn) {
+            Ok(uavs) => {
 
 
-        // match Uav::get_uavs(&conn) {
-        //     Ok(uavs) => {
+                for uav in uavs {
+                    println!("UAV: {:?}", uav);
+                }
+            }
+            Err(err) => {
+                eprintln!("Error fetching UAVs: {}", err);
+            }
+        }
+
+        match Camera::get_cameras(&conn) {
+            Ok(cameras) => {
 
 
-        //         for uav in uavs {
-        //             println!("UAV: {:?}", uav);
-        //         }
-        //     }
-        //     Err(err) => {
-        //         eprintln!("Error fetching UAVs: {}", err);
-        //     }
-        // }
-
-        // match Camera::get_cameras(&conn) {
-        //     Ok(cameras) => {
-
-
-        //         for camera in cameras {
-        //             println!("Camera: {:?}", camera);
-        //         }
-        //     }
-        //     Err(err) => {
-        //         eprintln!("Error fetching UAVs: {}", err);
-        //     }
-        // }
+                for camera in cameras {
+                    println!("Camera: {:?}", camera);
+                }
+            }
+            Err(err) => {
+                eprintln!("Error fetching UAVs: {}", err);
+            }
+        }
         
     }
 

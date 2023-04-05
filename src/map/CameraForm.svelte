@@ -7,7 +7,6 @@
 		name: string;
 		mass: number;
 		fov_x: number;
-		fov_y: number;
 		resolution_x: number;
 		resolution_y: number;
 	}
@@ -46,7 +45,7 @@
 		}
 
 		// Check if the viewing angles are within a reasonable range (e.g., 1° to 180°)
-		if (camera.fov_x < 1 || camera.fov_x > 180 || camera.fov_y < 1 || camera.fov_y > 180) {
+		if (camera.fov_x < 1 || camera.fov_x > 180) {
 			alert('Viewing angles should be between 1° and 180°');
 			return false;
 		}
@@ -71,7 +70,6 @@
 			name: (document.getElementById('camera_name') as HTMLInputElement).value,
 			mass: parseInt((document.getElementById('camera_mass') as HTMLInputElement).value),
 			fov_x: parseFloat((document.getElementById('camera_fov_x') as HTMLInputElement).value),
-			fov_y: parseFloat((document.getElementById('camera_fov_y') as HTMLInputElement).value),
 			resolution_x: parseInt(
 				(document.getElementById('camera_resolution_x') as HTMLInputElement).value
 			),
@@ -107,7 +105,6 @@
 			name: (document.getElementById('camera_name') as HTMLInputElement).value,
 			mass: parseInt((document.getElementById('camera_mass') as HTMLInputElement).value),
 			fov_x: parseFloat((document.getElementById('camera_fov_x') as HTMLInputElement).value),
-			fov_y: parseFloat((document.getElementById('camera_fov_y') as HTMLInputElement).value),
 			resolution_x: parseInt(
 				(document.getElementById('camera_resolution_x') as HTMLInputElement).value
 			),
@@ -136,7 +133,6 @@
 			name: 'camera_name',
 			mass: 0,
 			fov_x: 0,
-			fov_y: 0,
 			resolution_x: 0,
 			resolution_y: 0
 		};
@@ -161,8 +157,6 @@
 				selectedCamera.mass.toString();
 			(document.getElementById('camera_fov_x') as HTMLInputElement).value =
 				selectedCamera.fov_x.toString();
-			(document.getElementById('camera_fov_y') as HTMLInputElement).value =
-				selectedCamera.fov_y.toString();
 			(document.getElementById('camera_resolution_x') as HTMLInputElement).value =
 				selectedCamera.resolution_x.toString();
 			(document.getElementById('camera_resolution_y') as HTMLInputElement).value =
@@ -251,15 +245,6 @@
 			on:input={onCameraFieldChange}
 		/>
 
-		<label for="camera_fov_y" class="label">Y-axis FOV (degrees):</label>
-		<input
-			type="number"
-			class="input"
-			id="camera_fov_y"
-			value={selectedCamera ? selectedCamera.fov_y : ''}
-			readonly={!isEditModeCamera}
-			on:input={onCameraFieldChange}
-		/>
 
 		<label for="camera_resolution_x" class="label">Resolution X:</label>
 		<input
