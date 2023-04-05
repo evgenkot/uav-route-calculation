@@ -79,7 +79,6 @@
 				(document.getElementById('camera_resolution_y') as HTMLInputElement).value
 			)
 		};
-
 		if (isCameraValid(camera)) {
 			let response = await invoke<string>('update_camera', { camera });
 			if (response != 'Ok') {
@@ -218,8 +217,7 @@
 			value={selectedCamera ? selectedCamera.id : ''}
 			readonly
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="camera_name" class="label">Name:</label>
 		<input
 			type="text"
@@ -229,8 +227,7 @@
 			readonly={!isEditModeCamera}
 			on:input={onCameraFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="camera_mass" class="label">Mass (grams):</label>
 		<input
 			type="number"
@@ -240,8 +237,7 @@
 			readonly={!isEditModeCamera}
 			on:input={onCameraFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="camera_fov_x" class="label">X-axis FOV (degrees):</label>
 		<input
 			type="number"
@@ -251,8 +247,7 @@
 			readonly={!isEditModeCamera}
 			on:input={onCameraFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="camera_fov_y" class="label">Y-axis FOV (degrees):</label>
 		<input
 			type="number"
@@ -262,8 +257,7 @@
 			readonly={!isEditModeCamera}
 			on:input={onCameraFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="camera_resolution_x" class="label">Resolution X:</label>
 		<input
 			type="number"
@@ -273,8 +267,7 @@
 			readonly={!isEditModeCamera}
 			on:input={onCameraFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="camera_resolution_y" class="label">Resolution Y:</label>
 		<input
 			type="number"

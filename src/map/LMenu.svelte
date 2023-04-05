@@ -42,49 +42,16 @@
 	}
 
 	onMount(() => {
-		// fetchUavs();
+		
 	});
 </script>
 
 <div class="sidenav" style={`width: ${sidenavWidth}px`}>
-<!-- <div style={padding: 60px} ></div> -->
 
 		
 	<h1 style={`padding-top: 40px`}>Menu</h1>
 	<UAVForm/>
 	<CameraForm/>
-	<!-- <button on:click={toggleCameraBlock} class="toggle-display">Camera detatils</button>
-	<div class="block" id="camera">
-		<div class="parameters">
-			<label for="camera_id" class="label">ID:</label>
-			<input type="text" class="input" id="camera_id" />
-		</div>
-		<div class="parameters">
-			<label for="camera_name" class="label">Name:</label>
-			<input type="text" class="input" id="camera_name" />
-		</div>
-		<div class="parameters">
-			<label for="camera_mass" class="label">Mass:</label>
-			<input type="text" class="input" id="camera_mass" />
-		</div>
-		<div class="parameters">
-			<label for="camere_fov_x" class="label">Fov X:</label>
-			<input type="text" class="input" id="camere_fov_x" />
-		</div>
-		<div class="parameters">
-			<label for="camere_fov_y" class="label">Fov Y:</label>
-			<input type="text" class="input" id="camere_fov_y" />
-		</div>
-		<div class="parameters">
-			<label for="camera_resolution_x" class="label">Resolution X:</label>
-			<input type="text" class="input" id="camera_resolution_x" />
-		</div>
-		<div class="parameters">
-			<label for="camera_resolution_y" class="label">Resolution Y:</label>
-			<input type="text" class="input" id="camera_resolution_y" />
-		</div>
-	</div> -->
-
 	<button on:click={toggleAltitudeBlock} class="toggle-display">Altitude detatils</button>
 	<div class="block" id="altitude">
 		<div class="parameters">

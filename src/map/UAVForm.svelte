@@ -257,8 +257,7 @@
 			value={selectedUav ? selectedUav.id : ''}
 			readonly
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="uav_name" class="label">Name:</label>
 		<input
 			type="text"
@@ -268,8 +267,7 @@
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="uav_max_payload_mass" class="label">Max Payload Mass:</label>
 		<input
 			type="number"
@@ -279,8 +277,7 @@
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="uav_flight_duration" class="label">Flight Duration:</label>
 		<input
 			type="number"
@@ -290,8 +287,7 @@
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="takeoff_speed" class="label">Takeoff speed:</label>
 		<input
 			type="number"
@@ -301,8 +297,7 @@
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="flight_speed" class="label">Flight speed:</label>
 		<input
 			type="number"
@@ -312,8 +307,7 @@
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="min_altitude" class="label">Min altitude:</label>
 		<input
 			type="number"
@@ -323,8 +317,7 @@
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
-	</div>
-	<div class="parameters">
+
 		<label for="max_altitude" class="label">Max altitude:</label>
 		<input
 			type="number"
