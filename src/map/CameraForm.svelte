@@ -1,219 +1,179 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-
 	import { invoke } from '@tauri-apps/api/tauri';
 
-	interface Uav {
+	interface Camera {
 		id: number;
 		name: string;
-		max_payload_mass: number;
-		flight_duration: number;
-		takeoff_speed: number;
-		flight_speed: number;
-		min_altitude: number;
-		max_altitude: number;
+		mass: number;
+		fov_x: number;
+		fov_y: number;
+		resolution_x: number;
+		resolution_y: number;
 	}
 
-	let uavs: Uav[] = [];
-	let selectedUav: Uav | null = null;
+	let cameras: Camera[] = [];
+	let selectedCamera: Camera | null = null;
 
-	async function fetchUavs() {
+	async function fetchCameras() {
 		try {
-			const result = await invoke<Uav[]>('get_uavs_vec');
-			uavs = result;
-			selectedUav = uavs.length > 0 ? uavs[0] : null;
-			console.log(uavs);
+			const result = await invoke<Camera[]>('get_cameras_vec');
+			cameras = result;
+			selectedCamera = cameras.length > 0 ? cameras[0] : null;
+			console.log(cameras);
 		} catch (error) {
-			console.error('Failed to fetch UAVs:', error);
+			console.error('Failed to fetch cameras:', error);
 		}
 	}
 
-	let uavOnEdit = false;
+	let cameraOnEdit = false;
 
-	function onUavFieldChange() {
-		uavOnEdit = true;
+	function onCameraFieldChange() {
+		cameraOnEdit = true;
 	}
-	function isUavValid(uav: Uav): boolean {
-		// Check if the UAV name is not empty
-		if (!uav.name || uav.name.trim() === '') {
-			alert('UAV name cannot be empty');
+
+	function isCameraValid(camera: Camera): boolean {
+		// Check if the camera name is not empty
+		if (!camera.name || camera.name.trim() === '') {
+			alert('Camera name cannot be empty');
 			return false;
 		}
 
-		// Check if the maximum payload mass is within a reasonable range (e.g., 100g to 10kg)
-		if (uav.max_payload_mass < 100 || uav.max_payload_mass > 10000) {
-			alert('Max payload mass should be between 100g and 10kg');
+		// Check if the mass is within a reasonable range (e.g., 10g to 100no00g)
+		if (camera.mass < 10 || camera.mass > 10000) {
+			alert('Mass should be between 10g and 10000g');
 			return false;
 		}
 
-		// Check if the flight duration is within a reasonable range (e.g., 1 minute to 8 hours)
-		if (uav.flight_duration < 60 || uav.flight_duration > 28800) {
-			alert('Flight duration should be between 1 minute and 8 hours');
+		// Check if the viewing angles are within a reasonable range (e.g., 1° to 180°)
+		if (camera.fov_x < 1 || camera.fov_x > 180 || camera.fov_y < 1 || camera.fov_y > 180) {
+			alert('Viewing angles should be between 1° and 180°');
 			return false;
 		}
 
-		// Check if the takeoff and flight speeds are within reasonable ranges (e.g., 0.5m/s to 50m/s)
+		// Check if the resolutions are within a reasonable range (e.g., 1 to 10000)
 		if (
-			uav.takeoff_speed < 0.5 ||
-			uav.takeoff_speed > 50 ||
-			uav.flight_speed < 0.5 ||
-			uav.flight_speed > 50
+			camera.resolution_x < 1 ||
+			camera.resolution_x > 10000 ||
+			camera.resolution_y < 1 ||
+			camera.resolution_y > 10000
 		) {
-			alert('Takeoff and flight speeds should be between 0.5m/s and 50m/s');
-			return false;
-		}
-
-		// Check if the minimum and maximum altitudes are within reasonable ranges (e.g., 2m to 5000m)
-		if (
-			uav.min_altitude < 2 ||
-			uav.min_altitude > 5000 ||
-			uav.max_altitude < 5 ||
-			uav.max_altitude > 5000
-		) {
-			alert('Minimum and maximum altitudes should be between 2m and 5000m');
-			return false;
-		}
-
-		// Check if the minimum altitude is less than or equal to the maximum altitude
-		if (uav.min_altitude >= uav.max_altitude) {
-			alert('Minimum altitude should be less than the maximum altitude');
+			alert('Resolutions should be between 1 and 10000');
 			return false;
 		}
 
 		return true;
 	}
 
-	async function updateUav() {
-		const uav: Uav = {
-			id: parseInt((document.getElementById('uav_id') as HTMLInputElement).value),
-			name: (document.getElementById('uav_name') as HTMLInputElement).value,
-			max_payload_mass: parseInt(
-				(document.getElementById('uav_max_payload_mass') as HTMLInputElement).value
+	async function updateCamera() {
+		const camera: Camera = {
+			id: parseInt((document.getElementById('camera_id') as HTMLInputElement).value),
+			name: (document.getElementById('camera_name') as HTMLInputElement).value,
+			mass: parseInt((document.getElementById('camera_mass') as HTMLInputElement).value),
+			fov_x: parseFloat((document.getElementById('camera_fov_x') as HTMLInputElement).value),
+			fov_y: parseFloat((document.getElementById('camera_fov_y') as HTMLInputElement).value),
+			resolution_x: parseInt(
+				(document.getElementById('camera_resolution_x') as HTMLInputElement).value
 			),
-			flight_duration: parseInt(
-				(document.getElementById('uav_flight_duration') as HTMLInputElement).value
-			),
-			takeoff_speed: parseFloat(
-				(document.getElementById('uav_takeoff_speed') as HTMLInputElement).value
-			),
-			flight_speed: parseFloat(
-				(document.getElementById('uav_flight_speed') as HTMLInputElement).value
-			),
-			min_altitude: parseFloat(
-				(document.getElementById('uav_min_altitude') as HTMLInputElement).value
-			),
-			max_altitude: parseFloat(
-				(document.getElementById('uav_max_altitude') as HTMLInputElement).value
+			resolution_y: parseInt(
+				(document.getElementById('camera_resolution_y') as HTMLInputElement).value
 			)
 		};
 
-		if (isUavValid(uav)) {
-			let response = await invoke<string>('update_uav', { uav }); // Update the payload here
+		if (isCameraValid(camera)) {
+			let response = await invoke<string>('update_camera', { camera });
 			if (response != 'Ok') {
 				alert(response);
 			} else {
-				// Find the index of the UAV in the local list with the same ID
-				const index = uavs.findIndex((item) => item.id === uav.id);
+				// Find the index of the camera in the local list with the same ID
+				const index = cameras.findIndex((item) => item.id === camera.id);
 
-				// Update the local UAV list
+				// Update the local camera list
 				if (index !== -1) {
-					uavs[index] = uav;
-					uavs = [...uavs]; // Trigger reactivity by creating a new array reference
+					cameras[index] = camera;
+					cameras = [...cameras]; // Trigger reactivity by creating a new array reference
 				}
 
-				selectedUav = uavs.length > 0 ? uavs[index] : null;
-				uavOnEdit = false;
+				selectedCamera = cameras.length > 0 ? cameras[index] : null;
+				cameraOnEdit = false;
 			}
 		} else {
-			console.error('Invalid UAV data');
+			console.error('Invalid camera data');
 		}
 	}
 
-	async function newUav() {
-		const uav: Uav = {
+	async function newCamera() {
+		const camera: Camera = {
 			id: 0,
-			name: (document.getElementById('uav_name') as HTMLInputElement).value,
-			max_payload_mass: parseInt(
-				(document.getElementById('uav_max_payload_mass') as HTMLInputElement).value
+			name: (document.getElementById('camera_name') as HTMLInputElement).value,
+			mass: parseInt((document.getElementById('camera_mass') as HTMLInputElement).value),
+			fov_x: parseFloat((document.getElementById('camera_fov_x') as HTMLInputElement).value),
+			fov_y: parseFloat((document.getElementById('camera_fov_y') as HTMLInputElement).value),
+			resolution_x: parseInt(
+				(document.getElementById('camera_resolution_x') as HTMLInputElement).value
 			),
-			flight_duration: parseInt(
-				(document.getElementById('uav_flight_duration') as HTMLInputElement).value
-			),
-			takeoff_speed: parseFloat(
-				(document.getElementById('uav_takeoff_speed') as HTMLInputElement).value
-			),
-			flight_speed: parseFloat(
-				(document.getElementById('uav_flight_speed') as HTMLInputElement).value
-			),
-			min_altitude: parseFloat(
-				(document.getElementById('uav_min_altitude') as HTMLInputElement).value
-			),
-			max_altitude: parseFloat(
-				(document.getElementById('uav_max_altitude') as HTMLInputElement).value
+			resolution_y: parseInt(
+				(document.getElementById('camera_resolution_y') as HTMLInputElement).value
 			)
 		};
 
-		if (isUavValid(uav)) {
-			let response = await invoke<string>('new_uav', { uav }); // Update the payload here
+		if (isCameraValid(camera)) {
+			let response = await invoke<string>('new_camera', { camera });
 			if (response != 'Ok') {
 				alert(response);
 			} else {
-				await fetchUavs();
-				selectedUav = uavs.length > 0 ? uavs[uavs.length - 1] : null;
-				uavOnEdit = false;
+				await fetchCameras();
+				selectedCamera = cameras.length > 0 ? cameras[cameras.length - 1] : null;
+				cameraOnEdit = false;
 			}
 		} else {
-			console.error('Invalid UAV data');
+			console.error('Invalid Camera data');
 		}
 	}
 
-	async function deleteUav() {
-		const uav: Uav = {
-			id: parseInt((document.getElementById('uav_id') as HTMLInputElement).value),
-			name: 'uav_name',
-			max_payload_mass: 0,
-			flight_duration: 0,
-			takeoff_speed: 0,
-			flight_speed: 0,
-			min_altitude: 0,
-			max_altitude: 0
+	async function deleteCamera() {
+		const camera: Camera = {
+			id: parseInt((document.getElementById('camera_id') as HTMLInputElement).value),
+			name: 'camera_name',
+			mass: 0,
+			fov_x: 0,
+			fov_y: 0,
+			resolution_x: 0,
+			resolution_y: 0
 		};
-		let response = await invoke<string>('delete_uav', { uav });
+		let response = await invoke<string>('delete_camera', { camera });
 		if (response != 'Ok') {
 			alert(response);
 		} else {
-			const index = uavs.findIndex((item) => item.id === uav.id);
+			const index = cameras.findIndex((item) => item.id === camera.id);
 
-			// Update the local UAV list
+			// Update the local camera list
+			fetchCameras();
 
-			fetchUavs();
-
-			selectedUav = uavs.length > 0 ? uavs[0] : null;
-			uavOnEdit = false;
+			selectedCamera = cameras.length > 0 ? cameras[0] : null;
+			cameraOnEdit = false;
 		}
 	}
 
-	function undoUav() {
-		if (uavOnEdit && selectedUav) {
-			(document.getElementById('uav_name') as HTMLInputElement).value = selectedUav.name;
-			(document.getElementById('uav_max_payload_mass') as HTMLInputElement).value =
-				selectedUav.max_payload_mass.toString();
-			(document.getElementById('uav_flight_duration') as HTMLInputElement).value =
-				selectedUav.flight_duration.toString();
-			(document.getElementById('uav_takeoff_speed') as HTMLInputElement).value =
-				selectedUav.takeoff_speed.toString();
-			(document.getElementById('uav_flight_speed') as HTMLInputElement).value =
-				selectedUav.flight_speed.toString();
-			(document.getElementById('uav_min_altitude') as HTMLInputElement).value =
-				selectedUav.min_altitude.toString();
-			(document.getElementById('uav_max_altitude') as HTMLInputElement).value =
-				selectedUav.max_altitude.toString();
-			uavOnEdit = false;
+	function undoCamera() {
+		if (cameraOnEdit && selectedCamera) {
+			(document.getElementById('camera_name') as HTMLInputElement).value = selectedCamera.name;
+			(document.getElementById('camera_mass') as HTMLInputElement).value =
+				selectedCamera.mass.toString();
+			(document.getElementById('camera_fov_x') as HTMLInputElement).value =
+				selectedCamera.fov_x.toString();
+			(document.getElementById('camera_fov_y') as HTMLInputElement).value =
+				selectedCamera.fov_y.toString();
+			(document.getElementById('camera_resolution_x') as HTMLInputElement).value =
+				selectedCamera.resolution_x.toString();
+			(document.getElementById('camera_resolution_y') as HTMLInputElement).value =
+				selectedCamera.resolution_y.toString();
+			cameraOnEdit = false;
 		}
 	}
 
-	function toggleUAVBlock() {
-		let block = document.getElementById('uav');
+	function toggleCameraBlock() {
+		let block = document.getElementById('camera');
 		if (block !== null) {
 			if (block.style.display === 'none') {
 				block.style.display = 'block';
@@ -223,129 +183,127 @@
 		}
 	}
 
-	let isEditModeUAV = false;
-	function toggleEditModeUAV() {
-		isEditModeUAV = !isEditModeUAV;
+	let isEditModeCamera = false;
+	function toggleEditModeCamera() {
+		isEditModeCamera = !isEditModeCamera;
 	}
 
 	onMount(() => {
-		fetchUavs();
+		fetchCameras();
 	});
 </script>
 
-<select bind:value={selectedUav} on:change={() => {}} disabled={uavOnEdit}>
-	{#each uavs as uav (uav.id)}
-		<option value={uav}>{uav.name}</option>
+<select bind:value={selectedCamera} on:change={() => {}} disabled={cameraOnEdit}>
+	{#each cameras as camera (camera.id)}
+		<option value={camera}>{camera.name}</option>
 	{/each}
 </select>
-<button on:click={fetchUavs} class="fetch-uav">Fetch</button>
-<button on:click={toggleUAVBlock} class="toggle-display">UAV detatils</button>
-<div class="block" id="uav">
+<button on:click={fetchCameras} class="fetch-camera">Fetch</button>
+<button on:click={toggleCameraBlock} class="toggle-display">Camera detatils</button>
+<div class="block" id="camera">
 	<input
 		type="checkbox"
-		on:change={toggleEditModeUAV}
+		on:change={toggleEditModeCamera}
 		class="edit-mode-checkbox"
-		disabled={uavOnEdit}
+		disabled={cameraOnEdit}
 	/>
-	<label for="edit-mode-uav" class="edit-mode-label">Edit Mode</label>
+	<label for="edit-mode-camera" class="edit-mode-label">Edit Mode</label>
+
 	<div class="parameters">
-		<label for="uav_id" class="label">ID:</label>
+		<label for="camera_id" class="label">ID:</label>
 		<input
 			type="number"
 			class="input"
-			id="uav_id"
-			value={selectedUav ? selectedUav.id : ''}
+			id="camera_id"
+			value={selectedCamera ? selectedCamera.id : ''}
 			readonly
 		/>
 	</div>
 	<div class="parameters">
-		<label for="uav_name" class="label">Name:</label>
+		<label for="camera_name" class="label">Name:</label>
 		<input
 			type="text"
 			class="input"
-			id="uav_name"
-			value={selectedUav ? selectedUav.name : ''}
-			readonly={!isEditModeUAV}
-			on:input={onUavFieldChange}
+			id="camera_name"
+			value={selectedCamera ? selectedCamera.name : ''}
+			readonly={!isEditModeCamera}
+			on:input={onCameraFieldChange}
 		/>
 	</div>
 	<div class="parameters">
-		<label for="uav_max_payload_mass" class="label">Max Payload Mass:</label>
+		<label for="camera_mass" class="label">Mass (grams):</label>
 		<input
 			type="number"
 			class="input"
-			id="uav_max_payload_mass"
-			value={selectedUav ? selectedUav.max_payload_mass : ''}
-			readonly={!isEditModeUAV}
-			on:input={onUavFieldChange}
+			id="camera_mass"
+			value={selectedCamera ? selectedCamera.mass : ''}
+			readonly={!isEditModeCamera}
+			on:input={onCameraFieldChange}
 		/>
 	</div>
 	<div class="parameters">
-		<label for="uav_flight_duration" class="label">Flight Duration:</label>
+		<label for="camera_fov_x" class="label">X-axis FOV (degrees):</label>
 		<input
 			type="number"
 			class="input"
-			id="uav_flight_duration"
-			value={selectedUav ? selectedUav.flight_duration : ''}
-			readonly={!isEditModeUAV}
-			on:input={onUavFieldChange}
+			id="camera_fov_x"
+			value={selectedCamera ? selectedCamera.fov_x : ''}
+			readonly={!isEditModeCamera}
+			on:input={onCameraFieldChange}
 		/>
 	</div>
 	<div class="parameters">
-		<label for="takeoff_speed" class="label">Takeoff speed:</label>
+		<label for="camera_fov_y" class="label">Y-axis FOV (degrees):</label>
 		<input
 			type="number"
 			class="input"
-			id="uav_takeoff_speed"
-			value={selectedUav ? selectedUav.takeoff_speed : ''}
-			readonly={!isEditModeUAV}
-			on:input={onUavFieldChange}
+			id="camera_fov_y"
+			value={selectedCamera ? selectedCamera.fov_y : ''}
+			readonly={!isEditModeCamera}
+			on:input={onCameraFieldChange}
 		/>
 	</div>
 	<div class="parameters">
-		<label for="flight_speed" class="label">Flight speed:</label>
+		<label for="camera_resolution_x" class="label">Resolution X:</label>
 		<input
 			type="number"
 			class="input"
-			id="uav_flight_speed"
-			value={selectedUav ? selectedUav.flight_speed : ''}
-			readonly={!isEditModeUAV}
-			on:input={onUavFieldChange}
+			id="camera_resolution_x"
+			value={selectedCamera ? selectedCamera.resolution_x : ''}
+			readonly={!isEditModeCamera}
+			on:input={onCameraFieldChange}
 		/>
 	</div>
 	<div class="parameters">
-		<label for="min_altitude" class="label">Min altitude:</label>
+		<label for="camera_resolution_y" class="label">Resolution Y:</label>
 		<input
 			type="number"
 			class="input"
-			id="uav_min_altitude"
-			value={selectedUav ? selectedUav.min_altitude : ''}
-			readonly={!isEditModeUAV}
-			on:input={onUavFieldChange}
+			id="camera_resolution_y"
+			value={selectedCamera ? selectedCamera.resolution_y : ''}
+			readonly={!isEditModeCamera}
+			on:input={onCameraFieldChange}
 		/>
 	</div>
-	<div class="parameters">
-		<label for="max_altitude" class="label">Max altitude:</label>
-		<input
-			type="number"
-			class="input"
-			id="uav_max_altitude"
-			value={selectedUav ? selectedUav.max_altitude : ''}
-			readonly={!isEditModeUAV}
-			on:input={onUavFieldChange}
-		/>
-	</div>
+
 	<button
-		class="update-uav"
-		on:click={updateUav}
-		disabled={!uavOnEdit || uavs.length == 0 || !isEditModeUAV}>Update</button
+		class="update-camera"
+		on:click={updateCamera}
+		disabled={!cameraOnEdit || cameras.length == 0 || !isEditModeCamera}
 	>
-	<button class="new-uav" on:click={newUav} disabled={!uavOnEdit || !isEditModeUAV}>New</button>
+		Update
+	</button>
+	<button class="new-camera" on:click={newCamera} disabled={!cameraOnEdit || !isEditModeCamera}>
+		New
+	</button>
 	<button
-		class="delete-uav"
-		on:click={deleteUav}
-		disabled={uavOnEdit || uavs.length == 0 || !selectedUav || !selectedUav.id || !isEditModeUAV}
-		>Delete</button
+		class="delete-camera"
+		on:click={deleteCamera}
+		disabled={!cameraOnEdit || cameras.length == 0 || !isEditModeCamera}
 	>
-	<button class="undo-uav" on:click={undoUav} disabled={!uavOnEdit || !isEditModeUAV}>Undo</button>
+		Delete
+	</button>
+	<button class="undo-camera" on:click={undoCamera} disabled={!cameraOnEdit || !isEditModeCamera}>
+		Undo
+	</button>
 </div>
