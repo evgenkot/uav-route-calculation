@@ -233,12 +233,15 @@
 	});
 </script>
 
-<select bind:value={selectedUav} on:change={() => {}} disabled={uavOnEdit}>
-	{#each uavs as uav (uav.id)}
-		<option value={uav}>{uav.name}</option>
-	{/each}
-</select>
-<button on:click={fetchUavs} class="fetch-uav">Fetch</button>
+<div class="uav-select-fetch-wrapper">
+	<select bind:value={selectedUav} on:change={() => {}} disabled={uavOnEdit}>
+		{#each uavs as uav (uav.id)}
+			<option value={uav}>{uav.name}</option>
+		{/each}
+	</select>
+	<button on:click={fetchUavs} class="fetch-uav">Fetch</button>
+</div>
+
 <button on:click={toggleUAVBlock} class="toggle-display">UAV detatils</button>
 <div class="block" id="uav">
 	<input
@@ -328,17 +331,21 @@
 			on:input={onUavFieldChange}
 		/>
 	</div>
-	<button
-		class="update-uav"
-		on:click={updateUav}
-		disabled={!uavOnEdit || uavs.length == 0 || !isEditModeUAV}>Update</button
-	>
-	<button class="new-uav" on:click={newUav} disabled={!uavOnEdit || !isEditModeUAV}>New</button>
-	<button
-		class="delete-uav"
-		on:click={deleteUav}
-		disabled={uavOnEdit || uavs.length == 0 || !selectedUav || !selectedUav.id || !isEditModeUAV}
-		>Delete</button
-	>
-	<button class="undo-uav" on:click={undoUav} disabled={!uavOnEdit || !isEditModeUAV}>Undo</button>
+
+	<div class="uav-edit-toolbar">
+		<button
+			class="update-uav"
+			on:click={updateUav}
+			disabled={!uavOnEdit || uavs.length == 0 || !isEditModeUAV}>Update</button
+		>
+		<button class="new-uav" on:click={newUav} disabled={!uavOnEdit || !isEditModeUAV}>New</button>
+		<button
+			class="delete-uav"
+			on:click={deleteUav}
+			disabled={uavOnEdit || uavs.length == 0 || !selectedUav || !selectedUav.id || !isEditModeUAV}
+			>Delete</button
+		>
+		<button class="undo-uav" on:click={undoUav} disabled={!uavOnEdit || !isEditModeUAV}>Undo</button
+		>
+	</div>
 </div>

@@ -192,12 +192,15 @@
 	});
 </script>
 
-<select bind:value={selectedCamera} on:change={() => {}} disabled={cameraOnEdit}>
-	{#each cameras as camera (camera.id)}
-		<option value={camera}>{camera.name}</option>
-	{/each}
-</select>
-<button on:click={fetchCameras} class="fetch-camera">Fetch</button>
+<div class="uav-select-fetch-wrapper">
+	<select bind:value={selectedCamera} on:change={() => {}} disabled={cameraOnEdit}>
+		{#each cameras as camera (camera.id)}
+			<option value={camera}>{camera.name}</option>
+		{/each}
+	</select>
+	<button on:click={fetchCameras} class="fetch-camera">Fetch</button>
+</div>
+
 <button on:click={toggleCameraBlock} class="toggle-display">Camera detatils</button>
 <div class="block" id="camera">
 	<input
@@ -279,28 +282,30 @@
 		/>
 	</div>
 
-	<button
-		class="update-camera"
-		on:click={updateCamera}
-		disabled={!cameraOnEdit || cameras.length == 0 || !isEditModeCamera}
-	>
-		Update
-	</button>
-	<button class="new-camera" on:click={newCamera} disabled={!cameraOnEdit || !isEditModeCamera}>
-		New
-	</button>
-	<button
-		class="delete-camera"
-		on:click={deleteCamera}
-		disabled={cameraOnEdit ||
-			cameras.length == 0 ||
-			!selectedCamera ||
-			!selectedCamera.id ||
-			!isEditModeCamera}
-	>
-		Delete
-	</button>
-	<button class="undo-camera" on:click={undoCamera} disabled={!cameraOnEdit || !isEditModeCamera}>
-		Undo
-	</button>
+	<div class="uav-edit-toolbar">
+		<button
+			class="update-camera"
+			on:click={updateCamera}
+			disabled={!cameraOnEdit || cameras.length == 0 || !isEditModeCamera}
+		>
+			Update
+		</button>
+		<button class="new-camera" on:click={newCamera} disabled={!cameraOnEdit || !isEditModeCamera}>
+			New
+		</button>
+		<button
+			class="delete-camera"
+			on:click={deleteCamera}
+			disabled={cameraOnEdit ||
+				cameras.length == 0 ||
+				!selectedCamera ||
+				!selectedCamera.id ||
+				!isEditModeCamera}
+		>
+			Delete
+		</button>
+		<button class="undo-camera" on:click={undoCamera} disabled={!cameraOnEdit || !isEditModeCamera}>
+			Undo
+		</button>
+	</div>
 </div>
