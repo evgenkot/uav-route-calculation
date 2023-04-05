@@ -25,14 +25,14 @@ fn main() {
 
         
 
-        for i in 1..10 {
-            let mut ccamera = Camera::new_random();
-            ccamera.sql_add_to_db( &conn).expect("Allo");
-        }
-        for i in 1..10 {
-            let mut ccamera = Uav::new_random();
-            ccamera.sql_add_to_db( &conn).expect("Allo");
-        }
+        // for i in 1..10 {
+        //     let mut ccamera = Camera::new_random();
+        //     ccamera.sql_add_to_db( &conn).expect("Allo");
+        // }
+        // for i in 1..10 {
+        //     let mut ccamera = Uav::new_random();
+        //     ccamera.sql_add_to_db( &conn).expect("Allo");
+        // }
 
         match Uav::get_uavs(&conn) {
             Ok(uavs) => {
