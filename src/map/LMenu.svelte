@@ -19,28 +19,6 @@
 		}
 	}
 
-	function toggleCameraBlock() {
-		let block = document.getElementById('camera');
-		if (block !== null) {
-			if (block.style.display === 'none') {
-				block.style.display = 'block';
-			} else {
-				block.style.display = 'none';
-			}
-		}
-	}
-
-	function toggleAltitudeBlock() {
-		let block = document.getElementById('altitude');
-		if (block !== null) {
-			if (block.style.display === 'none') {
-				block.style.display = 'block';
-			} else {
-				block.style.display = 'none';
-			}
-		}
-	}
-
 	onMount(() => {
 		
 	});
@@ -52,21 +30,6 @@
 	<h1 style={`padding-top: 40px`}>Menu</h1>
 	<UAVForm/>
 	<CameraForm/>
-	<button on:click={toggleAltitudeBlock} class="toggle-display">Altitude detatils</button>
-	<div class="block" id="altitude">
-		<div class="parameters">
-			<label for="flight_altitude " class="label">Flight altitude:</label>
-			<input type="text" class="input" id="altitude_flight_altitude " />
-		</div>
-		<div class="parameters">
-			<label for="ground_level" class="label">Ground level:</label>
-			<input type="text" class="input" id="altitude_ground_level" />
-		</div>
-		<div class="parameters">
-			<label for="altitude_sea_level" class="label">Sea level:</label>
-			<input type="text" class="input" id="altitude_sea_level" />
-		</div>
-	</div>
 </div>
 
 <div class="toggle-container">
