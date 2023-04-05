@@ -111,7 +111,7 @@ impl Camera {
                         camera_fov_y = ?4,
                         camera_resolution_x = ?5,
                         camera_resolution_y = ?6
-                    WHERE uav_id = ?7",
+                    WHERE camera_id = ?7",
             (
                 &self.name,
                 &self.mass,

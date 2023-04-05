@@ -292,7 +292,11 @@
 	<button
 		class="delete-camera"
 		on:click={deleteCamera}
-		disabled={!cameraOnEdit || cameras.length == 0 || !isEditModeCamera}
+		disabled={cameraOnEdit ||
+			cameras.length == 0 ||
+			!selectedCamera ||
+			!selectedCamera.id ||
+			!isEditModeCamera}
 	>
 		Delete
 	</button>
