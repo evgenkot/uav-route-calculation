@@ -6,7 +6,7 @@
 	import Draw from 'ol/interaction/Draw';
 	import Modify from 'ol/interaction/Modify';
 	import Snap from 'ol/interaction/Snap';
-	import { Circle, Geometry, GeometryCollection, Polygon } from 'ol/geom';
+	import { Polygon } from 'ol/geom';
 	import { onMount } from 'svelte';
 
 	import { invoke } from '@tauri-apps/api/tauri';
@@ -52,10 +52,6 @@
 		draw.removeLastPoint();
 	}
 
-	function removeDeleteVertex() {
-		modify.unset('deleteCondition');
-	}
-
 	function enableNavigation() {
 		map.removeInteraction(draw);
 		map.removeInteraction(modify);
@@ -72,12 +68,18 @@
 		const vectorLayer = map
 			.getLayers()
 			.getArray()
-			.find((layer) => layer instanceof VectorLayer) as VectorLayer;
+			.find((layer) => layer instanceof VectorLayer) as VectorLayer<VectorSource>;
 		const source = vectorLayer.getSource() as VectorSource;
 		const features = source.getFeatures();
 		const vertices = features
 			.filter((feature) => feature.getGeometry() instanceof Polygon)
-			.map((feature) => feature.getGeometry().getCoordinates()[0]);
+			.map((feature) => {
+				const geometry = feature.getGeometry();
+				if (geometry instanceof Polygon) {
+					return geometry.getCoordinates()[0];
+				}
+				return undefined;
+			});
 
 		// Send the coordinates to the Rust backend
 		await invoke('receive_polygon_coordinates', { vertices });
