@@ -1,24 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { invoke } from '@tauri-apps/api/tauri';
-
-	interface Camera {
-		id: number;
-		name: string;
-		mass: number;
-		fov_x: number;
-		resolution_x: number;
-		resolution_y: number;
-	}
+	import type { Camera } from './types';
+	import { selectedCamera } from './store';
+	
+	
 
 	let cameras: Camera[] = [];
-	let selectedCamera: Camera | null = null;
+	// let selectedCamera: Camera | null = null;
 
 	async function fetchCameras() {
 		try {
 			const result = await invoke<Camera[]>('get_cameras_vec');
 			cameras = result;
-			selectedCamera = cameras.length > 0 ? cameras[0] : null;
+			selectedCamera.set( cameras.length > 0 ? cameras[0] : null);
 			console.log(cameras);
 		} catch (error) {
 			console.error('Failed to fetch cameras:', error);
@@ -91,7 +86,7 @@
 					cameras = [...cameras]; // Trigger reactivity by creating a new array reference
 				}
 
-				selectedCamera = cameras.length > 0 ? cameras[index] : null;
+				selectedCamera.set(cameras.length > 0 ? cameras[index] : null);
 				cameraOnEdit = false;
 			}
 		} else {
@@ -119,7 +114,7 @@
 				alert(response);
 			} else {
 				await fetchCameras();
-				selectedCamera = cameras.length > 0 ? cameras[cameras.length - 1] : null;
+				selectedCamera.set(cameras.length > 0 ? cameras[cameras.length - 1] : null);
 				cameraOnEdit = false;
 			}
 		} else {
@@ -145,22 +140,24 @@
 			// Update the local camera list
 			fetchCameras();
 
-			selectedCamera = cameras.length > 0 ? cameras[0] : null;
+			selectedCamera.set(cameras.length > 0 ? cameras[0] : null);
 			cameraOnEdit = false;
 		}
 	}
 
 	function undoCamera() {
 		if (cameraOnEdit && selectedCamera) {
-			(document.getElementById('camera_name') as HTMLInputElement).value = selectedCamera.name;
+
+			(document.getElementById('camera_name') as HTMLInputElement).value = $selectedCamera?.name || '';
+
 			(document.getElementById('camera_mass') as HTMLInputElement).value =
-				selectedCamera.mass.toString();
+				$selectedCamera?.mass.toString() || '';
 			(document.getElementById('camera_fov_x') as HTMLInputElement).value =
-				selectedCamera.fov_x.toString();
+				$selectedCamera?.fov_x.toString() || '';
 			(document.getElementById('camera_resolution_x') as HTMLInputElement).value =
-				selectedCamera.resolution_x.toString();
+				$selectedCamera?.resolution_x.toString() || '';
 			(document.getElementById('camera_resolution_y') as HTMLInputElement).value =
-				selectedCamera.resolution_y.toString();
+				$selectedCamera?.resolution_y.toString() || '';
 			cameraOnEdit = false;
 		}
 	}
@@ -187,7 +184,7 @@
 </script>
 
 <div class="uav-select-fetch-wrapper">
-	<select bind:value={selectedCamera} on:change={() => {}} disabled={cameraOnEdit}>
+	<select bind:value={$selectedCamera} on:change={() => {}} disabled={cameraOnEdit}>
 		{#each cameras as camera (camera.id)}
 			<option value={camera}>{camera.name}</option>
 		{/each}
@@ -211,7 +208,8 @@
 			type="number"
 			class="input"
 			id="camera_id"
-			value={selectedCamera ? selectedCamera.id : ''}
+
+			value={$selectedCamera ? $selectedCamera.id : ''}
 			readonly
 		/>
 
@@ -220,7 +218,7 @@
 			type="text"
 			class="input"
 			id="camera_name"
-			value={selectedCamera ? selectedCamera.name : ''}
+			value={$selectedCamera ? $selectedCamera.name : ''}
 			readonly={!isEditModeCamera}
 			on:input={onCameraFieldChange}
 		/>
@@ -230,7 +228,7 @@
 			type="number"
 			class="input"
 			id="camera_mass"
-			value={selectedCamera ? selectedCamera.mass : ''}
+			value={$selectedCamera ? $selectedCamera.mass : ''}
 			readonly={!isEditModeCamera}
 			on:input={onCameraFieldChange}
 		/>
@@ -240,7 +238,7 @@
 			type="number"
 			class="input"
 			id="camera_fov_x"
-			value={selectedCamera ? selectedCamera.fov_x : ''}
+			value={$selectedCamera ? $selectedCamera.fov_x : ''}
 			readonly={!isEditModeCamera}
 			on:input={onCameraFieldChange}
 		/>
@@ -251,7 +249,7 @@
 			type="number"
 			class="input"
 			id="camera_resolution_x"
-			value={selectedCamera ? selectedCamera.resolution_x : ''}
+			value={$selectedCamera ? $selectedCamera.resolution_x : ''}
 			readonly={!isEditModeCamera}
 			on:input={onCameraFieldChange}
 		/>
@@ -261,7 +259,7 @@
 			type="number"
 			class="input"
 			id="camera_resolution_y"
-			value={selectedCamera ? selectedCamera.resolution_y : ''}
+			value={$selectedCamera ? $selectedCamera.resolution_y : ''}
 			readonly={!isEditModeCamera}
 			on:input={onCameraFieldChange}
 		/>
@@ -283,8 +281,7 @@
 			on:click={deleteCamera}
 			disabled={cameraOnEdit ||
 				cameras.length == 0 ||
-				!selectedCamera ||
-				!selectedCamera.id ||
+				!$selectedCamera ||
 				!isEditModeCamera}
 		>
 			Delete

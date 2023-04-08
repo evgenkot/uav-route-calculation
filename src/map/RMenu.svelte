@@ -3,6 +3,7 @@
 
 	import { invoke } from '@tauri-apps/api/tauri';
 	import AltitudeForm from './AltitudeForm.svelte';
+	import { selectedUav, selectedCamera } from './store';
 
 	let isActive = false;
 	let sidenavWidth = 0;
@@ -27,17 +28,21 @@
 		}
 	}
 
-	onMount(() => {
-		
-	});
+	function displaySelectedUavAndCamera() {
+		// $selectedUav
+		//   ? console.log('Selected UAV:', $selectedUav)
+		//   : console.log('No UAV selected');
+		$selectedCamera
+			? console.log('Selected Camera:', $selectedCamera)
+			: console.log('No Camera selected');
+	}
+	onMount(() => {});
 </script>
 
 <div class="sidenav" style={`width: ${sidenavWidth}px`}>
-
-		
 	<h1 style={`padding-top: 40px`}>Menu</h1>
+	<button on:click={displaySelectedUavAndCamera}> Display Selected UAV and Camera </button>
 
-	
 	<button on:click={toggleAltitudeBlock} class="toggle-display">Altitude detatils</button>
 	<div class="block" id="altitude">
 		<div class="parameters">
@@ -54,7 +59,7 @@
 		</div>
 	</div>
 
-	<AltitudeForm/>
+	<AltitudeForm />
 </div>
 
 <div class="toggle-container">
@@ -63,10 +68,9 @@
 	</button>
 </div>
 
-
 <style>
-  @import "../styles/side-menu.css";
-  .sidenav {
+	@import '../styles/side-menu.css';
+	.sidenav {
 		right: 0;
 	}
 	.toggle-container {
