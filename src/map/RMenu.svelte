@@ -29,9 +29,9 @@
 	}
 
 	function displaySelectedUavAndCamera() {
-		// $selectedUav
-		//   ? console.log('Selected UAV:', $selectedUav)
-		//   : console.log('No UAV selected');
+		$selectedUav
+		  ? console.log('Selected UAV:', $selectedUav)
+		  : console.log('No UAV selected');
 		$selectedCamera
 			? console.log('Selected Camera:', $selectedCamera)
 			: console.log('No Camera selected');

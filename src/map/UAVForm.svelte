@@ -2,26 +2,16 @@
 	import { onMount } from 'svelte';
 
 	import { invoke } from '@tauri-apps/api/tauri';
-
-	interface Uav {
-		id: number;
-		name: string;
-		max_payload_mass: number;
-		flight_duration: number;
-		takeoff_speed: number;
-		flight_speed: number;
-		min_altitude: number;
-		max_altitude: number;
-	}
+	import type { Uav } from './types';
+	import { selectedUav } from './store';
 
 	let uavs: Uav[] = [];
-	let selectedUav: Uav | null = null;
 
 	async function fetchUavs() {
 		try {
 			const result = await invoke<Uav[]>('get_uavs_vec');
 			uavs = result;
-			selectedUav = uavs.length > 0 ? uavs[0] : null;
+			selectedUav.set(uavs.length > 0 ? uavs[0] : null);
 			console.log(uavs);
 		} catch (error) {
 			console.error('Failed to fetch UAVs:', error);
@@ -121,7 +111,7 @@
 					uavs = [...uavs]; // Trigger reactivity by creating a new array reference
 				}
 
-				selectedUav = uavs.length > 0 ? uavs[index] : null;
+				selectedUav.set(uavs.length > 0 ? uavs[index] : null);
 				uavOnEdit = false;
 			}
 		} else {
@@ -159,7 +149,7 @@
 				alert(response);
 			} else {
 				await fetchUavs();
-				selectedUav = uavs.length > 0 ? uavs[uavs.length - 1] : null;
+				selectedUav.set(uavs.length > 0 ? uavs[uavs.length - 1] : null);
 				uavOnEdit = false;
 			}
 		} else {
@@ -188,26 +178,27 @@
 
 			fetchUavs();
 
-			selectedUav = uavs.length > 0 ? uavs[0] : null;
+			selectedUav.set(uavs.length > 0 ? uavs[0] : null);
 			uavOnEdit = false;
 		}
 	}
 
 	function undoUav() {
 		if (uavOnEdit && selectedUav) {
-			(document.getElementById('uav_name') as HTMLInputElement).value = selectedUav.name;
+			(document.getElementById('uav_name') as HTMLInputElement).value = 
+				$selectedUav?.name || '';
 			(document.getElementById('uav_max_payload_mass') as HTMLInputElement).value =
-				selectedUav.max_payload_mass.toString();
+				$selectedUav?.max_payload_mass.toString() || '';
 			(document.getElementById('uav_flight_duration') as HTMLInputElement).value =
-				selectedUav.flight_duration.toString();
+				$selectedUav?.flight_duration.toString() || '';
 			(document.getElementById('uav_takeoff_speed') as HTMLInputElement).value =
-				selectedUav.takeoff_speed.toString();
+				$selectedUav?.takeoff_speed.toString() || '';
 			(document.getElementById('uav_flight_speed') as HTMLInputElement).value =
-				selectedUav.flight_speed.toString();
+				$selectedUav?.flight_speed.toString() || ''; 
 			(document.getElementById('uav_min_altitude') as HTMLInputElement).value =
-				selectedUav.min_altitude.toString();
+				$selectedUav?.min_altitude.toString() || '';
 			(document.getElementById('uav_max_altitude') as HTMLInputElement).value =
-				selectedUav.max_altitude.toString();
+				$selectedUav?.max_altitude.toString() || '';
 			uavOnEdit = false;
 		}
 	}
@@ -234,7 +225,7 @@
 </script>
 
 <div class="uav-select-fetch-wrapper">
-	<select bind:value={selectedUav} on:change={() => {}} disabled={uavOnEdit}>
+	<select bind:value={$selectedUav} on:change={() => {}} disabled={uavOnEdit}>
 		{#each uavs as uav (uav.id)}
 			<option value={uav}>{uav.name}</option>
 		{/each}
@@ -257,7 +248,7 @@
 			type="number"
 			class="input"
 			id="uav_id"
-			value={selectedUav ? selectedUav.id : ''}
+			value={$selectedUav ? $selectedUav.id : ''}
 			readonly
 		/>
 
@@ -266,7 +257,7 @@
 			type="text"
 			class="input"
 			id="uav_name"
-			value={selectedUav ? selectedUav.name : ''}
+			value={$selectedUav ? $selectedUav.name : ''}
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
@@ -276,7 +267,7 @@
 			type="number"
 			class="input"
 			id="uav_max_payload_mass"
-			value={selectedUav ? selectedUav.max_payload_mass : ''}
+			value={$selectedUav ? $selectedUav.max_payload_mass : ''}
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
@@ -286,7 +277,7 @@
 			type="number"
 			class="input"
 			id="uav_flight_duration"
-			value={selectedUav ? selectedUav.flight_duration : ''}
+			value={$selectedUav ? $selectedUav.flight_duration : ''}
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
@@ -296,7 +287,7 @@
 			type="number"
 			class="input"
 			id="uav_takeoff_speed"
-			value={selectedUav ? selectedUav.takeoff_speed : ''}
+			value={$selectedUav ? $selectedUav.takeoff_speed : ''}
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
@@ -306,7 +297,7 @@
 			type="number"
 			class="input"
 			id="uav_flight_speed"
-			value={selectedUav ? selectedUav.flight_speed : ''}
+			value={$selectedUav ? $selectedUav.flight_speed : ''}
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
@@ -316,7 +307,7 @@
 			type="number"
 			class="input"
 			id="uav_min_altitude"
-			value={selectedUav ? selectedUav.min_altitude : ''}
+			value={$selectedUav ? $selectedUav.min_altitude : ''}
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
@@ -326,7 +317,7 @@
 			type="number"
 			class="input"
 			id="uav_max_altitude"
-			value={selectedUav ? selectedUav.max_altitude : ''}
+			value={$selectedUav ? $selectedUav.max_altitude : ''}
 			readonly={!isEditModeUAV}
 			on:input={onUavFieldChange}
 		/>
@@ -342,7 +333,7 @@
 		<button
 			class="delete-uav"
 			on:click={deleteUav}
-			disabled={uavOnEdit || uavs.length == 0 || !selectedUav || !selectedUav.id || !isEditModeUAV}
+			disabled={uavOnEdit || uavs.length == 0 || !$selectedUav || !isEditModeUAV}
 			>Delete</button
 		>
 		<button class="undo-uav" on:click={undoUav} disabled={!uavOnEdit || !isEditModeUAV}>Undo</button

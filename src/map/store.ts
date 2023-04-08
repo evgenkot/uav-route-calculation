@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { Camera } from './types';
+import type { Camera, Uav } from './types';
 
-export const selectedUav = writable(null);
+export const selectedUav = writable<Uav | null>(null);
 export const selectedCamera = writable<Camera | null>(null);
