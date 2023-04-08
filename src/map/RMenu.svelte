@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 
 	import { invoke } from '@tauri-apps/api/tauri';
+	import AltitudeForm from './AltitudeForm.svelte';
 
 	let isActive = false;
 	let sidenavWidth = 0;
@@ -36,6 +37,7 @@
 		
 	<h1 style={`padding-top: 40px`}>Menu</h1>
 
+	
 	<button on:click={toggleAltitudeBlock} class="toggle-display">Altitude detatils</button>
 	<div class="block" id="altitude">
 		<div class="parameters">
@@ -51,6 +53,8 @@
 			<input type="text" class="input" id="altitude_sea_level" />
 		</div>
 	</div>
+
+	<AltitudeForm/>
 </div>
 
 <div class="toggle-container">
