@@ -64,6 +64,36 @@
 		map.addInteraction(snap);
 	}
 
+	// Add the following imports
+	import { transform } from 'ol/proj';
+	import proj4 from 'proj4';
+	import { register } from 'ol/proj/proj4';
+
+	// Add the helper functions
+	function getUTMZone(latitude: number, longitude: number): { zone: number; hemisphere: string } {
+		const zone = (Math.floor((longitude + 180) / 6) % 60) + 1;
+		const hemisphere = latitude >= 0 ? 'N' : 'S';
+		return { zone, hemisphere };
+	}
+
+	function getUTMEPSGCode(latitude: number, longitude: number): string {
+		const { zone, hemisphere } = getUTMZone(latitude, longitude);
+		const epsgCode = `EPSG:326${zone < 10 ? '0' + zone : zone}${hemisphere}`;
+		return epsgCode;
+	}
+
+	function defineUTMProjection(latitude: number, longitude: number): void {
+		const { zone, hemisphere } = getUTMZone(latitude, longitude);
+		const epsgCode = getUTMEPSGCode(latitude, longitude);
+		if (!proj4.defs(epsgCode)) {
+			proj4.defs(
+				epsgCode,
+				`+proj=utm +zone=${zone} +${hemisphere} +ellps=WGS84 +datum=WGS84 +units=m +no_defs`
+			);
+			register(proj4);
+		}
+	}
+
 	async function displayVertices() {
 		const vectorLayer = map
 			.getLayers()
@@ -76,10 +106,28 @@
 			.map((feature) => {
 				const geometry = feature.getGeometry();
 				if (geometry instanceof Polygon) {
-					return geometry.getCoordinates()[0];
+					// Get the coordinates in EPSG:3857
+					const coordinates3857 = geometry.getCoordinates()[0];
+
+					// Get the first coordinate of the polygon
+					const [firstLongitude, firstLatitude] = transform(
+						coordinates3857[0],
+						'EPSG:3857',
+						'EPSG:4326'
+					);
+
+					// Define the UTM projection for the area of interest
+					defineUTMProjection(firstLatitude, firstLongitude);
+
+					// Transform coordinates to the UTM zone projection
+					const utmEpsgCode = getUTMEPSGCode(firstLatitude, firstLongitude);
+					return coordinates3857.map((coordinate) =>
+						transform(coordinate, 'EPSG:3857', utmEpsgCode)
+					);
 				}
 				return undefined;
-			});
+			})
+			.filter((coord) => coord !== undefined) as number[][][];
 
 		// Send the coordinates to the Rust backend
 		await invoke('receive_polygon_coordinates', { vertices });
