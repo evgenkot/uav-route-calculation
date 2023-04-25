@@ -94,7 +94,7 @@
 		}
 	}
 
-	async function displayVertices() {
+	function getVertices(): number[][][] | undefined {
 		const vectorLayer = map
 			.getLayers()
 			.getArray()
@@ -129,9 +129,13 @@
 			})
 			.filter((coord) => coord !== undefined) as number[][][];
 
+		return vertices;
 		// Send the coordinates to the Rust backend
-		await invoke('receive_polygon_coordinates', { vertices });
+		// invoke('receive_polygon_coordinates', { vertices });
 	}
+
+
+	
 </script>
 
 <div id={viewMap} class="map" />
@@ -139,7 +143,7 @@
 	<button on:click={undo}>Undo</button>
 	<button on:click={enableDrawing}>Draw</button>
 	<button on:click={enableNavigation}>Navigation</button>
-	<button on:click={displayVertices}>Display Vertices</button>
+	<button on:click={getVertices}>Calculate</button>
 </div>
 
 <style>
