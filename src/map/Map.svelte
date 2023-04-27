@@ -8,6 +8,12 @@
 	import Snap from 'ol/interaction/Snap';
 	import { Polygon } from 'ol/geom';
 	import { onMount } from 'svelte';
+	import Point from 'ol/geom/Point';
+import Style from 'ol/style/Style';
+import Icon from 'ol/style/Icon';
+import Feature from 'ol/Feature';
+import Circle from 'ol/style/Circle';
+import Fill from 'ol/style/Fill';
 
 	import { invoke } from '@tauri-apps/api/tauri';
 
@@ -16,6 +22,7 @@
 	let draw: Draw;
 	let modify: Modify;
 	let snap: Snap;
+	const startPointSource = new VectorSource();
 
 	onMount(async () => {
 		const osmLayer = new TileLayer({ source: new OSM() });
@@ -26,9 +33,22 @@
 			source: source
 		});
 
+const startPointLayer = new VectorLayer({
+    source: startPointSource,
+    style: new Style({
+        image: new Circle({
+            radius: 7,
+            fill: new Fill({
+                color: 'rgba(255, 0, 0, 0.7)',
+            }),
+        }),
+    }),
+});
+
+
 		map = new Map({
 			target: viewMap,
-			layers: [osmLayer, vector],
+			layers: [osmLayer, vector, startPointLayer],
 			view: new View({
 				center: [0, 0],
 				zoom: 2
@@ -64,6 +84,8 @@
 		map.addInteraction(snap);
 	}
 
+	
+
 	// Add the following imports
 	import { transform } from 'ol/proj';
 	import proj4 from 'proj4';
@@ -93,6 +115,27 @@
 			register(proj4);
 		}
 	}
+	function enableStartingPoint() {
+    // Remove other interactions
+    map.removeInteraction(draw);
+    map.removeInteraction(modify);
+    map.removeInteraction(snap);
+
+    // Add a click event listener to the map
+    map.once('click', (event) => {
+        const coordinates = event.coordinate;
+        const startPoint = new Feature({
+            geometry: new Point(coordinates),
+        });
+
+        // Remove existing starting point features from the source
+        startPointSource.clear();
+
+        // Add the new starting point feature to the source
+        startPointSource.addFeature(startPoint);
+    });
+}
+
 
 	function getVertices(): number[][][] | undefined {
 		const vectorLayer = map
@@ -142,6 +185,7 @@
 <div class="toolbar">
 	<button on:click={undo}>Undo</button>
 	<button on:click={enableDrawing}>Draw</button>
+	<button on:click={enableStartingPoint}>Set Starting Point</button>
 	<button on:click={enableNavigation}>Navigation</button>
 	<button on:click={getVertices}>Calculate</button>
 </div>
