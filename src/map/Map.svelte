@@ -9,11 +9,11 @@
 	import { Polygon } from 'ol/geom';
 	import { onMount } from 'svelte';
 	import Point from 'ol/geom/Point';
-import Style from 'ol/style/Style';
-import Icon from 'ol/style/Icon';
-import Feature from 'ol/Feature';
-import Circle from 'ol/style/Circle';
-import Fill from 'ol/style/Fill';
+	import Style from 'ol/style/Style';
+	import Icon from 'ol/style/Icon';
+	import Feature from 'ol/Feature';
+	import Circle from 'ol/style/Circle';
+	import Fill from 'ol/style/Fill';
 
 	import { invoke } from '@tauri-apps/api/tauri';
 
@@ -33,18 +33,17 @@ import Fill from 'ol/style/Fill';
 			source: source
 		});
 
-const startPointLayer = new VectorLayer({
-    source: startPointSource,
-    style: new Style({
-        image: new Circle({
-            radius: 7,
-            fill: new Fill({
-                color: 'rgba(255, 0, 0, 0.7)',
-            }),
-        }),
-    }),
-});
-
+		const startPointLayer = new VectorLayer({
+			source: startPointSource,
+			style: new Style({
+				image: new Circle({
+					radius: 7,
+					fill: new Fill({
+						color: 'rgba(255, 0, 0, 0.7)'
+					})
+				})
+			})
+		});
 
 		map = new Map({
 			target: viewMap,
@@ -84,8 +83,6 @@ const startPointLayer = new VectorLayer({
 		map.addInteraction(snap);
 	}
 
-	
-
 	// Add the following imports
 	import { transform } from 'ol/proj';
 	import proj4 from 'proj4';
@@ -116,26 +113,25 @@ const startPointLayer = new VectorLayer({
 		}
 	}
 	function enableStartingPoint() {
-    // Remove other interactions
-    map.removeInteraction(draw);
-    map.removeInteraction(modify);
-    map.removeInteraction(snap);
+		// Remove other interactions
+		map.removeInteraction(draw);
+		map.removeInteraction(modify);
+		map.removeInteraction(snap);
 
-    // Add a click event listener to the map
-    map.once('click', (event) => {
-        const coordinates = event.coordinate;
-        const startPoint = new Feature({
-            geometry: new Point(coordinates),
-        });
+		// Add a click event listener to the map
+		map.once('click', (event) => {
+			const coordinates = event.coordinate;
+			const startPoint = new Feature({
+				geometry: new Point(coordinates)
+			});
 
-        // Remove existing starting point features from the source
-        startPointSource.clear();
+			// Remove existing starting point features from the source
+			startPointSource.clear();
 
-        // Add the new starting point feature to the source
-        startPointSource.addFeature(startPoint);
-    });
-}
-
+			// Add the new starting point feature to the source
+			startPointSource.addFeature(startPoint);
+		});
+	}
 
 	function getVertices(): number[][][] | undefined {
 		const vectorLayer = map
@@ -177,8 +173,37 @@ const startPointLayer = new VectorLayer({
 		// invoke('receive_polygon_coordinates', { vertices });
 	}
 
+	function getStartingPointCoordinates(): number[] | null {
+		const features = startPointSource.getFeatures();
+		if (features.length === 0) {
+			return null;
+		}
 
-	
+		const startingPointFeature = features[0];
+		const geometry = startingPointFeature.getGeometry();
+
+		if (geometry instanceof Point) {
+			const startingPointCoordinates = geometry.getCoordinates();
+
+			// Transform starting point coordinates to EPSG:4326 (longitude, latitude)
+			const [longitude, latitude] = transform(startingPointCoordinates, 'EPSG:3857', 'EPSG:4326');
+
+			// Define the UTM projection for the starting point
+			defineUTMProjection(latitude, longitude);
+
+			// Transform coordinates to the UTM zone projection
+			const utmEpsgCode = getUTMEPSGCode(latitude, longitude);
+			const startingPointCoordinatesInMeters = transform(
+				startingPointCoordinates,
+				'EPSG:3857',
+				utmEpsgCode
+			);
+			console.log(startingPointCoordinatesInMeters);
+			return startingPointCoordinatesInMeters;
+		}
+
+		return null;
+	}
 </script>
 
 <div id={viewMap} class="map" />
@@ -187,7 +212,7 @@ const startPointLayer = new VectorLayer({
 	<button on:click={enableDrawing}>Draw</button>
 	<button on:click={enableStartingPoint}>Set Starting Point</button>
 	<button on:click={enableNavigation}>Navigation</button>
-	<button on:click={getVertices}>Calculate</button>
+	<button on:click={getStartingPointCoordinates}>Calculate</button>
 </div>
 
 <style>

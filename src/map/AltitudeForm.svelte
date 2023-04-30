@@ -1,8 +1,8 @@
 <script lang="ts">
     import { writable } from "svelte/store";
+    import { altitudeValue } from "./store";
 
     let altitudeMode = "manual";
-    const altitudeValue = writable<number>(0);
     const pxPerMeterValue = writable<number>(0);
 
     function onAltitudeModeChange(event: Event) {
@@ -53,13 +53,13 @@
     <div class="input-row">
         <input
             type="radio"
-            id="calculate-px-m"
+            id="calculate-sm-px"
             name="altitude-mode"
             value="calculate"
             checked={altitudeMode === "calculate"}
             on:change={onAltitudeModeChange}
         />
-        <label for="calculate-px-m">Calculate using px/m</label>
+        <label for="calculate-sm-px">Calculate using sm/px</label>
     </div>
     <div class="input-row">
         <label for="altitude">Altitude:</label>
@@ -67,17 +67,17 @@
             type="number"
             id="altitude"
             min="0"
-            step="0.01"
+            step="0.001"
             disabled={altitudeMode === "calculate"}
             on:input={onAltitudeValueChange}
         />
     </div>
     {#if altitudeMode === "calculate"}
     <div class="input-row">
-        <label for="px-per-meter">Px/m:</label>
+        <label for="sm-per-px">sm/px:</label>
         <input
             type="number"
-            id="px-per-meter"
+            id="sm-per-px"
             min="0"
             step="0.01"
             on:input={onPxPerMeterValueChange}
