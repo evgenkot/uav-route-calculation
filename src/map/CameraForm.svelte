@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { invoke } from '@tauri-apps/api/tauri';
-	import type { Camera } from './types';
+	import type { Camera } from './store';
 	import { selectedCamera } from './store';
 	
 	

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 
 	import { invoke } from '@tauri-apps/api/tauri';
-	import type { Uav } from './types';
+	import type { Uav } from './store';
 	import { selectedUav } from './store';
 
 	let uavs: Uav[] = [];
