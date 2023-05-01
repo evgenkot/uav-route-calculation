@@ -167,10 +167,11 @@
 				return undefined;
 			})
 			.filter((coord) => coord !== undefined) as number[][][];
-
+		console.log(vertices);
+		invoke('receive_polygon_coordinates', { vertices });
 		return vertices;
 		// Send the coordinates to the Rust backend
-		// invoke('receive_polygon_coordinates', { vertices });
+		
 	}
 
 	function getStartingPointCoordinates(): number[] | null {
@@ -212,7 +213,7 @@
 	<button on:click={enableDrawing}>Draw</button>
 	<button on:click={enableStartingPoint}>Set Starting Point</button>
 	<button on:click={enableNavigation}>Navigation</button>
-	<button on:click={getStartingPointCoordinates}>Calculate</button>
+	<button on:click={getVertices}>Calculate</button>
 </div>
 
 <style>

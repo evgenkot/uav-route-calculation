@@ -26,3 +26,12 @@ export const selectedCamera = writable<Camera | null>(null);
 export const altitudeValue = writable<number>(0);
 
 export const overlapValue = writable<number>(0);
+
+export interface MissionPlan {
+    area_vertices: number[][][];
+    mission_uav: Uav;
+    mission_camera: Camera;
+    mission_altitude: number;
+    mission_start: number[];
+}
+
