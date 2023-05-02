@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
-	import { altitudeValue, selectedCamera, overlapValue} from './store';
-	import type {Camera} from './store';
-	
+	import { altitudeValue, selectedCamera, overlapValue } from './store';
+	import type { Camera } from './store';
 
 	let altitudeMode = 'manual';
 	const smPerValue = writable<number>(0);
@@ -24,7 +23,9 @@
 			if ($selectedCamera) {
 				const overlap = $overlapValue / 100;
 				const tg = (angle: number) => Math.tan(angle * (Math.PI / 180));
-				const calculatedAltitude = ($selectedCamera.resolution_x * (1 - overlap) * 0.5  * value) / (tg(($selectedCamera.fov_x) * 0.5 )* 100);
+				const calculatedAltitude =
+					($selectedCamera.resolution_x * (1 - overlap) * 0.5 * value) /
+					(tg($selectedCamera.fov_x * 0.5) * 100);
 				altitudeValue.set(calculatedAltitude);
 			}
 			return value;
@@ -45,6 +46,17 @@
 		<label for="manual-altitude">Manual altitude input</label>
 	</div>
 	<div class="input-row">
+		<input
+			type="radio"
+			id="calculate-sm-px"
+			name="altitude-mode"
+			value="calculate"
+			checked={altitudeMode === 'calculate'}
+			on:change={onAltitudeModeChange}
+		/>
+		<label for="calculate-sm-px">Calculate using sm/px</label>
+	</div>
+	<div class="input-row">
 		<label for="overlap-percentage">Overlap (%):</label>
 		<input
 			type="number"
@@ -55,7 +67,6 @@
 			bind:value={$overlapValue}
 		/>
 	</div>
-	
 	<div class="input-row">
 		<label for="altitude">Altitude:</label>
 		<input
@@ -66,18 +77,7 @@
 			disabled={altitudeMode === 'calculate'}
 			on:input={onAltitudeValueChange}
 			bind:value={$altitudeValue}
-		/> 
-	</div>
-	<div class="input-row">
-		<input
-			type="radio"
-			id="calculate-sm-px"
-			name="altitude-mode"
-			value="calculate"
-			checked={altitudeMode === 'calculate'}
-			on:change={onAltitudeModeChange}
 		/>
-		<label for="calculate-sm-px">Calculate using sm/px</label>
 	</div>
 	{#if altitudeMode === 'calculate'}
 		<div class="input-row">

@@ -34,4 +34,12 @@ export interface MissionPlan {
     mission_altitude: number;
     mission_start: number[];
 }
+ 
 
+export enum Algorithm {
+  NearestNeighbor = "NearestNeighbor",
+  ChristofidesAlgorithm = "ChristofidesAlgorithm",
+  BruteForce = "BruteForce",
+}
+
+export const selectedAlgorithm = writable<Algorithm>(Algorithm.NearestNeighbor);

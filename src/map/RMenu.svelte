@@ -3,6 +3,7 @@
 
 	import { invoke } from '@tauri-apps/api/tauri';
 	import AltitudeForm from './AltitudeForm.svelte';
+	import AlgorithmSelect from './AlgorithmSelect.svelte';
 	import { selectedUav, selectedCamera } from './store';
 
 	let isActive = false;
@@ -58,6 +59,7 @@
 	</div>
 
 	<AltitudeForm />
+	<AlgorithmSelect />
 </div>
 
 <div class="toggle-container">
