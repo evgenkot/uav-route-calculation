@@ -15,6 +15,9 @@
 	import Circle from 'ol/style/Circle';
 	import Fill from 'ol/style/Fill';
 
+	import LineString from 'ol/geom/LineString';
+	import Stroke from 'ol/style/Stroke';
+
 	import { invoke } from '@tauri-apps/api/tauri';
 
 	let viewMap = 'main-map';
@@ -23,6 +26,8 @@
 	let modify: Modify;
 	let snap: Snap;
 	const startPointSource = new VectorSource();
+	let discretizedAreaLayer = new VectorLayer();
+	let nearestNeighborLayer = new VectorLayer();
 
 	onMount(async () => {
 		const osmLayer = new TileLayer({ source: new OSM() });
@@ -45,9 +50,31 @@
 			})
 		});
 
+		discretizedAreaLayer = new VectorLayer({
+			source: new VectorSource(),
+			style: new Style({
+				image: new Circle({
+					radius: 5,
+					fill: new Fill({
+						color: 'rgba(0, 255, 0, 0.7)'
+					})
+				})
+			})
+		});
+
+		nearestNeighborLayer = new VectorLayer({
+			source: new VectorSource(),
+			style: new Style({
+				stroke: new Stroke({
+					color: 'rgba(0, 0, 255, 0.7)',
+					width: 3
+				})
+			})
+		});
+
 		map = new Map({
 			target: viewMap,
-			layers: [osmLayer, vector, startPointLayer],
+			layers: [osmLayer, vector, startPointLayer, discretizedAreaLayer, nearestNeighborLayer],
 			view: new View({
 				center: [0, 0],
 				zoom: 2
@@ -205,6 +232,42 @@
 		return null;
 	}
 
+	function updateResultsLayer(discretizedArea: number[][], planResult: number[][]) {
+		const discretizedAreaSource = discretizedAreaLayer.getSource();
+		const nearestNeighborSource = nearestNeighborLayer.getSource();
+
+		if (discretizedAreaSource == null) {
+			alert('discretizedAreaSource not loaded');
+			return;
+		}
+		if (nearestNeighborSource == null) {
+			alert('nearestNeighborSource not loaded');
+			return;
+		}
+
+		discretizedAreaSource.clear();
+		nearestNeighborSource.clear();
+
+		const firstPoint = discretizedArea[0];
+		const utmEpsgCode = getUTMEPSGCode(firstPoint[1], firstPoint[0]);
+
+		// Define the UTM projection for the first point
+		defineUTMProjection(firstPoint[1], firstPoint[0]);
+
+		discretizedArea.forEach((point) => {
+			const coordinates = transform(point, utmEpsgCode, 'EPSG:3857');
+			const feature = new Feature(new Point(coordinates));
+			discretizedAreaSource.addFeature(feature);
+		});
+
+		const nearestNeighborLineCoordinates = planResult.map((point) =>
+			transform(point, utmEpsgCode, 'EPSG:3857')
+		);
+		const nearestNeighborLine = new LineString(nearestNeighborLineCoordinates);
+		const nearestNeighborLineFeature = new Feature(nearestNeighborLine);
+		nearestNeighborSource.addFeature(nearestNeighborLineFeature);
+	}
+
 	async function calculate() {
 		const vertices = getVertices();
 		const startingPoint = getStartingPointCoordinates();
@@ -231,11 +294,12 @@
 		let planResult;
 
 		try {
-			discretizedArea = await invoke('discretize_area', {
+			const result = await invoke('discretize_area', {
 				polygon: vertices[0],
 				photoWidth: photoWidth,
 				photoHeight: photoHeight
 			});
+			discretizedArea = result as number[][];
 			console.log(discretizedArea);
 		} catch (error) {
 			alert('Error calling discretize_area');
@@ -243,16 +307,19 @@
 		}
 
 		try {
-			planResult = await invoke('nearest_neighbor', {
+			const result = await invoke('nearest_neighbor', {
 				points: discretizedArea,
 				startPoint: startingPoint
 			});
 
+			planResult = result as number[][];
 			console.log(planResult);
 		} catch (error) {
 			alert('Error calling nearest Neighbor');
 			return;
 		}
+
+		updateResultsLayer(discretizedArea, planResult);
 	}
 </script>
 
