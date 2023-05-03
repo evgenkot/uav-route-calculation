@@ -167,11 +167,10 @@
 				return undefined;
 			})
 			.filter((coord) => coord !== undefined) as number[][][];
-		console.log(vertices);
-		invoke('receive_polygon_coordinates', { vertices });
+		// console.log(vertices);
+		// invoke('receive_polygon_coordinates', { vertices });
 		return vertices;
 		// Send the coordinates to the Rust backend
-		
 	}
 
 	function getStartingPointCoordinates(): number[] | null {
@@ -199,11 +198,61 @@
 				'EPSG:3857',
 				utmEpsgCode
 			);
-			console.log(startingPointCoordinatesInMeters);
+			// console.log(startingPointCoordinatesInMeters);
 			return startingPointCoordinatesInMeters;
 		}
 
 		return null;
+	}
+
+	async function calculate() {
+		const vertices = getVertices();
+		const startingPoint = getStartingPointCoordinates();
+
+		if (vertices === undefined) {
+			alert('getVertices function is not available. Please make sure the map is loaded.');
+			return;
+		}
+
+		if (vertices.length <= 0) {
+			alert('Area not set');
+			return;
+		}
+
+		if (startingPoint === null) {
+			alert('Starting point not set');
+			return;
+		}
+
+		// console.log(vertices, startingPoint);
+		const photoWidth = 40;
+		const photoHeight = 30;
+		let discretizedArea;
+		let planResult;
+
+		try {
+			discretizedArea = await invoke('discretize_area', {
+				polygon: vertices[0],
+				photoWidth: photoWidth,
+				photoHeight: photoHeight
+			});
+			console.log(discretizedArea);
+		} catch (error) {
+			alert('Error calling discretize_area');
+			return;
+		}
+
+		try {
+			planResult = await invoke('nearest_neighbor', {
+				points: discretizedArea,
+				startPoint: startingPoint
+			});
+
+			console.log(planResult);
+		} catch (error) {
+			alert('Error calling nearest Neighbor');
+			return;
+		}
 	}
 </script>
 
@@ -213,7 +262,7 @@
 	<button on:click={enableDrawing}>Draw</button>
 	<button on:click={enableStartingPoint}>Set Starting Point</button>
 	<button on:click={enableNavigation}>Navigation</button>
-	<button on:click={getVertices}>Calculate</button>
+	<button on:click={calculate}>Calculate</button>
 </div>
 
 <style>

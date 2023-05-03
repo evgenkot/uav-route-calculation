@@ -8,6 +8,8 @@ mod camera_handle;
 mod mission;
 mod uav_handle;
 use mission::{camera::Camera, uav::Uav};
+mod algorithms;
+use algorithms::{discretize_area, nearest_neighbor};
 
 use crate::mission::uav;
 
@@ -74,6 +76,8 @@ fn main() {
             camera_handle::update_camera,
             camera_handle::delete_camera,
             camera_handle::get_cameras_vec,
+            algorithms::discretize_area,
+            algorithms::nearest_neighbor,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

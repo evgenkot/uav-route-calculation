@@ -5,10 +5,10 @@ pub(crate) mod camera;
 pub(crate) mod uav;
 use rusqlite::{Connection, Result};
 
-#[derive(Deserialize)]
-pub struct PolygonCoordinates {
-    vertices: Vec<Vec<[f64; 2]>>,
-}
+// #[derive(Deserialize)]
+// pub struct PolygonCoordinates {
+//     vertices: Vec<Vec<[f64; 2]>>,
+// }
 
 // #[tauri::command]
 // pub fn receive_polygon_coordinates(coordinates: PolygonCoordinates) {

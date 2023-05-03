@@ -43,3 +43,12 @@ export enum Algorithm {
 }
 
 export const selectedAlgorithm = writable<Algorithm>(Algorithm.NearestNeighbor);
+
+export interface Point {
+    x: number;
+    y: number;
+}
+
+export interface Polygon {
+    vertices: Point[];
+}
