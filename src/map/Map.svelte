@@ -248,21 +248,28 @@
 		discretizedAreaSource.clear();
 		nearestNeighborSource.clear();
 
-		const firstPoint = discretizedArea[0];
-		const utmEpsgCode = getUTMEPSGCode(firstPoint[1], firstPoint[0]);
-
-		// Define the UTM projection for the first point
-		defineUTMProjection(firstPoint[1], firstPoint[0]);
-
 		discretizedArea.forEach((point) => {
+			const [longitude, latitude] = point;
+			const utmEpsgCode = getUTMEPSGCode(latitude, longitude);
+
+			// Define the UTM projection for the point
+			defineUTMProjection(latitude, longitude);
+
 			const coordinates = transform(point, utmEpsgCode, 'EPSG:3857');
 			const feature = new Feature(new Point(coordinates));
 			discretizedAreaSource.addFeature(feature);
 		});
 
-		const nearestNeighborLineCoordinates = planResult.map((point) =>
-			transform(point, utmEpsgCode, 'EPSG:3857')
-		);
+		const nearestNeighborLineCoordinates = planResult.map((point) => {
+			const [longitude, latitude] = point;
+			const utmEpsgCode = getUTMEPSGCode(latitude, longitude);
+
+			// Define the UTM projection for the point
+			defineUTMProjection(latitude, longitude);
+
+			return transform(point, utmEpsgCode, 'EPSG:3857');
+		});
+
 		const nearestNeighborLine = new LineString(nearestNeighborLineCoordinates);
 		const nearestNeighborLineFeature = new Feature(nearestNeighborLine);
 		nearestNeighborSource.addFeature(nearestNeighborLineFeature);
