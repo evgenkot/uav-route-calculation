@@ -148,28 +148,35 @@
 		);
 		return utmCoordinates;
 	}
-
 	function updateResultsLayer(discretizedArea: number[][], planResult: number[][]) {
 		const discretizedAreaSource = discretizedAreaLayer.getSource();
 		const nearestNeighborSource = nearestNeighborLayer.getSource();
 
-		if (!discretizedAreaSource || !nearestNeighborSource) {
-			alert('Unable to update the results layer. Ensure the map is loaded properly.');
+		if (discretizedAreaSource === null || nearestNeighborSource === null) {
+			alert('Layer sources not found');
 			return;
 		}
 
 		discretizedAreaSource.clear();
 		nearestNeighborSource.clear();
 
-		const discretizedAreaFeatures = discretizedArea.map(
-			(coord) => new Feature(new Point(transform(coord, zone, 'EPSG:3857')))
-		);
+		const discretizedAreaFeatures = discretizedArea.map((coord) => {
+			const wgs84Coord = transform(coord, zone, 'EPSG:4326');
+			const webMercatorCoord = transform(wgs84Coord, 'EPSG:4326', 'EPSG:3857');
+			return new Feature(new Point(webMercatorCoord));
+		});
+
 		const planResultLine = new LineString(
-			planResult.map((coord) => transform(coord, zone, 'EPSG:3857'))
+			planResult.map((coord) => {
+				const wgs84Coord = transform(coord, zone, 'EPSG:4326');
+				const webMercatorCoord = transform(wgs84Coord, 'EPSG:4326', 'EPSG:3857');
+				return webMercatorCoord;
+			})
 		);
 
+		const planResultLineFeature = new Feature(planResultLine);
 		discretizedAreaSource.addFeatures(discretizedAreaFeatures);
-		nearestNeighborSource.addFeature(new Feature(planResultLine));
+		nearestNeighborSource.addFeature(planResultLineFeature);
 	}
 
 	function setZone(coordinates: number[]) {
