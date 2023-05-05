@@ -1,4 +1,5 @@
 <script lang="ts">
+	//OL imports
 	import Map from 'ol/Map';
 	import View from 'ol/View';
 	import { OSM, Vector as VectorSource, XYZ } from 'ol/source';
@@ -10,22 +11,26 @@
 	import { onMount } from 'svelte';
 	import Point from 'ol/geom/Point';
 	import Style from 'ol/style/Style';
-	import Icon from 'ol/style/Icon';
 	import Feature from 'ol/Feature';
 	import Circle from 'ol/style/Circle';
 	import Fill from 'ol/style/Fill';
-
 	import LineString from 'ol/geom/LineString';
 	import Stroke from 'ol/style/Stroke';
 
+	// Transform imports
+	import { transform } from 'ol/proj';
+	import proj4 from 'proj4';
+	import { register } from 'ol/proj/proj4';
+
+	// Tauri imports
 	import { invoke } from '@tauri-apps/api/tauri';
 
 	let viewMap = 'main-map';
 	let map: Map;
-	let draw: Draw;
-	let modify: Modify;
-	let snap: Snap;
-	const startPointSource = new VectorSource();
+	let drawInteraction: Draw;
+	let modifyInteraction: Modify;
+	let snapInteraction: Snap;
+	let startPointSource = new VectorSource();
 	let discretizedAreaLayer = new VectorLayer();
 	let nearestNeighborLayer = new VectorLayer();
 
@@ -81,39 +86,33 @@
 			})
 		});
 
-		draw = new Draw({
+		drawInteraction = new Draw({
 			source: source,
 			type: 'Polygon'
 		});
-		// map.addInteraction(draw);
 
-		modify = new Modify({ source: source });
-		map.addInteraction(modify);
+		modifyInteraction = new Modify({ source: source });
+		map.addInteraction(modifyInteraction);
 
-		snap = new Snap({ source: source });
-		map.addInteraction(snap);
+		snapInteraction = new Snap({ source: source });
+		map.addInteraction(snapInteraction);
 	});
 
 	function undo() {
-		draw.removeLastPoint();
+		drawInteraction.removeLastPoint();
 	}
 
 	function enableNavigation() {
-		map.removeInteraction(draw);
-		map.removeInteraction(modify);
-		map.removeInteraction(snap);
+		map.removeInteraction(drawInteraction);
+		map.removeInteraction(modifyInteraction);
+		map.removeInteraction(snapInteraction);
 	}
 
 	function enableDrawing() {
-		map.addInteraction(draw);
-		map.addInteraction(modify);
-		map.addInteraction(snap);
+		map.addInteraction(drawInteraction);
+		map.addInteraction(modifyInteraction);
+		map.addInteraction(snapInteraction);
 	}
-
-	// Add the following imports
-	import { transform } from 'ol/proj';
-	import proj4 from 'proj4';
-	import { register } from 'ol/proj/proj4';
 
 	// Add the helper functions
 	function getUTMZone(latitude: number, longitude: number): { zone: number; hemisphere: string } {
@@ -139,11 +138,13 @@
 			register(proj4);
 		}
 	}
+
+	
 	function enableStartingPoint() {
 		// Remove other interactions
-		map.removeInteraction(draw);
-		map.removeInteraction(modify);
-		map.removeInteraction(snap);
+		map.removeInteraction(drawInteraction);
+		map.removeInteraction(modifyInteraction);
+		map.removeInteraction(snapInteraction);
 
 		// Add a click event listener to the map
 		map.once('click', (event) => {
@@ -158,6 +159,38 @@
 			// Add the new starting point feature to the source
 			startPointSource.addFeature(startPoint);
 		});
+	}
+
+	function getStartingPointCoordinates(): number[] | null {
+		const features = startPointSource.getFeatures();
+		if (features.length === 0) {
+			return null;
+		}
+
+		const startingPointFeature = features[0];
+		const geometry = startingPointFeature.getGeometry();
+
+		if (geometry instanceof Point) {
+			const startingPointCoordinates = geometry.getCoordinates();
+
+			// Transform starting point coordinates to EPSG:4326 (longitude, latitude)
+			const [longitude, latitude] = transform(startingPointCoordinates, 'EPSG:3857', 'EPSG:4326');
+
+			// Define the UTM projection for the starting point
+			defineUTMProjection(latitude, longitude);
+
+			// Transform coordinates to the UTM zone projection
+			const utmEpsgCode = getUTMEPSGCode(latitude, longitude);
+			const startingPointCoordinatesInMeters = transform(
+				startingPointCoordinates,
+				'EPSG:3857',
+				utmEpsgCode
+			);
+			// console.log(startingPointCoordinatesInMeters);
+			return startingPointCoordinatesInMeters;
+		}
+
+		return null;
 	}
 
 	function getVertices(): number[][][] | undefined {
@@ -198,38 +231,6 @@
 		// invoke('receive_polygon_coordinates', { vertices });
 		return vertices;
 		// Send the coordinates to the Rust backend
-	}
-
-	function getStartingPointCoordinates(): number[] | null {
-		const features = startPointSource.getFeatures();
-		if (features.length === 0) {
-			return null;
-		}
-
-		const startingPointFeature = features[0];
-		const geometry = startingPointFeature.getGeometry();
-
-		if (geometry instanceof Point) {
-			const startingPointCoordinates = geometry.getCoordinates();
-
-			// Transform starting point coordinates to EPSG:4326 (longitude, latitude)
-			const [longitude, latitude] = transform(startingPointCoordinates, 'EPSG:3857', 'EPSG:4326');
-
-			// Define the UTM projection for the starting point
-			defineUTMProjection(latitude, longitude);
-
-			// Transform coordinates to the UTM zone projection
-			const utmEpsgCode = getUTMEPSGCode(latitude, longitude);
-			const startingPointCoordinatesInMeters = transform(
-				startingPointCoordinates,
-				'EPSG:3857',
-				utmEpsgCode
-			);
-			// console.log(startingPointCoordinatesInMeters);
-			return startingPointCoordinatesInMeters;
-		}
-
-		return null;
 	}
 
 	function updateResultsLayer(discretizedArea: number[][], planResult: number[][]) {
