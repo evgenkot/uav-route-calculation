@@ -4,6 +4,8 @@ use std::f64::{INFINITY, NEG_INFINITY};
 
 #[tauri::command]
 pub fn discretize_area(polygon: Vec<(f64, f64)>, photo_width: f64, photo_height: f64) -> Result<Vec<(f64, f64)>, String> {
+    println!("Received polygon coordinates: {:?}", polygon);
+
     let (mut min_x, mut max_x, mut min_y, mut max_y) = (INFINITY, NEG_INFINITY, INFINITY, NEG_INFINITY);
 
     for (x, y) in &polygon {

@@ -31,16 +31,17 @@
 	let modifyInteraction: Modify;
 	let snapInteraction: Snap;
 	let startPointSource = new VectorSource();
+	let vectorPolySource = new VectorSource({ wrapX: false });
 	let discretizedAreaLayer = new VectorLayer();
 	let nearestNeighborLayer = new VectorLayer();
 
 	onMount(async () => {
 		const osmLayer = new TileLayer({ source: new OSM() });
 
-		const source = new VectorSource({ wrapX: false });
+		// const source = new VectorSource({ wrapX: false });
 
 		const vector = new VectorLayer({
-			source: source
+			source: vectorPolySource
 		});
 
 		const startPointLayer = new VectorLayer({
@@ -87,14 +88,14 @@
 		});
 
 		drawInteraction = new Draw({
-			source: source,
+			source: vectorPolySource,
 			type: 'Polygon'
 		});
 
-		modifyInteraction = new Modify({ source: source });
+		modifyInteraction = new Modify({ source: vectorPolySource });
 		map.addInteraction(modifyInteraction);
 
-		snapInteraction = new Snap({ source: source });
+		snapInteraction = new Snap({ source: vectorPolySource });
 		map.addInteraction(snapInteraction);
 	});
 
@@ -114,32 +115,80 @@
 		map.addInteraction(snapInteraction);
 	}
 
-	// Add the helper functions
-	function getUTMZone(latitude: number, longitude: number): { zone: number; hemisphere: string } {
-		const zone = (Math.floor((longitude + 180) / 6) % 60) + 1;
-		const hemisphere = latitude >= 0 ? 'N' : 'S';
-		return { zone, hemisphere };
-	}
+	import { get as getProjection } from 'ol/proj';
 
-	function getUTMEPSGCode(latitude: number, longitude: number): string {
-		const { zone, hemisphere } = getUTMZone(latitude, longitude);
-		const epsgCode = `EPSG:326${zone < 10 ? '0' + zone : zone}${hemisphere}`;
-		return epsgCode;
-	}
+	let zone = 'EPSG:3857';
+	proj4.defs(zone, `+proj=utm +zone=1 +ellps=WGS84 +datum=WGS84 +units=m +no_defs`);
+	register(proj4);
 
-	function defineUTMProjection(latitude: number, longitude: number): void {
-		const { zone, hemisphere } = getUTMZone(latitude, longitude);
-		const epsgCode = getUTMEPSGCode(latitude, longitude);
-		if (!proj4.defs(epsgCode)) {
-			proj4.defs(
-				epsgCode,
-				`+proj=utm +zone=${zone} +${hemisphere} +ellps=WGS84 +datum=WGS84 +units=m +no_defs`
-			);
-			register(proj4);
+	function getStartingPointCoordinates(): number[] | null {
+		const features = startPointSource.getFeatures();
+		if (features.length === 0) {
+			return null;
 		}
+		const point = features[0].getGeometry() as Point;
+		const coordinates = point.getCoordinates();
+		const wgs84Coordinates = transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+		const utmCoordinates = transform(wgs84Coordinates, 'EPSG:4326', zone);
+		return utmCoordinates;
 	}
 
-	
+	function getVertices(): number[][][] | null {
+		const features = vectorPolySource.getFeatures();
+		if (features.length === 0) {
+			return null;
+		}
+		const polygon = features[0].getGeometry() as Polygon;
+		const coordinates = polygon.getCoordinates();
+		const utmCoordinates = coordinates.map((ring) =>
+			ring.map((coord) => {
+				const wgs84Coord = transform(coord, 'EPSG:3857', 'EPSG:4326');
+				return transform(wgs84Coord, 'EPSG:4326', zone);
+			})
+		);
+		return utmCoordinates;
+	}
+
+	function updateResultsLayer(discretizedArea: number[][], planResult: number[][]) {
+		const discretizedAreaSource = discretizedAreaLayer.getSource();
+		const nearestNeighborSource = nearestNeighborLayer.getSource();
+
+		if (!discretizedAreaSource || !nearestNeighborSource) {
+			alert('Unable to update the results layer. Ensure the map is loaded properly.');
+			return;
+		}
+
+		discretizedAreaSource.clear();
+		nearestNeighborSource.clear();
+
+		const discretizedAreaFeatures = discretizedArea.map(
+			(coord) => new Feature(new Point(transform(coord, zone, 'EPSG:3857')))
+		);
+		const planResultLine = new LineString(
+			planResult.map((coord) => transform(coord, zone, 'EPSG:3857'))
+		);
+
+		discretizedAreaSource.addFeatures(discretizedAreaFeatures);
+		nearestNeighborSource.addFeature(new Feature(planResultLine));
+	}
+
+	function setZone(coordinates: number[]) {
+		const wgs84Coordinates = transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+		const lat = wgs84Coordinates[1];
+		const lon = wgs84Coordinates[0];
+		const utmZoneNumber = Math.floor((lon + 180) / 6) + 1;
+		const isNorthernHemisphere = lat >= 0;
+
+		zone = `EPSG:326${isNorthernHemisphere ? '' : '1'}${String(utmZoneNumber).padStart(2, '0')}`;
+		proj4.defs(
+			zone,
+			`+proj=utm +zone=${utmZoneNumber} ${
+				isNorthernHemisphere ? '+north' : '+south'
+			} +ellps=WGS84 +datum=WGS84 +units=m +no_defs`
+		);
+		register(proj4);
+	}
+
 	function enableStartingPoint() {
 		// Remove other interactions
 		map.removeInteraction(drawInteraction);
@@ -158,129 +207,15 @@
 
 			// Add the new starting point feature to the source
 			startPointSource.addFeature(startPoint);
+			setZone(coordinates);
 		});
-	}
-
-	function getStartingPointCoordinates(): number[] | null {
-		const features = startPointSource.getFeatures();
-		if (features.length === 0) {
-			return null;
-		}
-
-		const startingPointFeature = features[0];
-		const geometry = startingPointFeature.getGeometry();
-
-		if (geometry instanceof Point) {
-			const startingPointCoordinates = geometry.getCoordinates();
-
-			// Transform starting point coordinates to EPSG:4326 (longitude, latitude)
-			const [longitude, latitude] = transform(startingPointCoordinates, 'EPSG:3857', 'EPSG:4326');
-
-			// Define the UTM projection for the starting point
-			defineUTMProjection(latitude, longitude);
-
-			// Transform coordinates to the UTM zone projection
-			const utmEpsgCode = getUTMEPSGCode(latitude, longitude);
-			const startingPointCoordinatesInMeters = transform(
-				startingPointCoordinates,
-				'EPSG:3857',
-				utmEpsgCode
-			);
-			// console.log(startingPointCoordinatesInMeters);
-			return startingPointCoordinatesInMeters;
-		}
-
-		return null;
-	}
-
-	function getVertices(): number[][][] | undefined {
-		const vectorLayer = map
-			.getLayers()
-			.getArray()
-			.find((layer) => layer instanceof VectorLayer) as VectorLayer<VectorSource>;
-		const source = vectorLayer.getSource() as VectorSource;
-		const features = source.getFeatures();
-		const vertices = features
-			.filter((feature) => feature.getGeometry() instanceof Polygon)
-			.map((feature) => {
-				const geometry = feature.getGeometry();
-				if (geometry instanceof Polygon) {
-					// Get the coordinates in EPSG:3857
-					const coordinates3857 = geometry.getCoordinates()[0];
-
-					// Get the first coordinate of the polygon
-					const [firstLongitude, firstLatitude] = transform(
-						coordinates3857[0],
-						'EPSG:3857',
-						'EPSG:4326'
-					);
-
-					// Define the UTM projection for the area of interest
-					defineUTMProjection(firstLatitude, firstLongitude);
-
-					// Transform coordinates to the UTM zone projection
-					const utmEpsgCode = getUTMEPSGCode(firstLatitude, firstLongitude);
-					return coordinates3857.map((coordinate) =>
-						transform(coordinate, 'EPSG:3857', utmEpsgCode)
-					);
-				}
-				return undefined;
-			})
-			.filter((coord) => coord !== undefined) as number[][][];
-		// console.log(vertices);
-		// invoke('receive_polygon_coordinates', { vertices });
-		return vertices;
-		// Send the coordinates to the Rust backend
-	}
-
-	function updateResultsLayer(discretizedArea: number[][], planResult: number[][]) {
-		const discretizedAreaSource = discretizedAreaLayer.getSource();
-		const nearestNeighborSource = nearestNeighborLayer.getSource();
-
-		if (discretizedAreaSource == null) {
-			alert('discretizedAreaSource not loaded');
-			return;
-		}
-		if (nearestNeighborSource == null) {
-			alert('nearestNeighborSource not loaded');
-			return;
-		}
-
-		discretizedAreaSource.clear();
-		nearestNeighborSource.clear();
-
-		discretizedArea.forEach((point) => {
-			const [longitude, latitude] = point;
-			const utmEpsgCode = getUTMEPSGCode(latitude, longitude);
-
-			// Define the UTM projection for the point
-			defineUTMProjection(latitude, longitude);
-
-			const coordinates = transform(point, utmEpsgCode, 'EPSG:3857');
-			const feature = new Feature(new Point(coordinates));
-			discretizedAreaSource.addFeature(feature);
-		});
-
-		const nearestNeighborLineCoordinates = planResult.map((point) => {
-			const [longitude, latitude] = point;
-			const utmEpsgCode = getUTMEPSGCode(latitude, longitude);
-
-			// Define the UTM projection for the point
-			defineUTMProjection(latitude, longitude);
-
-			return transform(point, utmEpsgCode, 'EPSG:3857');
-		});
-
-		const nearestNeighborLine = new LineString(nearestNeighborLineCoordinates);
-		const nearestNeighborLineFeature = new Feature(nearestNeighborLine);
-		nearestNeighborSource.addFeature(nearestNeighborLineFeature);
 	}
 
 	async function calculate() {
 		const vertices = getVertices();
 		const startingPoint = getStartingPointCoordinates();
 
-		if (vertices === undefined) {
+		if (vertices === null) {
 			alert('getVertices function is not available. Please make sure the map is loaded.');
 			return;
 		}
@@ -327,6 +262,8 @@
 			return;
 		}
 
+		console.log('discretizedArea', discretizedArea);
+		console.log('startingPoint', startingPoint);
 		updateResultsLayer(discretizedArea, planResult);
 	}
 </script>
