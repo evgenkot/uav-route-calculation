@@ -2,12 +2,12 @@
 	//OL imports
 	import Map from 'ol/Map';
 	import View from 'ol/View';
-	import { OSM, Vector as VectorSource, XYZ } from 'ol/source';
+	import { OSM, Vector as VectorSource } from 'ol/source';
 	import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
 	import Draw from 'ol/interaction/Draw';
 	import Modify from 'ol/interaction/Modify';
 	import Snap from 'ol/interaction/Snap';
-	import { Polygon } from 'ol/geom';
+	import type { Polygon } from 'ol/geom';
 	import { onMount } from 'svelte';
 	import Point from 'ol/geom/Point';
 	import Style from 'ol/style/Style';
@@ -25,6 +25,16 @@
 	// Tauri imports
 	import { invoke } from '@tauri-apps/api/tauri';
 
+	// Store import
+	import {
+		altitudeValue,
+		selectedCamera,
+		selectedUav,
+		overlapValue,
+		selectedAlgorithm
+	} from './store';
+	import { Algorithm } from './store';
+
 	let viewMap = 'main-map';
 	let map: Map;
 	let drawInteraction: Draw;
@@ -33,7 +43,7 @@
 	let startPointSource = new VectorSource();
 	let vectorPolySource = new VectorSource({ wrapX: false });
 	let discretizedAreaLayer = new VectorLayer();
-	let nearestNeighborLayer = new VectorLayer();
+	let planLayer = new VectorLayer();
 
 	onMount(async () => {
 		const osmLayer = new TileLayer({ source: new OSM() });
@@ -68,7 +78,7 @@
 			})
 		});
 
-		nearestNeighborLayer = new VectorLayer({
+		planLayer = new VectorLayer({
 			source: new VectorSource(),
 			style: new Style({
 				stroke: new Stroke({
@@ -80,7 +90,7 @@
 
 		map = new Map({
 			target: viewMap,
-			layers: [osmLayer, vector, startPointLayer, discretizedAreaLayer, nearestNeighborLayer],
+			layers: [osmLayer, vector, startPointLayer, discretizedAreaLayer, planLayer],
 			view: new View({
 				center: [0, 0],
 				zoom: 2
@@ -150,15 +160,15 @@
 	}
 	function updateResultsLayer(discretizedArea: number[][], planResult: number[][]) {
 		const discretizedAreaSource = discretizedAreaLayer.getSource();
-		const nearestNeighborSource = nearestNeighborLayer.getSource();
+		const planSource = planLayer.getSource();
 
-		if (discretizedAreaSource === null || nearestNeighborSource === null) {
+		if (discretizedAreaSource === null || planSource === null) {
 			alert('Layer sources not found');
 			return;
 		}
 
 		discretizedAreaSource.clear();
-		nearestNeighborSource.clear();
+		planSource.clear();
 
 		const discretizedAreaFeatures = discretizedArea.map((coord) => {
 			const wgs84Coord = transform(coord, zone, 'EPSG:4326');
@@ -176,7 +186,48 @@
 
 		const planResultLineFeature = new Feature(planResultLine);
 		discretizedAreaSource.addFeatures(discretizedAreaFeatures);
-		nearestNeighborSource.addFeature(planResultLineFeature);
+		planSource.addFeature(planResultLineFeature);
+	}
+
+	function updatePlanLayer(planResult: number[][]) {
+		const planSource = planLayer.getSource();
+
+		if (planSource === null) {
+			alert('Plan Layer sources not found');
+			return;
+		}
+
+		planSource.clear();
+
+		const planResultLine = new LineString(
+			planResult.map((coord) => {
+				const wgs84Coord = transform(coord, zone, 'EPSG:4326');
+				const webMercatorCoord = transform(wgs84Coord, 'EPSG:4326', 'EPSG:3857');
+				return webMercatorCoord;
+			})
+		);
+
+		const planResultLineFeature = new Feature(planResultLine);
+		planSource.addFeature(planResultLineFeature);
+	}
+
+	function updateDiscretizedLayer(discretizedArea: number[][]) {
+		const discretizedAreaSource = discretizedAreaLayer.getSource();
+
+		if (discretizedAreaSource === null) {
+			alert('DiscretizedArea Source not found');
+			return;
+		}
+
+		discretizedAreaSource.clear();
+
+		const discretizedAreaFeatures = discretizedArea.map((coord) => {
+			const wgs84Coord = transform(coord, zone, 'EPSG:4326');
+			const webMercatorCoord = transform(wgs84Coord, 'EPSG:4326', 'EPSG:3857');
+			return new Feature(new Point(webMercatorCoord));
+		});
+
+		discretizedAreaSource.addFeatures(discretizedAreaFeatures);
 	}
 
 	function setZone(coordinates: number[]) {
@@ -237,9 +288,33 @@
 			return;
 		}
 
-		// console.log(vertices, startingPoint);
-		const photoWidth = 40;
-		const photoHeight = 30;
+		if (!$selectedCamera) {
+			alert('Camera not set');
+			return;
+		}
+
+		if (!$selectedUav) {
+			alert('Uav not set');
+			return;
+		}
+
+		if ($selectedUav.min_altitude > $altitudeValue || $selectedUav.max_altitude < $altitudeValue) {
+			alert('Altitude out of range');
+			return;
+		}
+
+		if ($selectedUav.min_altitude > $altitudeValue || $selectedUav.max_altitude < $altitudeValue) {
+			alert('Altitude out of range');
+			return;
+		}
+		const alt = $altitudeValue;
+
+		const overlap = $overlapValue / 100;
+		const tg = (angle: number) => Math.tan(angle * (Math.PI / 180));
+
+		altitudeValue;
+		const photoWidth = tg($selectedCamera.fov_x * 0.5) * 2 * alt * (1 - overlap);
+		const photoHeight = (photoWidth * $selectedCamera.resolution_y) / $selectedCamera.resolution_x;
 		let discretizedArea;
 		let planResult;
 
@@ -256,22 +331,54 @@
 			return;
 		}
 
-		try {
-			const result = await invoke('nearest_neighbor', {
-				points: discretizedArea,
-				startPoint: startingPoint
+		updateDiscretizedLayer(discretizedArea);
+
+		async function confirmBruteForce(): Promise<boolean> {
+			return new Promise((resolve) => {
+				const shouldExecute = window.confirm(
+					'You are going to use Brute Force to calculate route, it will take a long time.'
+				);
+				resolve(shouldExecute);
 			});
+		}
+
+		try {
+			let result;
+			switch ($selectedAlgorithm) {
+				case Algorithm.NearestNeighbor: {
+					result = await invoke('nearest_neighbor', {
+						points: discretizedArea,
+						startPoint: startingPoint
+					});
+					break;
+				}
+				case Algorithm.BruteForce: {
+					const shouldExecute = await confirmBruteForce();
+					if (shouldExecute) {
+						result = await invoke('brute_force', {
+							points: discretizedArea,
+							startPoint: startingPoint
+						});
+					} else {
+						return;
+					}
+					break;
+				}
+				default:
+					alert('No algo selected');
+					break;
+			}
 
 			planResult = result as number[][];
 			console.log(planResult);
 		} catch (error) {
-			alert('Error calling nearest Neighbor');
+			alert('Error calling calculation');
 			return;
 		}
 
 		console.log('discretizedArea', discretizedArea);
 		console.log('startingPoint', startingPoint);
-		updateResultsLayer(discretizedArea, planResult);
+		updatePlanLayer(planResult);
 	}
 </script>
 

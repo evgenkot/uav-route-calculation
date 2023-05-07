@@ -3,10 +3,15 @@ use tauri::command;
 use std::f64::{INFINITY, NEG_INFINITY};
 
 #[tauri::command]
-pub fn discretize_area(polygon: Vec<(f64, f64)>, photo_width: f64, photo_height: f64) -> Result<Vec<(f64, f64)>, String> {
+pub fn discretize_area(
+    polygon: Vec<(f64, f64)>,
+    photo_width: f64,
+    photo_height: f64,
+) -> Result<Vec<(f64, f64)>, String> {
     println!("Received polygon coordinates: {:?}", polygon);
 
-    let (mut min_x, mut max_x, mut min_y, mut max_y) = (INFINITY, NEG_INFINITY, INFINITY, NEG_INFINITY);
+    let (mut min_x, mut max_x, mut min_y, mut max_y) =
+        (INFINITY, NEG_INFINITY, INFINITY, NEG_INFINITY);
 
     for (x, y) in &polygon {
         min_x = min_x.min(*x);
@@ -92,13 +97,16 @@ pub fn nearest_neighbor(
             .ok_or("Failed to find the nearest point".to_string())?;
         let nearest_point = *nearest_point;
         remaining_points.remove(nearest_index);
+        if result.is_empty() {
+            result.push(start_point);
+        }
         result.push(nearest_point);
         current_point = nearest_point;
     }
 
+    result.push(start_point);
     Ok(result)
 }
-
 // Helper function to calculate the Euclidean distance between two points
 pub fn euclidean_distance(a: &(f64, f64), b: &(f64, f64)) -> f64 {
     let (x1, y1) = *a;
@@ -110,6 +118,63 @@ pub fn euclidean_distance(a: &(f64, f64), b: &(f64, f64)) -> f64 {
 //     // Implement the christofides_algorithm
 // }
 
-// pub fn brute_force(points: &[(f64, f64)], start_point: &(f64, f64)) -> Vec<(f64, f64)> {
-//     // Implement the brute_force algorithm
-// }
+use std::f64::MAX;
+
+#[tauri::command]
+pub fn brute_force(points: Vec<(f64, f64)>, start_point: (f64, f64)) -> Vec<(f64, f64)> {
+    let mut points = points.to_owned();
+    let mut path = vec![start_point];
+    let mut best_path = Vec::new();
+    let mut best_distance = MAX;
+
+    brute_force_helper(
+        &mut points,
+        &mut path,
+        &start_point,
+        0.0,
+        &mut best_path,
+        &mut best_distance,
+    );
+
+    best_path
+}
+
+fn brute_force_helper(
+    points: &mut Vec<(f64, f64)>,
+    current_path: &mut Vec<(f64, f64)>,
+    start_point: &(f64, f64),
+    current_distance: f64,
+    best_path: &mut Vec<(f64, f64)>,
+    best_distance: &mut f64,
+) {
+    if points.is_empty() {
+        let total_distance =
+            current_distance + euclidean_distance(start_point, current_path.last().unwrap());
+        if total_distance < *best_distance {
+            *best_distance = total_distance;
+            *best_path = current_path.clone();
+            best_path.push(*start_point);
+        }
+    } else {
+        for i in 0..points.len() {
+            let point = points.remove(i);
+            let last_point = current_path.last().unwrap();
+            let new_distance = current_distance + euclidean_distance(last_point, &point);
+
+            if new_distance < *best_distance {
+                current_path.push(point);
+                brute_force_helper(
+                    points,
+                    current_path,
+                    start_point,
+                    new_distance,
+                    best_path,
+                    best_distance,
+                );
+                current_path.pop();
+            }
+
+            points.insert(i, point);
+        }
+    }
+}
