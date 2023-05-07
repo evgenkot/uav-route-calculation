@@ -35,5 +35,6 @@ export const selectedAlgorithm = writable<Algorithm>(Algorithm.NearestNeighbor);
 
 export const planInMeters = writable<number[][]>([]);
 
+export const routeLength = writable<number>(0);
 export const missionDuration = writable<number>(0);
 export const photoCount = writable<number>(0);

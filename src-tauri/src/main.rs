@@ -79,6 +79,7 @@ fn main() {
             algorithms::discretize_area,
             algorithms::nearest_neighbor,
             algorithms::brute_force,
+            algorithms::calculate_distance,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

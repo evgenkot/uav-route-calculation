@@ -33,7 +33,8 @@
 		overlapValue,
 		selectedAlgorithm,
 		planInMeters,
-		missionDuration, 
+		routeLength,
+		missionDuration,
 		photoCount
 	} from './store';
 	import { Algorithm } from './store';
@@ -374,7 +375,11 @@
 
 			planResult = result as number[][];
 			planInMeters.set(planResult);
-			
+			routeLength.set(
+				await invoke('calculate_distance', {
+					points: planResult
+				})
+			);
 			console.log(planResult);
 		} catch (error) {
 			alert('Error calling calculation');
@@ -382,6 +387,12 @@
 		}
 
 		photoCount.set(discretizedArea.length);
+		
+		if ($selectedUav)
+		{
+			missionDuration.set($routeLength/$selectedUav.flight_speed + $altitudeValue/$selectedUav.takeoff_speed)
+		}
+
 		console.log('discretizedArea', discretizedArea);
 		console.log('startingPoint', startingPoint);
 		updatePlanLayer(planResult);

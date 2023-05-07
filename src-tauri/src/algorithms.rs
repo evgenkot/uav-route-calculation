@@ -118,8 +118,6 @@ pub fn euclidean_distance(a: &(f64, f64), b: &(f64, f64)) -> f64 {
 //     // Implement the christofides_algorithm
 // }
 
-use std::f64::MAX;
-
 
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -218,8 +216,11 @@ fn brute_force_helper(
     }
 }
 
-
-// pub fn calculate_distance(points: Vec<(f64, f64)>) -> f64{
-
-    
-// }
+#[tauri::command]
+pub fn calculate_distance(points: Vec<(f64, f64)>) -> f64 {
+    points
+        .iter()
+        .zip(points.iter().cycle().skip(1))
+        .map(|(a, b)| euclidean_distance(a, b))
+        .sum()
+}
