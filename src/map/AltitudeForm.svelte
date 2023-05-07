@@ -33,7 +33,8 @@
 	}
 </script>
 
-<div class="menu">
+<div class="altitude-menu">
+	<h2>Altitude</h2>
 	<div class="input-row">
 		<input
 			type="radio"
@@ -91,21 +92,5 @@
 </div>
 
 <style>
-	.menu {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.input-row {
-		display: flex;
-		align-items: center;
-	}
-
-	.input-row:not(:first-child) {
-		margin-top: 8px;
-	}
-
-	.input-row input[type='number'] {
-		margin-left: 8px;
-	}
+	
 </style>

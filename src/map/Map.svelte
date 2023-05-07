@@ -31,7 +31,10 @@
 		selectedCamera,
 		selectedUav,
 		overlapValue,
-		selectedAlgorithm
+		selectedAlgorithm,
+		planInMeters,
+		missionDuration, 
+		photoCount
 	} from './store';
 	import { Algorithm } from './store';
 
@@ -370,12 +373,15 @@
 			}
 
 			planResult = result as number[][];
+			planInMeters.set(planResult);
+			
 			console.log(planResult);
 		} catch (error) {
 			alert('Error calling calculation');
 			return;
 		}
 
+		photoCount.set(discretizedArea.length);
 		console.log('discretizedArea', discretizedArea);
 		console.log('startingPoint', startingPoint);
 		updatePlanLayer(planResult);

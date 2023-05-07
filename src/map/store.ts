@@ -24,31 +24,16 @@ export const selectedUav = writable<Uav | null>(null);
 export const selectedCamera = writable<Camera | null>(null);
 
 export const altitudeValue = writable<number>(0);
-
 export const overlapValue = writable<number>(0);
-
-export interface MissionPlan {
-    area_vertices: number[][][];
-    mission_uav: Uav;
-    mission_camera: Camera;
-    mission_altitude: number;
-    mission_start: number[];
-}
- 
 
 export enum Algorithm {
   NearestNeighbor = "NearestNeighbor",
   ChristofidesAlgorithm = "ChristofidesAlgorithm",
   BruteForce = "BruteForce",
 }
-
 export const selectedAlgorithm = writable<Algorithm>(Algorithm.NearestNeighbor);
 
-export interface Point {
-    x: number;
-    y: number;
-}
+export const planInMeters = writable<number[][]>([]);
 
-export interface Polygon {
-    vertices: Point[];
-}
+export const missionDuration = writable<number>(0);
+export const photoCount = writable<number>(0);

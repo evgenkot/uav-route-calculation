@@ -120,61 +120,106 @@ pub fn euclidean_distance(a: &(f64, f64), b: &(f64, f64)) -> f64 {
 
 use std::f64::MAX;
 
+
+use std::sync::{Arc, Mutex};
+use std::thread;
+
+// Main function to find the shortest path using the brute force approach.
 #[tauri::command]
 pub fn brute_force(points: Vec<(f64, f64)>, start_point: (f64, f64)) -> Vec<(f64, f64)> {
-    let mut points = points.to_owned();
-    let mut path = vec![start_point];
-    let mut best_path = Vec::new();
-    let mut best_distance = MAX;
+    // Wrap the points and best_path in Arc for shared ownership across threads.
+    let points = Arc::new(points);
+    let best_path = Arc::new(Mutex::new((Vec::new(), f64::MAX)));
 
-    brute_force_helper(
-        &mut points,
-        &mut path,
-        &start_point,
-        0.0,
-        &mut best_path,
-        &mut best_distance,
-    );
+    let mut threads = Vec::new();
 
+    // Iterate through each point, creating a separate thread for each.
+    for (i, point) in points.iter().enumerate() {
+        // Clone Arc references to share ownership with the spawned threads.
+        let points = Arc::clone(&points);
+        let best_path = Arc::clone(&best_path);
+        let start_point = start_point.clone();
+        let removed_point = point.clone();
+
+        // Spawn a thread for each point, removing it from the remaining points.
+        let thread = thread::spawn(move || {
+            let mut remaining_points = points.to_vec();
+            remaining_points.remove(i);
+
+            let current_path = vec![start_point, removed_point];
+            let current_distance = euclidean_distance(&start_point, &removed_point);
+
+            // Call the helper function in each thread.
+            brute_force_helper(
+                remaining_points,
+                current_path,
+                start_point,
+                current_distance,
+                &best_path,
+            );
+        });
+
+        threads.push(thread);
+    }
+
+    // Wait for all threads to complete.
+    for thread in threads {
+        thread.join().unwrap();
+    }
+
+    // Extract the best path from the Arc<Mutex<_>>.
+    let (best_path, _) = Arc::try_unwrap(best_path).unwrap().into_inner().unwrap();
     best_path
 }
 
+// Recursive helper function to find the shortest path using the brute force approach.
 fn brute_force_helper(
-    points: &mut Vec<(f64, f64)>,
-    current_path: &mut Vec<(f64, f64)>,
-    start_point: &(f64, f64),
+    points: Vec<(f64, f64)>,
+    current_path: Vec<(f64, f64)>,
+    start_point: (f64, f64),
     current_distance: f64,
-    best_path: &mut Vec<(f64, f64)>,
-    best_distance: &mut f64,
+    best_path: &Arc<Mutex<(Vec<(f64, f64)>, f64)>>,
 ) {
+    // Base case: if there are no points left, update the best path if the current path is shorter.
     if points.is_empty() {
         let total_distance =
-            current_distance + euclidean_distance(start_point, current_path.last().unwrap());
-        if total_distance < *best_distance {
-            *best_distance = total_distance;
-            *best_path = current_path.clone();
-            best_path.push(*start_point);
+            current_distance + euclidean_distance(&start_point, current_path.last().unwrap());
+
+        let mut best_path = best_path.lock().unwrap();
+
+        if total_distance < best_path.1 {
+            best_path.0 = current_path.clone();
+            best_path.0.push(start_point);
+            best_path.1 = total_distance;
         }
     } else {
-        for i in 0..points.len() {
-            let point = points.remove(i);
-            let last_point = current_path.last().unwrap();
-            let new_distance = current_distance + euclidean_distance(last_point, &point);
+        // Iterate through each remaining point, removing it from the list and updating the path.
+        for (i, point) in points.iter().enumerate() {
+            let mut remaining_points = points.clone();
+            let removed_point = remaining_points.remove(i);
 
-            if new_distance < *best_distance {
-                current_path.push(point);
+            let last_point = current_path.last().unwrap();
+            let new_distance = current_distance + euclidean_distance(last_point, &removed_point);
+
+            // If the updated path is shorter than the current best path, continue the search.
+            if new_distance < best_path.lock().unwrap().1 {
+                let mut new_path = current_path.clone();
+                new_path.push(*point);
+
                 brute_force_helper(
-                    points,
-                    current_path,
+                    remaining_points,
+                    new_path,
                     start_point,
                     new_distance,
                     best_path,
-                    best_distance,
                 );
-                current_path.pop();
             }
-
-            points.insert(i, point);
         }
     }
 }
+
+
+// pub fn calculate_distance(points: Vec<(f64, f64)>) -> f64{
+
+    
+// }
