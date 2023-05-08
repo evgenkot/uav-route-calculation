@@ -32,6 +32,7 @@
 		selectedUav,
 		overlapValue,
 		selectedAlgorithm,
+		utmZone,
 		planInMeters,
 		routeLength,
 		missionDuration,
@@ -130,6 +131,7 @@
 	}
 
 	import { get as getProjection } from 'ol/proj';
+	import { set } from 'ol/transform';
 
 	let zone = 'EPSG:3857';
 	proj4.defs(zone, `+proj=utm +zone=1 +ellps=WGS84 +datum=WGS84 +units=m +no_defs`);
@@ -248,6 +250,7 @@
 				isNorthernHemisphere ? '+north' : '+south'
 			} +ellps=WGS84 +datum=WGS84 +units=m +no_defs`
 		);
+		utmZone.set(zone);
 		register(proj4);
 	}
 

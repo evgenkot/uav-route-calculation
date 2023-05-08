@@ -33,6 +33,7 @@ export enum Algorithm {
 }
 export const selectedAlgorithm = writable<Algorithm>(Algorithm.NearestNeighbor);
 
+export const utmZone = writable<string>('EPSG:3857');
 export const planInMeters = writable<number[][]>([]);
 
 export const routeLength = writable<number>(0);
