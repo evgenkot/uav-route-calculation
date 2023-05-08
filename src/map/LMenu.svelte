@@ -3,10 +3,6 @@
 	import UAVForm from './UAVForm.svelte';
 	import CameraForm from './CameraForm.svelte';
 
-
-	import { writable } from 'svelte/store';
-	import { invoke } from '@tauri-apps/api/tauri';
-
 	let isActive = false;
 	let sidenavWidth = 0;
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { writable } from 'svelte/store';
 	import { Algorithm, selectedAlgorithm } from './store';
 
 	let currentSelectedAlgorithm: Algorithm = Algorithm.NearestNeighbor;
@@ -23,18 +22,6 @@
 				checked
 			/>
 			Nearest Neighbor
-		</label>
-	</div>
-	<div>
-		<label>
-			<input
-				type="radio"
-				name="algorithm"
-				value="ChristofidesAlgorithm"
-				bind:group={currentSelectedAlgorithm}
-				on:change={handleChange}
-			/>
-			Christofides Algorithm
 		</label>
 	</div>
 	<div>

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
 	import { altitudeValue, selectedCamera, overlapValue } from './store';
-	import type { Camera } from './store';
 
 	let altitudeMode = 'manual';
 	const smPerValue = writable<number>(0);

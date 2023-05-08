@@ -25,7 +25,7 @@
 	// Tauri imports
 	import { invoke } from '@tauri-apps/api/tauri';
 
-	// Store import
+	// Import Svelte stores for accessing reactive values
 	import {
 		altitudeValue,
 		selectedCamera,
@@ -40,6 +40,7 @@
 	} from './store';
 	import { Algorithm } from './store';
 
+	// Initialize map components
 	let viewMap = 'main-map';
 	let map: Map;
 	let drawInteraction: Draw;
@@ -50,10 +51,10 @@
 	let discretizedAreaLayer = new VectorLayer();
 	let planLayer = new VectorLayer();
 
+	// Set up map and interactions on component mount
 	onMount(async () => {
+		// Create and configure map layers
 		const osmLayer = new TileLayer({ source: new OSM() });
-
-		// const source = new VectorSource({ wrapX: false });
 
 		const vector = new VectorLayer({
 			source: vectorPolySource
@@ -93,6 +94,7 @@
 			})
 		});
 
+		// Initialize map with target element, layers, and view settings
 		map = new Map({
 			target: viewMap,
 			layers: [osmLayer, vector, startPointLayer, discretizedAreaLayer, planLayer],
@@ -102,6 +104,7 @@
 			})
 		});
 
+		// Initialize and add interactions to the map
 		drawInteraction = new Draw({
 			source: vectorPolySource,
 			type: 'Polygon'
@@ -114,6 +117,7 @@
 		map.addInteraction(snapInteraction);
 	});
 
+	// Helper functions for map interactions and calculations
 	function undo() {
 		drawInteraction.removeLastPoint();
 	}
@@ -130,13 +134,14 @@
 		map.addInteraction(snapInteraction);
 	}
 
-	import { get as getProjection } from 'ol/proj';
-	import { set } from 'ol/transform';
-
+	// Set default UTM zone to Web Mercator projection
 	let zone = 'EPSG:3857';
+	// Define the projection for the default UTM zone
 	proj4.defs(zone, `+proj=utm +zone=1 +ellps=WGS84 +datum=WGS84 +units=m +no_defs`);
+	// Register the projection with OpenLayers
 	register(proj4);
 
+	// Function to get the starting point coordinates in UTM
 	function getStartingPointCoordinates(): number[] | null {
 		const features = startPointSource.getFeatures();
 		if (features.length === 0) {
@@ -149,6 +154,7 @@
 		return utmCoordinates;
 	}
 
+	// Function to get the vertices of the drawn polygon in UTM
 	function getVertices(): number[][][] | null {
 		const features = vectorPolySource.getFeatures();
 		if (features.length === 0) {
@@ -164,6 +170,8 @@
 		);
 		return utmCoordinates;
 	}
+
+	// Update the results layer with the discretized area and the calculated flight plan
 	function updateResultsLayer(discretizedArea: number[][], planResult: number[][]) {
 		const discretizedAreaSource = discretizedAreaLayer.getSource();
 		const planSource = planLayer.getSource();
@@ -195,6 +203,7 @@
 		planSource.addFeature(planResultLineFeature);
 	}
 
+	// Update the plan layer with the calculated flight plan
 	function updatePlanLayer(planResult: number[][]) {
 		const planSource = planLayer.getSource();
 
@@ -217,6 +226,7 @@
 		planSource.addFeature(planResultLineFeature);
 	}
 
+	// Update the discretized area layer with the discretized area points
 	function updateDiscretizedLayer(discretizedArea: number[][]) {
 		const discretizedAreaSource = discretizedAreaLayer.getSource();
 
@@ -236,6 +246,7 @@
 		discretizedAreaSource.addFeatures(discretizedAreaFeatures);
 	}
 
+	// Set the UTM zone based on the starting point coordinates
 	function setZone(coordinates: number[]) {
 		const wgs84Coordinates = transform(coordinates, 'EPSG:3857', 'EPSG:4326');
 		const lat = wgs84Coordinates[1];
@@ -250,10 +261,12 @@
 				isNorthernHemisphere ? '+north' : '+south'
 			} +ellps=WGS84 +datum=WGS84 +units=m +no_defs`
 		);
+		// Also update store var
 		utmZone.set(zone);
 		register(proj4);
 	}
 
+	// Enable the starting point selection interaction
 	function enableStartingPoint() {
 		// Remove other interactions
 		map.removeInteraction(drawInteraction);
@@ -276,6 +289,7 @@
 		});
 	}
 
+	// Function to calculate the flight plan using the selected algorithm
 	async function calculate() {
 		const vertices = getVertices();
 		const startingPoint = getStartingPointCoordinates();
@@ -390,10 +404,11 @@
 		}
 
 		photoCount.set(discretizedArea.length);
-		
-		if ($selectedUav)
-		{
-			missionDuration.set($routeLength/$selectedUav.flight_speed + $altitudeValue/$selectedUav.takeoff_speed)
+
+		if ($selectedUav) {
+			missionDuration.set(
+				$routeLength / $selectedUav.flight_speed + $altitudeValue / $selectedUav.takeoff_speed
+			);
 		}
 
 		console.log('discretizedArea', discretizedArea);

@@ -7,7 +7,6 @@
 	
 
 	let cameras: Camera[] = [];
-	// let selectedCamera: Camera | null = null;
 
 	async function fetchCameras() {
 		try {

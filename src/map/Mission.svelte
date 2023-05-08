@@ -1,8 +1,11 @@
 <script lang="ts">
+	// OL imports
 	import { transform } from 'ol/proj';
 
+	// Store imports
 	import { routeLength, missionDuration, photoCount, utmZone, planInMeters } from './store';
 
+	// Tauri API
 	import { save } from '@tauri-apps/api/dialog';
 	import { writeFile } from '@tauri-apps/api/fs';
 

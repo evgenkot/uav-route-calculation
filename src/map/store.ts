@@ -28,7 +28,6 @@ export const overlapValue = writable<number>(0);
 
 export enum Algorithm {
   NearestNeighbor = "NearestNeighbor",
-  ChristofidesAlgorithm = "ChristofidesAlgorithm",
   BruteForce = "BruteForce",
 }
 export const selectedAlgorithm = writable<Algorithm>(Algorithm.NearestNeighbor);
