@@ -1,5 +1,3 @@
-use tauri::command;
-
 use std::f64::{INFINITY, NEG_INFINITY};
 
 #[tauri::command]
@@ -117,7 +115,6 @@ pub fn euclidean_distance(a: &(f64, f64), b: &(f64, f64)) -> f64 {
 // pub fn christofides_algorithm(points: &[(f64, f64)], start_point: &(f64, f64)) -> Vec<(f64, f64)> {
 //     // Implement the christofides_algorithm
 // }
-
 
 use std::sync::{Arc, Mutex};
 use std::thread;

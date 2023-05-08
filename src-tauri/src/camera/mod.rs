@@ -1,6 +1,7 @@
 use rand::Rng;
 use rusqlite::{Connection, Result};
 use serde::{Deserialize, Serialize};
+pub mod camera_handle;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Camera {
@@ -39,10 +40,6 @@ impl Camera {
         let resolution_y = rng.gen_range(800..4000);
 
         Camera::new(name, mass, fov_x, resolution_x, resolution_y)
-    }
-
-    pub fn take_picture(&self) {
-        println!("{} Click!", self.name);
     }
 
     pub fn print_camera(&self) {
@@ -115,9 +112,7 @@ impl Camera {
         conn.execute(
             "DELETE FROM camera 
             WHERE camera_id = ?1",
-            (
-                &self.id,
-            ),
+            (&self.id,),
         )
     }
 
@@ -144,23 +139,17 @@ impl Camera {
             })
         })?;
 
-        // let mut camera_vector: Vec<Result<Camera>> = Vec::new();
-        // for camera_item in camera_iter {
-        //     camera_vector.push(camera_item);
-        // }
-
-        // Ok(camera_vector)
         Ok(camera_iter.collect())
     }
     pub fn get_cameras(conn: &Connection) -> Result<Vec<Camera>> {
         let camera_results = Self::sql_get_cameras(conn)?;
-    
+
         let mut cameras: Vec<Camera> = Vec::new();
         for camera_result in camera_results {
-            match camera_result{
-                Ok(camera) =>cameras.push(camera),
+            match camera_result {
+                Ok(camera) => cameras.push(camera),
                 Err(err) => eprintln!("Error processing a Camera: {}", err),
-            }   
+            }
         }
         Ok(cameras)
     }

@@ -1,6 +1,7 @@
 use rand::Rng;
 use rusqlite::{Connection, Result};
 use serde::{Deserialize, Serialize};
+pub mod uav_handle;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Uav {
@@ -55,14 +56,6 @@ impl Uav {
             min_altitude,
             max_altitude,
         )
-    }
-
-    pub fn fly(&self) {
-        println!("{} is flying!", self.name);
-    }
-
-    pub fn land(&self) {
-        println!("{} is landing!", self.name);
     }
 
     pub fn print_uav(&self) {
@@ -144,9 +137,7 @@ impl Uav {
         conn.execute(
             "DELETE FROM uav 
             WHERE uav_id = ?1",
-            (
-                &self.id,
-            ),
+            (&self.id,),
         )
     }
 
@@ -177,12 +168,6 @@ impl Uav {
             })
         })?;
 
-        // let mut uav_vector: Vec<Result<Uav>> = Vec::new();
-        // for uav_item in uav_iter {
-        //     uav_vector.push(uav_item);
-        // }
-
-        // Ok(uav_vector)
         Ok(uav_iter.collect())
     }
 

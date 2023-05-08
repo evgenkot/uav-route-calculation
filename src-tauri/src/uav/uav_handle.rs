@@ -1,14 +1,5 @@
-use rusqlite::{Connection, Result};
-
-use crate::mission;
-use mission::{uav::Uav};
-
-// #[tauri::command]
-// pub fn save_uav(conn: &Connection, uav: mission::uav::Uav) -> Result<()> {
-//     println!("Received updated UAV: {:?}", uav);
-//     // Update the backend with the new UAV data
-//     Ok(())
-// }
+use crate::uav::Uav;
+use rusqlite::Connection;
 
 #[tauri::command]
 pub fn new_uav(uav: Uav) -> String {
@@ -41,9 +32,9 @@ pub fn delete_uav(uav: Uav) -> String {
 }
 
 #[tauri::command]
-pub fn get_uavs_vec() -> Vec<mission::uav::Uav> {
+pub fn get_uavs_vec() -> Vec<Uav> {
     let conn = Connection::open("mydatabase.db").expect("Cant open base");
-    match mission::uav::Uav::get_uavs(&conn) {
+    match Uav::get_uavs(&conn) {
         Ok(result) => result,
         Err(_) => vec![],
     }
