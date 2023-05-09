@@ -420,9 +420,9 @@
 <div id={viewMap} class="map" />
 <div class="toolbar">
 	<button on:click={undo}>Undo</button>
+	<button on:click={enableNavigation}>Navigation</button>
 	<button on:click={enableDrawing}>Draw</button>
 	<button on:click={enableStartingPoint}>Set Starting Point</button>
-	<button on:click={enableNavigation}>Navigation</button>
 	<button on:click={calculate}>Calculate</button>
 </div>
 
