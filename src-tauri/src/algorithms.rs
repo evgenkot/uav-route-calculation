@@ -59,25 +59,29 @@ pub fn discretize_area(
         let mut y = min_y;
 
         while y <= max_y {
-            // Calculate the corners of the rectangle at (x, y).
-            let corners = vec![
-                (x, y),
-                (x + photo_width, y),
-                (x, y + photo_height),
-                (x + photo_width, y + photo_height),
+            // Calculate the corners and midpoints of the rectangle at (x, y).
+            let points = vec![
+                (x, y), // top-left corner
+                (x + photo_width, y), // top-right corner
+                (x, y + photo_height), // bottom-left corner
+                (x + photo_width, y + photo_height), // bottom-right corner
+                (x + half_camera_width, y), // top edge center
+                (x + photo_width, y + half_camera_height), // right edge center
+                (x + half_camera_width, y + photo_height), // bottom edge center
+                (x, y + half_camera_height), // left edge center
             ];
 
-            // Check if any corner of the rectangle is inside the polygon.
-            let is_any_corner_inside = corners
+            // Check if any corner or midpoint of the rectangle is inside the polygon.
+            let is_any_point_inside = points
                 .into_iter()
-                .any(|corner| is_inside_polygon(corner, &polygon));
+                .any(|point| is_inside_polygon(point, &polygon));
 
-            // If any corner is inside, calculate the center of the rectangle and add it to the result.
-            if is_any_corner_inside {
+            if is_any_point_inside {
                 let center_x = x + half_camera_width;
                 let center_y = y + half_camera_height;
                 result.push((center_x, center_y));
-            } // Move to the next position in y-axis.
+            }
+
             y += photo_height;
         }
 

@@ -7,7 +7,7 @@
 	import Draw from 'ol/interaction/Draw';
 	import Modify from 'ol/interaction/Modify';
 	import Snap from 'ol/interaction/Snap';
-	import type { Polygon } from 'ol/geom';
+	import { Polygon } from 'ol/geom';
 	import { onMount } from 'svelte';
 	import Point from 'ol/geom/Point';
 	import Style from 'ol/style/Style';
@@ -50,6 +50,7 @@
 	let vectorPolySource = new VectorSource({ wrapX: false });
 	let discretizedAreaLayer = new VectorLayer();
 	let planLayer = new VectorLayer();
+	let photoLayer = new VectorLayer();
 
 	// Set up map and interactions on component mount
 	onMount(async () => {
@@ -68,6 +69,16 @@
 					fill: new Fill({
 						color: 'rgba(255, 0, 0, 0.7)'
 					})
+				})
+			})
+		});
+
+		photoLayer = new VectorLayer({
+			source: new VectorSource(),
+			style: new Style({
+				stroke: new Stroke({
+					color: 'rgba(255, 165, 0, 0.7)', //Orange color for photo rectangles
+					width: 2
 				})
 			})
 		});
@@ -97,7 +108,7 @@
 		// Initialize map with target element, layers, and view settings
 		map = new Map({
 			target: viewMap,
-			layers: [osmLayer, vector, startPointLayer, discretizedAreaLayer, planLayer],
+			layers: [osmLayer, vector, startPointLayer, discretizedAreaLayer, planLayer, photoLayer],
 			view: new View({
 				center: [0, 0],
 				zoom: 2
@@ -246,6 +257,46 @@
 		discretizedAreaSource.addFeatures(discretizedAreaFeatures);
 	}
 
+	function updatePhotoLayer(discretizedArea: number[][], photoWidth: number, photoHeight: number) {
+		const photoLayerSource = photoLayer.getSource();
+
+		if (photoLayerSource === null) {
+			alert('Photo Layer source not found');
+			return;
+		}
+
+		photoLayerSource.clear();
+
+		const photoFeatures = discretizedArea.map((coord) => {
+			// Create rectangle for each photo.
+			// Assuming coord[0] and coord[1] are the center of the photo.
+			const bottomLeft = transform(
+				[coord[0] - photoWidth / 2, coord[1] - photoHeight / 2],
+				zone,
+				'EPSG:4326'
+			);
+			const topRight = transform(
+				[coord[0] + photoWidth / 2, coord[1] + photoHeight / 2],
+				zone,
+				'EPSG:4326'
+			);
+
+			const photoRectangle = new Polygon([
+				[
+					transform(bottomLeft, 'EPSG:4326', 'EPSG:3857'),
+					transform([bottomLeft[0], topRight[1]], 'EPSG:4326', 'EPSG:3857'),
+					transform(topRight, 'EPSG:4326', 'EPSG:3857'),
+					transform([topRight[0], bottomLeft[1]], 'EPSG:4326', 'EPSG:3857'),
+					transform(bottomLeft, 'EPSG:4326', 'EPSG:3857')
+				]
+			]);
+
+			return new Feature(photoRectangle);
+		});
+
+		photoLayerSource.addFeatures(photoFeatures);
+	}
+
 	// Set the UTM zone based on the starting point coordinates
 	function setZone(coordinates: number[]) {
 		const wgs84Coordinates = transform(coordinates, 'EPSG:3857', 'EPSG:4326');
@@ -353,6 +404,7 @@
 		}
 
 		updateDiscretizedLayer(discretizedArea);
+		updatePhotoLayer(discretizedArea, photoWidth, photoHeight);
 
 		async function confirmBruteForce(): Promise<boolean> {
 			return new Promise((resolve) => {
@@ -409,9 +461,10 @@
 			missionDuration.set(
 				$routeLength / $selectedUav.flight_speed + $altitudeValue / $selectedUav.takeoff_speed
 			);
-			if ($missionDuration > $selectedUav.flight_duration)
-			{
-				alert("Mission duration exceeds what the drone is capable of flying, it is recommended to reduce the area.")	
+			if ($missionDuration > $selectedUav.flight_duration) {
+				alert(
+					'Mission duration exceeds what the drone is capable of flying, it is recommended to reduce the area.'
+				);
 			}
 		}
 

@@ -19,34 +19,14 @@
 		}
 	}
 
-	function toggleAltitudeBlock() {
-		let block = document.getElementById('altitude');
-		if (block !== null) {
-			if (block.style.display === 'none') {
-				block.style.display = 'block';
-			} else {
-				block.style.display = 'none';
-			}
-		}
-	}
-
-	function displaySelectedUavAndCamera() {
-		$selectedUav ? console.log('Selected UAV:', $selectedUav) : console.log('No UAV selected');
-		$selectedCamera
-			? console.log('Selected Camera:', $selectedCamera)
-			: console.log('No Camera selected');
-	}
 	onMount(() => {});
 </script>
 
 <div class="sidenav" style={`width: ${sidenavWidth}px`}>
 	<h1 style={`padding-top: 40px`}>Menu</h1>
-	<button on:click={displaySelectedUavAndCamera}> Display Selected UAV and Camera </button>
-
 	<AltitudeForm />
 	<AlgorithmSelect />
 	<Mission />
-	
 </div>
 
 <div class="toggle-container">
