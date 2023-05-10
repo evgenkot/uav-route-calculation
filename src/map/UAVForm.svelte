@@ -9,7 +9,7 @@
 
 	async function fetchUavs() {
 		try {
-			const result = await invoke<Uav[]>('get_uavs_vec');
+			const result = await invoke<Uav[]>('get_all_uavs_vec');
 			uavs = result;
 			selectedUav.set(uavs.length > 0 ? uavs[0] : null);
 			console.log(uavs);

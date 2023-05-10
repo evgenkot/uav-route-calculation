@@ -17,7 +17,7 @@ fn main() {
     {
         let conn = Connection::open("mydatabase.db").expect("Cant open base");
 
-        uav::Uav::sql_create_table(&conn).expect("cant create uav table");
+        uav::uav_sql::create_table(&conn).expect("cant create uav table");
         camera::camera_sql::create_table(&conn).expect("Cant create camera table");
     }
 
@@ -26,7 +26,7 @@ fn main() {
             uav_handle::new_uav,
             uav_handle::update_uav,
             uav_handle::delete_uav,
-            uav_handle::get_uavs_vec,
+            uav_handle::get_all_uavs_vec,
             camera_handle::new_camera,
             camera_handle::update_camera,
             camera_handle::delete_camera,
