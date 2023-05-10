@@ -10,7 +10,7 @@
 
 	async function fetchCameras() {
 		try {
-			const result = await invoke<Camera[]>('get_cameras_vec');
+			const result = await invoke<Camera[]>('get_all_cameras_vec');
 			cameras = result;
 			selectedCamera.set( cameras.length > 0 ? cameras[0] : null);
 			console.log(cameras);

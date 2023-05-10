@@ -18,7 +18,7 @@ fn main() {
         let conn = Connection::open("mydatabase.db").expect("Cant open base");
 
         uav::Uav::sql_create_table(&conn).expect("cant create uav table");
-        camera::Camera::sql_create_table(&conn).expect("Cant create camera table");
+        camera::camera_sql::create_table(&conn).expect("Cant create camera table");
     }
 
     tauri::Builder::default()
@@ -30,7 +30,7 @@ fn main() {
             camera_handle::new_camera,
             camera_handle::update_camera,
             camera_handle::delete_camera,
-            camera_handle::get_cameras_vec,
+            camera_handle::get_all_cameras_vec,
             algorithms::discretize_area,
             algorithms::nearest_neighbor,
             algorithms::brute_force,
