@@ -324,8 +324,8 @@
 			return;
 		}
 
-		if ($selectedUav.min_altitude > $altitudeValue || $selectedUav.max_altitude < $altitudeValue) {
-			alert('Altitude out of range');
+		if ($selectedUav.max_payload_mass < $selectedCamera.mass) {
+			alert('Uav overload');
 			return;
 		}
 		const alt = $altitudeValue;
@@ -409,6 +409,10 @@
 			missionDuration.set(
 				$routeLength / $selectedUav.flight_speed + $altitudeValue / $selectedUav.takeoff_speed
 			);
+			if ($missionDuration > $selectedUav.flight_duration)
+			{
+				alert("Mission duration exceeds what the drone is capable of flying, it is recommended to reduce the area.")	
+			}
 		}
 
 		console.log('discretizedArea', discretizedArea);
