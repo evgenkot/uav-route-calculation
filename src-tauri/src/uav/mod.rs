@@ -1,5 +1,4 @@
 use rand::Rng;
-use rusqlite::{Connection, Result};
 use serde::{Deserialize, Serialize};
 pub mod uav_handle;
 pub mod uav_sql;

@@ -1,5 +1,4 @@
 use rand::Rng;
-
 use serde::{Deserialize, Serialize};
 pub mod camera_handle;
 pub mod camera_sql;
@@ -51,6 +50,4 @@ impl Camera {
         println!("resolution_x: {}", &self.resolution_x);
         println!("resolution_y: {}", &self.resolution_y);
     }
-
-    
 }

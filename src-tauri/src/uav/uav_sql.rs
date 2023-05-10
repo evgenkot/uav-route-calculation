@@ -1,5 +1,5 @@
-use rusqlite::{Connection, Result};
 use crate::uav::Uav;
+use rusqlite::{Connection, Result};
 
 pub fn create_table(conn: &Connection) -> Result<usize> {
     conn.execute(
