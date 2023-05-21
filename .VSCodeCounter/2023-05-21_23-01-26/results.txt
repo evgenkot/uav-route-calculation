@@ -1,0 +1,84 @@
+Date : 2023-05-21 23:01:26
+Directory : f:\user\Documents\University\University6\uav_route_calculation
+Total : 37 files,  12972 codes, 10643 comments, 380 blanks, all 23995 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| Plain Text (PDF)   |          1 |      6,904 |     10,592 |         14 |     17,510 |
+| JSON               |          4 |      3,731 |          0 |          4 |      3,735 |
+| Svelte             |          9 |      1,260 |          0 |        188 |      1,448 |
+| Rust               |          9 |        604 |         34 |         87 |        725 |
+| CSS                |          3 |        344 |          3 |         61 |        408 |
+| TypeScript         |          5 |         54 |          6 |         13 |         73 |
+| JavaScript         |          2 |         29 |          3 |          4 |         36 |
+| JSON with Comments |          1 |         13 |          4 |          1 |         18 |
+| HTML               |          1 |         12 |          0 |          1 |         13 |
+| Ignore             |          1 |         11 |          1 |          2 |         14 |
+| Markdown           |          1 |         10 |          0 |          5 |         15 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                 | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                    |         37 |     12,972 |     10,643 |        380 |     23,995 |
+| . (Files)                                                                                            |          9 |      3,729 |          8 |         17 |      3,754 |
+| doc                                                                                                  |          1 |      6,904 |     10,592 |         14 |     17,510 |
+| src                                                                                                  |         17 |      1,662 |          9 |        261 |      1,932 |
+| src (Files)                                                                                          |          4 |         30 |          6 |          5 |         41 |
+| src-tauri                                                                                            |         10 |        677 |         34 |         88 |        799 |
+| src-tauri (Files)                                                                                    |          2 |         76 |          0 |          2 |         78 |
+| src-tauri\src                                                                                        |          8 |        601 |         34 |         86 |        721 |
+| src-tauri\src (Files)                                                                                |          2 |        206 |         34 |         45 |        285 |
+| src-tauri\src\camera                                                                                 |          3 |        183 |          0 |         20 |        203 |
+| src-tauri\src\uav                                                                                    |          3 |        212 |          0 |         21 |        233 |
+| src\map                                                                                              |          9 |      1,282 |          0 |        189 |      1,471 |
+| src\routes                                                                                           |          2 |         13 |          0 |          6 |         19 |
+| src\styles                                                                                           |          2 |        337 |          3 |         61 |        401 |
++------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                                             | language           | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| f:\user\Documents\University\University6\uav_route_calculation\.eslintrc.cjs                         | JavaScript         |         20 |          0 |          1 |         21 |
+| f:\user\Documents\University\University6\uav_route_calculation\.prettierignore                       | Ignore             |         11 |          1 |          2 |         14 |
+| f:\user\Documents\University\University6\uav_route_calculation\.prettierrc                           | JSON               |          9 |          0 |          1 |         10 |
+| f:\user\Documents\University\University6\uav_route_calculation\README.md                             | Markdown           |         10 |          0 |          5 |         15 |
+| f:\user\Documents\University\University6\uav_route_calculation\doc\ПИ-2022_КЭ-303_Ращупкин_ЕВ_КР.pdf | Plain Text (PDF)   |      6,904 |     10,592 |         14 |     17,510 |
+| f:\user\Documents\University\University6\uav_route_calculation\package-lock.json                     | JSON               |      3,606 |          0 |          1 |      3,607 |
+| f:\user\Documents\University\University6\uav_route_calculation\package.json                          | JSON               |         43 |          0 |          1 |         44 |
+| f:\user\Documents\University\University6\uav_route_calculation\src-tauri\build.rs                    | Rust               |          3 |          0 |          1 |          4 |
+| f:\user\Documents\University\University6\uav_route_calculation\src-tauri\src\algorithms.rs           | Rust               |        172 |         34 |         37 |        243 |
+| f:\user\Documents\University\University6\uav_route_calculation\src-tauri\src\camera\camera_handle.rs | Rust               |         38 |          0 |          5 |         43 |
+| f:\user\Documents\University\University6\uav_route_calculation\src-tauri\src\camera\camera_sql.rs    | Rust               |         97 |          0 |          9 |        106 |
+| f:\user\Documents\University\University6\uav_route_calculation\src-tauri\src\camera\mod.rs           | Rust               |         48 |          0 |          6 |         54 |
+| f:\user\Documents\University\University6\uav_route_calculation\src-tauri\src\main.rs                 | Rust               |         34 |          0 |          8 |         42 |
+| f:\user\Documents\University\University6\uav_route_calculation\src-tauri\src\uav\mod.rs              | Rust               |         66 |          0 |          6 |         72 |
+| f:\user\Documents\University\University6\uav_route_calculation\src-tauri\src\uav\uav_handle.rs       | Rust               |         38 |          0 |          5 |         43 |
+| f:\user\Documents\University\University6\uav_route_calculation\src-tauri\src\uav\uav_sql.rs          | Rust               |        108 |          0 |         10 |        118 |
+| f:\user\Documents\University\University6\uav_route_calculation\src-tauri\tauri.conf.json             | JSON               |         73 |          0 |          1 |         74 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\app.d.ts                          | TypeScript         |          5 |          6 |          2 |         13 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\app.html                          | HTML               |         12 |          0 |          1 |         13 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\global.css                        | CSS                |          7 |          0 |          0 |          7 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\index.test.ts                     | TypeScript         |          6 |          0 |          2 |          8 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\map\AlgorithmSelect.svelte        | Svelte             |         42 |          0 |          5 |         47 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\map\AltitudeForm.svelte           | Svelte             |         87 |          0 |          9 |         96 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\map\CameraForm.svelte             | Svelte             |        256 |          0 |         37 |        293 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\map\LMenu.svelte                  | Svelte             |         36 |          0 |         10 |         46 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\map\Map.svelte                    | Svelte             |        396 |          0 |         62 |        458 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\map\Mission.svelte                | Svelte             |         69 |          0 |         12 |         81 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\map\RMenu.svelte                  | Svelte             |         56 |          0 |         11 |         67 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\map\UAVForm.svelte                | Svelte             |        307 |          0 |         36 |        343 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\map\store.ts                      | TypeScript         |         33 |          0 |          7 |         40 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\routes\+layout.ts                 | TypeScript         |          2 |          0 |          0 |          2 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\routes\+page.svelte               | Svelte             |         11 |          0 |          6 |         17 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\styles\map-style.css              | CSS                |        288 |          0 |         58 |        346 |
+| f:\user\Documents\University\University6\uav_route_calculation\src\styles\side-menu.css              | CSS                |         49 |          3 |          3 |         55 |
+| f:\user\Documents\University\University6\uav_route_calculation\svelte.config.js                      | JavaScript         |          9 |          3 |          3 |         15 |
+| f:\user\Documents\University\University6\uav_route_calculation\tsconfig.json                         | JSON with Comments |         13 |          4 |          1 |         18 |
+| f:\user\Documents\University\University6\uav_route_calculation\vite.config.ts                        | TypeScript         |          8 |          0 |          2 |         10 |
+| Total                                                                                                |                    |     12,972 |     10,643 |        380 |     23,995 |
++------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
