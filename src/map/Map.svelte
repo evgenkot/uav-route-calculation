@@ -119,7 +119,14 @@
 
 	// Helper functions for map interactions and calculations
 	function undo() {
-		drawInteraction.removeLastPoint();
+		// Remove last drown polygon or remove last point 
+		if (vectorPolySource.getFeatures().length > 0) {
+			vectorPolySource.removeFeature(
+				vectorPolySource.getFeatures()[0]
+			);
+		} else {
+			drawInteraction.removeLastPoint();
+		}
 	}
 
 	function enableNavigation() {
@@ -409,9 +416,10 @@
 			missionDuration.set(
 				$routeLength / $selectedUav.flight_speed + $altitudeValue / $selectedUav.takeoff_speed
 			);
-			if ($missionDuration > $selectedUav.flight_duration)
-			{
-				alert("Mission duration exceeds what the drone is capable of flying, it is recommended to reduce the area.")	
+			if ($missionDuration > $selectedUav.flight_duration) {
+				alert(
+					'Mission duration exceeds what the drone is capable of flying, it is recommended to reduce the area.'
+				);
 			}
 		}
 
