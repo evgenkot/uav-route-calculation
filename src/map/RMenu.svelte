@@ -41,8 +41,6 @@
 
 <div class="sidenav" style={`width: ${sidenavWidth}px`}>
 	<h1 style={`padding-top: 40px`}>Menu</h1>
-	<button on:click={displaySelectedUavAndCamera}> Display Selected UAV and Camera </button>
-
 	<AltitudeForm />
 	<AlgorithmSelect />
 	<Mission />
