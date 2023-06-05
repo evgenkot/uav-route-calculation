@@ -1,10 +1,10 @@
 # Details
 
-Date : 2023-05-21 23:01:26
+Date : 2023-06-05 10:53:53
 
 Directory f:\\user\\Documents\\University\\University6\\uav_route_calculation
 
-Total : 37 files,  12972 codes, 10643 comments, 380 blanks, all 23995 lines
+Total : 38 files,  24242 codes, 13556 comments, 393 blanks, all 38191 lines
 
 [Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -14,8 +14,9 @@ Total : 37 files,  12972 codes, 10643 comments, 380 blanks, all 23995 lines
 | [.eslintrc.cjs](/.eslintrc.cjs) | JavaScript | 20 | 0 | 1 | 21 |
 | [.prettierignore](/.prettierignore) | Ignore | 11 | 1 | 2 | 14 |
 | [.prettierrc](/.prettierrc) | JSON | 9 | 0 | 1 | 10 |
-| [README.md](/README.md) | Markdown | 10 | 0 | 5 | 15 |
-| [doc/ПИ-2022_КЭ-303_Ращупкин_ЕВ_КР.pdf](/doc/%D0%9F%D0%98-2022_%D0%9A%D0%AD-303_%D0%A0%D0%B0%D1%89%D1%83%D0%BF%D0%BA%D0%B8%D0%BD_%D0%95%D0%92_%D0%9A%D0%A0.pdf) | Plain Text (PDF) | 6,904 | 10,592 | 14 | 17,510 |
+| [README.md](/README.md) | Markdown | 13 | 0 | 7 | 20 |
+| [doc/Raschupkin_EV_UAV_Route_Planning.pdf](/doc/Raschupkin_EV_UAV_Route_Planning.pdf) | Plain Text (PDF) | 9,425 | 4,560 | 12 | 13,997 |
+| [doc/ПИ-2022_КЭ-303_Ращупкин_ЕВ_КР.pdf](/doc/%D0%9F%D0%98-2022_%D0%9A%D0%AD-303_%D0%A0%D0%B0%D1%89%D1%83%D0%BF%D0%BA%D0%B8%D0%BD_%D0%95%D0%92_%D0%9A%D0%A0.pdf) | Plain Text (PDF) | 8,739 | 8,945 | 14 | 17,698 |
 | [package-lock.json](/package-lock.json) | JSON | 3,606 | 0 | 1 | 3,607 |
 | [package.json](/package.json) | JSON | 43 | 0 | 1 | 44 |
 | [src-tauri/build.rs](/src-tauri/build.rs) | Rust | 3 | 0 | 1 | 4 |
@@ -36,9 +37,9 @@ Total : 37 files,  12972 codes, 10643 comments, 380 blanks, all 23995 lines
 | [src/map/AltitudeForm.svelte](/src/map/AltitudeForm.svelte) | Svelte | 87 | 0 | 9 | 96 |
 | [src/map/CameraForm.svelte](/src/map/CameraForm.svelte) | Svelte | 256 | 0 | 37 | 293 |
 | [src/map/LMenu.svelte](/src/map/LMenu.svelte) | Svelte | 36 | 0 | 10 | 46 |
-| [src/map/Map.svelte](/src/map/Map.svelte) | Svelte | 396 | 0 | 62 | 458 |
+| [src/map/Map.svelte](/src/map/Map.svelte) | Svelte | 404 | 0 | 62 | 466 |
 | [src/map/Mission.svelte](/src/map/Mission.svelte) | Svelte | 69 | 0 | 12 | 81 |
-| [src/map/RMenu.svelte](/src/map/RMenu.svelte) | Svelte | 56 | 0 | 11 | 67 |
+| [src/map/RMenu.svelte](/src/map/RMenu.svelte) | Svelte | 55 | 0 | 10 | 65 |
 | [src/map/UAVForm.svelte](/src/map/UAVForm.svelte) | Svelte | 307 | 0 | 36 | 343 |
 | [src/map/store.ts](/src/map/store.ts) | TypeScript | 33 | 0 | 7 | 40 |
 | [src/routes/+layout.ts](/src/routes/+layout.ts) | TypeScript | 2 | 0 | 0 | 2 |
