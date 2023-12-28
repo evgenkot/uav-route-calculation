@@ -1,20 +1,17 @@
 .sidenav {
     position: fixed;
     top: 0;
-    /* left: 0; */
     height: 100%;
     width: 0;
     z-index: 1;
     background-color: #ffffff;
     overflow-x: hidden;
     transition: 0.5s;
-  /* padding-top: 60px; */
 }
 
 .toggle-container {
     position: absolute;
     top: 0;
-    /* left: 0; */
     padding: 16px;
     z-index: 2;
 }
