@@ -6,7 +6,9 @@
 	import AlgorithmSelect from './AlgorithmSelect.svelte';
 	import Mission from './Mission.svelte';
 	import { selectedUav, selectedCamera } from './store';
-
+	import Draw from './Draw.svelte';
+	import Points from './Points.svelte'
+	import Calculate from './Calculate.svelte';
 	let isActive = false;
 	let sidenavWidth = 0;
 
@@ -43,8 +45,12 @@
 	<h1 style={`padding-top: 40px`}>Menu</h1>
 	<AltitudeForm />
 	<AlgorithmSelect />
-	<Mission />
 	
+	<Draw />
+	<Points />
+	
+	<Calculate />
+	<Mission />
 </div>
 
 <div class="toggle-container">

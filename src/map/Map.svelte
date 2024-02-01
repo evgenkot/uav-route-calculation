@@ -36,20 +36,25 @@
 		planInMeters,
 		routeLength,
 		missionDuration,
-		photoCount
+		photoCount,
+		map,
+		drawInteraction,
+		modifyInteraction,
+		snapInteraction,
+		startPointSource,
+		vectorPolySource,
+		discretizedAreaLayer,
+		planLayer,
 	} from './store';
 	import { Algorithm } from './store';
 
 	// Initialize map components
 	let viewMap = 'main-map';
-	let map: Map;
-	let drawInteraction: Draw;
-	let modifyInteraction: Modify;
-	let snapInteraction: Snap;
-	let startPointSource = new VectorSource();
-	let vectorPolySource = new VectorSource({ wrapX: false });
-	let discretizedAreaLayer = new VectorLayer();
-	let planLayer = new VectorLayer();
+
+	// let startPointSource = new VectorSource();
+	// let vectorPolySource = new VectorSource({ wrapX: false });
+	// let discretizedAreaLayer = new VectorLayer();
+	// let planLayer = new VectorLayer();
 
 	// Set up map and interactions on component mount
 	onMount(async () => {
@@ -57,11 +62,11 @@
 		const osmLayer = new TileLayer({ source: new OSM() });
 
 		const vector = new VectorLayer({
-			source: vectorPolySource
+			source: $vectorPolySource
 		});
 
 		const startPointLayer = new VectorLayer({
-			source: startPointSource,
+			source: $startPointSource,
 			style: new Style({
 				image: new Circle({
 					radius: 7,
@@ -72,7 +77,7 @@
 			})
 		});
 
-		discretizedAreaLayer = new VectorLayer({
+		$discretizedAreaLayer = new VectorLayer({
 			source: new VectorSource(),
 			style: new Style({
 				image: new Circle({
@@ -84,7 +89,7 @@
 			})
 		});
 
-		planLayer = new VectorLayer({
+		$planLayer = new VectorLayer({
 			source: new VectorSource(),
 			style: new Style({
 				stroke: new Stroke({
@@ -95,75 +100,60 @@
 		});
 
 		// Initialize map with target element, layers, and view settings
-		map = new Map({
-			target: viewMap,
-			layers: [osmLayer, vector, startPointLayer, discretizedAreaLayer, planLayer],
-			view: new View({
-				center: [0, 0],
-				zoom: 2
+		map.set(
+			new Map({
+				target: viewMap,
+				layers: [osmLayer, vector, startPointLayer, $discretizedAreaLayer, $planLayer],
+				view: new View({
+					center: [0, 0],
+					zoom: 2
+				})
 			})
-		});
+		);
 
 		// Initialize and add interactions to the map
-		drawInteraction = new Draw({
-			source: vectorPolySource,
-			type: 'Polygon'
-		});
+		drawInteraction.set(
+			new Draw({
+				source: $vectorPolySource,
+				type: 'Polygon'
+			})
+		);
 
-		modifyInteraction = new Modify({ source: vectorPolySource });
-		map.addInteraction(modifyInteraction);
+		modifyInteraction.set(new Modify({ source: $vectorPolySource }));
 
-		snapInteraction = new Snap({ source: vectorPolySource });
-		map.addInteraction(snapInteraction);
+		snapInteraction.set(new Snap({ source: $vectorPolySource }));
 	});
 
 	// Helper functions for map interactions and calculations
-	function undo() {
-		// Remove last drown polygon or remove last point 
-		if (vectorPolySource.getFeatures().length > 0) {
-			vectorPolySource.removeFeature(
-				vectorPolySource.getFeatures()[0]
-			);
-		} else {
-			drawInteraction.removeLastPoint();
-		}
-	}
+	// function undoPolygon() {
+	// 	if (vectorPolySource.getFeatures().length > 0) {
+	// 		vectorPolySource.removeFeature(
+	// 			vectorPolySource.getFeatures()[vectorPolySource.getFeatures().length - 1]
+	// 		);
+	// 	}
+	// }
 
-	function enableNavigation() {
-		map.removeInteraction(drawInteraction);
-		map.removeInteraction(modifyInteraction);
-		map.removeInteraction(snapInteraction);
-	}
+	// function undoPoint() {
 
-	function enableDrawing() {
-		map.addInteraction(drawInteraction);
-		map.addInteraction(modifyInteraction);
-		map.addInteraction(snapInteraction);
-	}
-
-	// Set default UTM zone to Web Mercator projection
-	let zone = 'EPSG:3857';
-	// Define the projection for the default UTM zone
-	proj4.defs(zone, `+proj=utm +zone=1 +ellps=WGS84 +datum=WGS84 +units=m +no_defs`);
-	// Register the projection with OpenLayers
-	register(proj4);
+	// 	$drawInteraction.removeLastPoint();
+	// }
 
 	// Function to get the starting point coordinates in UTM
 	function getStartingPointCoordinates(): number[] | null {
-		const features = startPointSource.getFeatures();
+		const features = $startPointSource.getFeatures();
 		if (features.length === 0) {
 			return null;
 		}
 		const point = features[0].getGeometry() as Point;
 		const coordinates = point.getCoordinates();
 		const wgs84Coordinates = transform(coordinates, 'EPSG:3857', 'EPSG:4326');
-		const utmCoordinates = transform(wgs84Coordinates, 'EPSG:4326', zone);
+		const utmCoordinates = transform(wgs84Coordinates, 'EPSG:4326', $utmZone);
 		return utmCoordinates;
 	}
 
 	// Function to get the vertices of the drawn polygon in UTM
 	function getVertices(): number[][][] | null {
-		const features = vectorPolySource.getFeatures();
+		const features = $vectorPolySource.getFeatures();
 		if (features.length === 0) {
 			return null;
 		}
@@ -172,7 +162,7 @@
 		const utmCoordinates = coordinates.map((ring) =>
 			ring.map((coord) => {
 				const wgs84Coord = transform(coord, 'EPSG:3857', 'EPSG:4326');
-				return transform(wgs84Coord, 'EPSG:4326', zone);
+				return transform(wgs84Coord, 'EPSG:4326', $utmZone);
 			})
 		);
 		return utmCoordinates;
@@ -180,8 +170,8 @@
 
 	// Update the results layer with the discretized area and the calculated flight plan
 	function updateResultsLayer(discretizedArea: number[][], planResult: number[][]) {
-		const discretizedAreaSource = discretizedAreaLayer.getSource();
-		const planSource = planLayer.getSource();
+		const discretizedAreaSource = $discretizedAreaLayer.getSource();
+		const planSource = $planLayer.getSource();
 
 		if (discretizedAreaSource === null || planSource === null) {
 			alert('Layer sources not found');
@@ -192,14 +182,14 @@
 		planSource.clear();
 
 		const discretizedAreaFeatures = discretizedArea.map((coord) => {
-			const wgs84Coord = transform(coord, zone, 'EPSG:4326');
+			const wgs84Coord = transform(coord, $utmZone, 'EPSG:4326');
 			const webMercatorCoord = transform(wgs84Coord, 'EPSG:4326', 'EPSG:3857');
 			return new Feature(new Point(webMercatorCoord));
 		});
 
 		const planResultLine = new LineString(
 			planResult.map((coord) => {
-				const wgs84Coord = transform(coord, zone, 'EPSG:4326');
+				const wgs84Coord = transform(coord, $utmZone, 'EPSG:4326');
 				const webMercatorCoord = transform(wgs84Coord, 'EPSG:4326', 'EPSG:3857');
 				return webMercatorCoord;
 			})
@@ -212,7 +202,7 @@
 
 	// Update the plan layer with the calculated flight plan
 	function updatePlanLayer(planResult: number[][]) {
-		const planSource = planLayer.getSource();
+		const planSource = $planLayer.getSource();
 
 		if (planSource === null) {
 			alert('Plan Layer sources not found');
@@ -223,19 +213,19 @@
 
 		const planResultLine = new LineString(
 			planResult.map((coord) => {
-				const wgs84Coord = transform(coord, zone, 'EPSG:4326');
+				const wgs84Coord = transform(coord, $utmZone, 'EPSG:4326');
 				const webMercatorCoord = transform(wgs84Coord, 'EPSG:4326', 'EPSG:3857');
 				return webMercatorCoord;
 			})
 		);
 
 		const planResultLineFeature = new Feature(planResultLine);
-		planSource.addFeature(planResultLineFeature);
+		planSource.addFeature(planResultLineFeature); 	
 	}
 
 	// Update the discretized area layer with the discretized area points
 	function updateDiscretizedLayer(discretizedArea: number[][]) {
-		const discretizedAreaSource = discretizedAreaLayer.getSource();
+		const discretizedAreaSource = $discretizedAreaLayer.getSource();
 
 		if (discretizedAreaSource === null) {
 			alert('DiscretizedArea Source not found');
@@ -245,7 +235,7 @@
 		discretizedAreaSource.clear();
 
 		const discretizedAreaFeatures = discretizedArea.map((coord) => {
-			const wgs84Coord = transform(coord, zone, 'EPSG:4326');
+			const wgs84Coord = transform(coord, $utmZone, 'EPSG:4326');
 			const webMercatorCoord = transform(wgs84Coord, 'EPSG:4326', 'EPSG:3857');
 			return new Feature(new Point(webMercatorCoord));
 		});
@@ -253,48 +243,6 @@
 		discretizedAreaSource.addFeatures(discretizedAreaFeatures);
 	}
 
-	// Set the UTM zone based on the starting point coordinates
-	function setZone(coordinates: number[]) {
-		const wgs84Coordinates = transform(coordinates, 'EPSG:3857', 'EPSG:4326');
-		const lat = wgs84Coordinates[1];
-		const lon = wgs84Coordinates[0];
-		const utmZoneNumber = Math.floor((lon + 180) / 6) + 1;
-		const isNorthernHemisphere = lat >= 0;
-
-		zone = `EPSG:326${isNorthernHemisphere ? '' : '1'}${String(utmZoneNumber).padStart(2, '0')}`;
-		proj4.defs(
-			zone,
-			`+proj=utm +zone=${utmZoneNumber} ${
-				isNorthernHemisphere ? '+north' : '+south'
-			} +ellps=WGS84 +datum=WGS84 +units=m +no_defs`
-		);
-		// Also update store var
-		utmZone.set(zone);
-		register(proj4);
-	}
-
-	// Enable the starting point selection interaction
-	function enableStartingPoint() {
-		// Remove other interactions
-		map.removeInteraction(drawInteraction);
-		map.removeInteraction(modifyInteraction);
-		map.removeInteraction(snapInteraction);
-
-		// Add a click event listener to the map
-		map.once('click', (event) => {
-			const coordinates = event.coordinate;
-			const startPoint = new Feature({
-				geometry: new Point(coordinates)
-			});
-
-			// Remove existing starting point features from the source
-			startPointSource.clear();
-
-			// Add the new starting point feature to the source
-			startPointSource.addFeature(startPoint);
-			setZone(coordinates);
-		});
-	}
 
 	// Function to calculate the flight plan using the selected algorithm
 	async function calculate() {
@@ -332,7 +280,7 @@
 		}
 
 		if ($selectedUav.max_payload_mass < $selectedCamera.mass) {
-			alert('Uav overload');
+			alert('Uav max payload mass less then camera mass');
 			return;
 		}
 		const alt = $altitudeValue;
@@ -431,11 +379,11 @@
 
 <div id={viewMap} class="map" />
 <div class="toolbar">
-	<button on:click={undo}>Undo</button>
-	<button on:click={enableNavigation}>Navigation</button>
-	<button on:click={enableDrawing}>Draw</button>
-	<button on:click={enableStartingPoint}>Set Starting Point</button>
-	<button on:click={calculate}>Calculate</button>
+	<!-- <button on:click={undoPolygon}>Undo Polygon</button>
+	<button on:click={undoPoint}>Undo Point</button> -->
+	<!-- <button on:click={enableNavigation}>Navigation</button> -->
+	<!-- <button on:click={enableDrawing}>Draw</button> -->
+	<!-- <button on:click={calculate}>Calculate</button> -->
 </div>
 
 <style>
