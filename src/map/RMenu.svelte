@@ -9,6 +9,7 @@
 	import Draw from './Draw.svelte';
 	import Points from './Points.svelte'
 	import Calculate from './Calculate.svelte';
+	import Descritize from './Descritize.svelte';
 	let isActive = false;
 	let sidenavWidth = 0;
 
@@ -48,7 +49,7 @@
 	
 	<Draw />
 	<Points />
-	
+	<Descritize />
 	<Calculate />
 	<Mission />
 </div>

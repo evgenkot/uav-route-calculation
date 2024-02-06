@@ -113,3 +113,6 @@ export const startSelected = writable<Boolean>(false);
 export const altitudeSelected = writable<Boolean>(false);
 export const areaDiscretized = writable<Boolean>(false);
 
+export const discretizedArea = writable<number[][]>([]);
+export const startingPoint = writable<number[] | null>(null);
+export const planResult = writable<number[][]>([]);
