@@ -1,35 +1,46 @@
 <script lang="ts">
+	import { writable } from 'svelte/store';
 	import {
 		map,
 		drawInteraction,
 		modifyInteraction,
 		snapInteraction,
 		vectorPolySource,
-		areaSelected
+		areaSelected,
+		isDrawing
 	} from './store';
-	import { Algorithm } from './store';
 
-	let isDrawing = false;
+	
 
 	let visible = true;
 	function toggleVisible() {
 		visible = !visible;
 	}
 
+	export function disableDrawing() {
+		$isDrawing = false;
+		$map.removeInteraction($drawInteraction);
+		$map.removeInteraction($modifyInteraction);
+		$map.removeInteraction($snapInteraction);
+		console.log('You are now not Drawing');
+	}
+
+
+	function enableDrawing() {
+		$isDrawing = true;
+		$map.addInteraction($drawInteraction);
+		$map.addInteraction($modifyInteraction);
+		$map.addInteraction($snapInteraction);
+		console.log('You are now Drawing');
+		$areaSelected = false;
+	}
+
+
 	function toggleDrawing() {
-		if (isDrawing) {
-			isDrawing = !isDrawing;
-			$map.removeInteraction($drawInteraction);
-			$map.removeInteraction($modifyInteraction);
-			$map.removeInteraction($snapInteraction);
-			console.log('You are now not Drawing');
+		if ($isDrawing) {
+			disableDrawing();			
 		} else {
-			isDrawing = !isDrawing;
-			$map.addInteraction($drawInteraction);
-			$map.addInteraction($modifyInteraction);
-			$map.addInteraction($snapInteraction);
-			console.log('You are now Drawing');
-			$areaSelected = false;
+			enableDrawing();			
 		}
 	}
 
@@ -62,7 +73,7 @@
 {#if visible}
 	<div class="block" id="drawBlock">
 		<div class="draw-mode-label">Draw Mode</div>
-		<button on:click={toggleDrawing}>{isDrawing ? 'Stop' : 'Start'} Drawing</button>
+		<button on:click={toggleDrawing}>{$isDrawing ? 'Stop' : 'Start'} Drawing</button>
 		<button on:click={undoPolygon}>Undo Polygon</button>
 		<button on:click={undoPoint}>Undo Point</button>
 		<button on:click={checkPolygon}>Check</button>

@@ -12,9 +12,11 @@
 		drawInteraction,
 		modifyInteraction,
 		snapInteraction,
-        startPointSource,
+		startPointSource,
 		startSelected,
+		isDrawing
 	} from './store';
+
 
 	// Set the UTM zone based on the starting point coordinates
 	function setZone(coordinates: number[]) {
@@ -25,7 +27,10 @@
 		const utmZoneNumber = Math.floor((lon + 180) / 6) + 1;
 		const isNorthernHemisphere = lat >= 0;
 
-		let zone = `EPSG:326${isNorthernHemisphere ? '' : '1'}${String(utmZoneNumber).padStart(2, '0')}`;
+		let zone = `EPSG:326${isNorthernHemisphere ? '' : '1'}${String(utmZoneNumber).padStart(
+			2,
+			'0'
+		)}`;
 		proj4.defs(
 			zone,
 			`+proj=utm +zone=${utmZoneNumber} ${
@@ -58,11 +63,14 @@
 			setZone(coordinates);
 		});
 	}
-
 </script>
 
 <!-- class="toggle-display" -->
-<button on:click={setStartingPoint} class="{$startSelected ? 'done' : 'todo'} rmenu-category">Set start</button>
+<button
+	on:click={setStartingPoint}
+	disabled={!(!$isDrawing)}
+	class="{$startSelected ? 'done' : 'todo'} rmenu-category">Set start</button
+>
 
 <style>
 	.done {
