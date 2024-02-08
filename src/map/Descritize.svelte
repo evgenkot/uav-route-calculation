@@ -14,7 +14,8 @@
 		startSelected,
 		altitudeSelected,
 		discretizedArea,
-		startingPoint
+		startingPoint,
+		discretizationDirection
 	} from './store';
 	import { transform } from 'ol/proj';
 	import { Point, type Polygon } from 'ol/geom';
@@ -127,12 +128,13 @@
 			const result = await invoke('discretize_area', {
 				polygon: vertices[0],
 				photoWidth: photoWidth,
-				photoHeight: photoHeight
+				photoHeight: photoHeight,
+				directionDegrees: $discretizationDirection
 			});
 			$discretizedArea = result as number[][];
 			console.log(discretizedArea);
 		} catch (error) {
-			alert('Error calling discretize_area');
+			alert('Error calling discretize_area. ' + error);
 			return;
 		}
 
@@ -148,6 +150,17 @@
 	<button on:click={discretize} disabled={!($areaSelected && $startSelected && $altitudeSelected)}
 		>Discretize</button
 	>
+	<div class="input-row">
+		<label for="direction-field">Discretization Direction:</label>
+		<input
+			type="number"
+			id="direction-field"
+			min="0"
+			max="360"
+			step="0.1"
+			bind:value={$discretizationDirection}
+		/>
+	</div>
 {/if}
 
 <style>

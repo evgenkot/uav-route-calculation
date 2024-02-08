@@ -51,8 +51,8 @@
 					const shouldExecute = await confirmBruteForce();
 					if (shouldExecute) {
 						result = await invoke('brute_force', {
-							points: discretizedArea,
-							startPoint: startingPoint
+							points: $discretizedArea,
+							startPoint: $startingPoint
 						});
 					} else {
 						return;
@@ -73,7 +73,7 @@
 			);
 			console.log($planResult);
 		} catch (error) {
-			alert('Error calling calculation');
+			alert('Error calling calculation. ' + error);
 			return;
 		}
 

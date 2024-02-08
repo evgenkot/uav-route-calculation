@@ -1,4 +1,39 @@
+use std::f64::consts::PI;
 use std::f64::{INFINITY, NEG_INFINITY};
+
+// Coordinate transformation at rotation, they express old coordinates through new coordinates
+fn coordinate_restore(x: f64, y: f64, direction_radians: f64) -> (f64, f64) {
+    let cosinus = direction_radians.cos();
+    let sinus = direction_radians.sin();
+    let xd = x * cosinus - y * sinus;
+    let yd = x * sinus + y * cosinus;
+    (xd, yd)
+}
+
+fn x_restore(x: f64, y: f64, direction_radians: f64) -> f64 {
+    x * direction_radians.cos() - y * direction_radians.sin()
+}
+
+fn y_restore(x: f64, y: f64, direction_radians: f64) -> f64 {
+    x * direction_radians.sin() + y * direction_radians.cos()
+}
+
+// Coordinate transformation at rotation, they express old coordinates through new coordinates
+fn coordinate_transformation(x: f64, y: f64, direction_radians: f64) -> (f64, f64) {
+    let cosinus = direction_radians.cos();
+    let sinus = direction_radians.sin();
+    let xd = x * cosinus + y * sinus;
+    let yd = y * cosinus - x * sinus;
+    (xd, yd)
+}
+
+fn x_transform(x: f64, y: f64, direction_radians: f64) -> f64 {
+    x * direction_radians.cos() + y * direction_radians.sin()
+}
+
+fn y_transform(x: f64, y: f64, direction_radians: f64) -> f64 {
+    y * direction_radians.cos() - x * direction_radians.sin()
+}
 
 #[tauri::command]
 pub fn discretize_area(
@@ -8,16 +43,26 @@ pub fn discretize_area(
     photo_width: f64,
     // Height of the photo.
     photo_height: f64,
+    // Direction
+    direction_degrees: f64,
 ) -> Result<Vec<(f64, f64)>, String> {
     // Returns a Result containing either a vector of tuples representing the discretized area or a String error.
     println!("Received polygon coordinates: {:?}", polygon);
+
+    let direction_radians = direction_degrees * PI / 180.0;
 
     // Initialize min and max x and y values to extreme opposites.
     let (mut min_x, mut max_x, mut min_y, mut max_y) =
         (INFINITY, NEG_INFINITY, INFINITY, NEG_INFINITY);
 
+    // Apply transformation to each point
+    let polygon_transformed: Vec<(f64, f64)> = polygon
+        .iter()
+        .map(|&(x, y)| coordinate_transformation(x, y, direction_radians))
+        .collect();
+
     // Loop through polygon coordinates to find min and max x and y values.
-    for (x, y) in &polygon {
+    for (x, y) in &polygon_transformed {
         min_x = min_x.min(*x);
         max_x = max_x.max(*x);
         min_y = min_y.min(*y);
@@ -52,13 +97,17 @@ pub fn discretize_area(
 
     // Calculate half the camera width and height.
     let (half_camera_width, half_camera_height) = (photo_width / 2.0, photo_height / 2.0);
-    let mut x = min_x;
 
-    // Iterate over x and y values from min to max, checking for intersection with the polygon.
-    while x <= max_x {
-        let mut y = min_y;
+    let polygon_width = (max_x - min_x).abs();
+    let polygon_height = (max_y - min_y).abs();
 
-        while y <= max_y {
+    let photo_count_width = (polygon_width / photo_width) as u64 + 1;
+    let photo_count_height = (polygon_height / photo_height) as u64 + 1;
+
+    for i in 0..photo_count_width {
+        let x = min_x + (i as f64) * photo_width;
+        for j in 0..photo_count_height {
+            let y = min_y + (j as f64) * photo_height;
             // Calculate the corners of the rectangle at (x, y).
             let corners = vec![
                 (x, y),
@@ -69,22 +118,18 @@ pub fn discretize_area(
 
             // Check if any corner of the rectangle is inside the polygon.
             let is_any_corner_inside = corners
-                .into_iter()
-                .any(|corner| is_inside_polygon(corner, &polygon));
+                .iter()
+                .any(|&corner| is_inside_polygon(corner, &polygon_transformed));
 
             // If any corner is inside, calculate the center of the rectangle and add it to the result.
             if is_any_corner_inside {
                 let center_x = x + half_camera_width;
                 let center_y = y + half_camera_height;
-                result.push((center_x, center_y));
-            } // Move to the next position in y-axis.
-            y += photo_height;
+                result.push(coordinate_restore(center_x, center_y, direction_radians));
+                // result.push((center_x, center_y));
+            }
         }
-
-        // Move to the next position in x-axis.
-        x += photo_width;
     }
-
     // Return the result vector containing the centers of the rectangles that intersect with the polygon.
     Ok(result)
 }

@@ -115,6 +115,8 @@ export const areaDiscretized = writable<Boolean>(false);
 
 export const isDrawing = writable<Boolean>(false);
 
+export const discretizationDirection = writable<number>(0);
+
 export const discretizedArea = writable<number[][]>([]);
 export const startingPoint = writable<number[] | null>(null);
 export const planResult = writable<number[][]>([]);
