@@ -43,17 +43,28 @@
 	// Function to get the vertices of the drawn polygon in UTM
 	function getVertices(): number[][][] | null {
 		const features = $vectorPolySource.getFeatures();
+
 		if (features.length === 0) {
 			return null;
 		}
-		const polygon = features[0].getGeometry() as Polygon;
-		const coordinates = polygon.getCoordinates();
-		const utmCoordinates = coordinates.map((ring: Coordinate[]) =>
-			ring.map((coord) => {
-				const wgs84Coord = transform(coord, 'EPSG:3857', 'EPSG:4326');
-				return transform(wgs84Coord, 'EPSG:4326', $utmZone);
-			})
-		);
+
+		const utmCoordinates: number[][][] = [];
+
+		features.forEach((feature) => {
+			const polygon = feature.getGeometry() as Polygon;
+			const coordinates = polygon.getCoordinates();
+
+			const utmPolygon = coordinates.map((ring: Coordinate[]) =>
+				ring.map((coord) => {
+					const wgs84Coord = transform(coord, 'EPSG:3857', 'EPSG:4326');
+					const utmCoord = transform(wgs84Coord, 'EPSG:4326', $utmZone);
+					return [utmCoord[0], utmCoord[1]]; // Ensure the coordinates are numbers
+				})
+			);
+
+			utmCoordinates.push(utmPolygon[0]); // Push the entire polygon into utmCoordinates
+		});
+
 		return utmCoordinates;
 	}
 
@@ -126,19 +137,19 @@
 
 		try {
 			const result = await invoke('discretize_area', {
-				polygon: vertices[0],
+				polygons: vertices,
 				photoWidth: photoWidth,
 				photoHeight: photoHeight,
 				directionDegrees: $discretizationDirection
 			});
-			$discretizedArea = result as number[][];
+			$discretizedArea = result as number[][][];
 			console.log(discretizedArea);
 		} catch (error) {
 			alert('Error calling discretize_area. ' + error);
 			return;
 		}
 
-		updateDiscretizedLayer($discretizedArea);
+		updateDiscretizedLayer($discretizedArea.flatMap((innerArr) => innerArr));
 		areaDiscretized.set(true);
 	}
 </script>

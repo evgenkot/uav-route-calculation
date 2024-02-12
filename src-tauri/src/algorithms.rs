@@ -38,100 +38,106 @@ fn y_transform(x: f64, y: f64, direction_radians: f64) -> f64 {
 #[tauri::command]
 pub fn discretize_area(
     // Vector of tuples representing x and y coordinates of the polygon.
-    polygon: Vec<(f64, f64)>,
+    polygons: Vec<Vec<(f64, f64)>>,
     // Width of the photo.
     photo_width: f64,
     // Height of the photo.
     photo_height: f64,
     // Direction
     direction_degrees: f64,
-) -> Result<Vec<(f64, f64)>, String> {
+) -> Result<Vec<Vec<(f64, f64)>>, String> {
     // Returns a Result containing either a vector of tuples representing the discretized area or a String error.
-    println!("Received polygon coordinates: {:?}", polygon);
+    println!("Received polygon coordinates: {:?}", polygons);
 
     let direction_radians = direction_degrees * PI / 180.0;
 
-    // Initialize min and max x and y values to extreme opposites.
-    let (mut min_x, mut max_x, mut min_y, mut max_y) =
-        (INFINITY, NEG_INFINITY, INFINITY, NEG_INFINITY);
+    // Initialize a vector to store the results for each polygon.
+    let mut results = Vec::new();
 
-    // Apply transformation to each point
-    let polygon_transformed: Vec<(f64, f64)> = polygon
-        .iter()
-        .map(|&(x, y)| coordinate_transformation(x, y, direction_radians))
-        .collect();
+    for polygon in polygons {
+        // Initialize min and max x and y values to extreme opposites.
+        let (mut min_x, mut max_x, mut min_y, mut max_y) =
+            (INFINITY, NEG_INFINITY, INFINITY, NEG_INFINITY);
 
-    // Loop through polygon coordinates to find min and max x and y values.
-    for (x, y) in &polygon_transformed {
-        min_x = min_x.min(*x);
-        max_x = max_x.max(*x);
-        min_y = min_y.min(*y);
-        max_y = max_y.max(*y);
-    }
+        // Apply transformation to each point
+        let polygon_transformed: Vec<(f64, f64)> = polygon
+            .iter()
+            .map(|&(x, y)| coordinate_transformation(x, y, direction_radians))
+            .collect();
 
-    // Inner function to check if a point is inside the polygon.
-    fn is_inside_polygon(point: (f64, f64), polygon: &Vec<(f64, f64)>) -> bool {
-        // Initialize inside flag to false.
-        let mut inside = false;
-        let len = polygon.len();
-        let mut j = len - 1;
-
-        // Loop through the polygon's vertices, checking if the point intersects.
-        for i in 0..len {
-            let (x_i, y_i) = polygon[i];
-            let (x_j, y_j) = polygon[j];
-
-            // Determine if the point is intersecting with the edge from vertex i to vertex j.
-            let intersect = (y_i > point.1) != (y_j > point.1)
-                && point.0 < (x_j - x_i) * (point.1 - y_i) / (y_j - y_i) + x_i;
-            if intersect {
-                inside = !inside;
-            }
-            j = i;
+        // Loop through polygon coordinates to find min and max x and y values.
+        for (x, y) in &polygon_transformed {
+            min_x = min_x.min(*x);
+            max_x = max_x.max(*x);
+            min_y = min_y.min(*y);
+            max_y = max_y.max(*y);
         }
-        inside
-    }
 
-    // Initialize the result vector.
-    let mut result = Vec::new();
+        // Inner function to check if a point is inside the polygon.
+        fn is_inside_polygon(point: (f64, f64), polygon: &Vec<(f64, f64)>) -> bool {
+            // Initialize inside flag to false.
+            let mut inside = false;
+            let len = polygon.len();
+            let mut j = len - 1;
 
-    // Calculate half the camera width and height.
-    let (half_camera_width, half_camera_height) = (photo_width / 2.0, photo_height / 2.0);
+            // Loop through the polygon's vertices, checking if the point intersects.
+            for i in 0..len {
+                let (x_i, y_i) = polygon[i];
+                let (x_j, y_j) = polygon[j];
 
-    let polygon_width = (max_x - min_x).abs();
-    let polygon_height = (max_y - min_y).abs();
+                // Determine if the point is intersecting with the edge from vertex i to vertex j.
+                let intersect = (y_i > point.1) != (y_j > point.1)
+                    && point.0 < (x_j - x_i) * (point.1 - y_i) / (y_j - y_i) + x_i;
+                if intersect {
+                    inside = !inside;
+                }
+                j = i;
+            }
+            inside
+        }
 
-    let photo_count_width = (polygon_width / photo_width) as u64 + 1;
-    let photo_count_height = (polygon_height / photo_height) as u64 + 1;
+        // Initialize the result vector.
+        let mut result = Vec::new();
 
-    for i in 0..photo_count_width {
-        let x = min_x + (i as f64) * photo_width;
-        for j in 0..photo_count_height {
-            let y = min_y + (j as f64) * photo_height;
-            // Calculate the corners of the rectangle at (x, y).
-            let corners = vec![
-                (x, y),
-                (x + photo_width, y),
-                (x, y + photo_height),
-                (x + photo_width, y + photo_height),
-            ];
+        // Calculate half the camera width and height.
+        let (half_camera_width, half_camera_height) = (photo_width / 2.0, photo_height / 2.0);
 
-            // Check if any corner of the rectangle is inside the polygon.
-            let is_any_corner_inside = corners
-                .iter()
-                .any(|&corner| is_inside_polygon(corner, &polygon_transformed));
+        let polygon_width = (max_x - min_x).abs();
+        let polygon_height = (max_y - min_y).abs();
 
-            // If any corner is inside, calculate the center of the rectangle and add it to the result.
-            if is_any_corner_inside {
-                let center_x = x + half_camera_width;
-                let center_y = y + half_camera_height;
-                result.push(coordinate_restore(center_x, center_y, direction_radians));
-                // result.push((center_x, center_y));
+        let photo_count_width = (polygon_width / photo_width) as u64 + 1;
+        let photo_count_height = (polygon_height / photo_height) as u64 + 1;
+
+        for i in 0..photo_count_width {
+            let x = min_x + (i as f64) * photo_width;
+            for j in 0..photo_count_height {
+                let y = min_y + (j as f64) * photo_height;
+                // Calculate the corners of the rectangle at (x, y).
+                let corners = vec![
+                    (x, y),
+                    (x + photo_width, y),
+                    (x, y + photo_height),
+                    (x + photo_width, y + photo_height),
+                ];
+
+                // Check if any corner of the rectangle is inside the polygon.
+                let is_any_corner_inside = corners
+                    .iter()
+                    .any(|&corner| is_inside_polygon(corner, &polygon_transformed));
+
+                // If any corner is inside, calculate the center of the rectangle and add it to the result.
+                if is_any_corner_inside {
+                    let center_x = x + half_camera_width;
+                    let center_y = y + half_camera_height;
+                    result.push(coordinate_restore(center_x, center_y, direction_radians));
+                }
             }
         }
+        // Push the result vector containing the centers of the rectangles that intersect with the polygon.
+        results.push(result);
     }
-    // Return the result vector containing the centers of the rectangles that intersect with the polygon.
-    Ok(result)
+    // Return the vector of results containing the centers of the rectangles that intersect with each polygon.
+    Ok(results)
 }
 
 #[tauri::command]

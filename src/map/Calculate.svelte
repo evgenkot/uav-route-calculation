@@ -42,7 +42,7 @@
 			switch ($selectedAlgorithm) {
 				case Algorithm.NearestNeighbor: {
 					result = await invoke('nearest_neighbor', {
-						points: $discretizedArea,
+						points: $discretizedArea.flatMap((innerArr) => innerArr),
 						startPoint: $startingPoint
 					});
 					break;
@@ -51,7 +51,7 @@
 					const shouldExecute = await confirmBruteForce();
 					if (shouldExecute) {
 						result = await invoke('brute_force', {
-							points: $discretizedArea,
+							points: $discretizedArea.flatMap((innerArr) => innerArr),
 							startPoint: $startingPoint
 						});
 					} else {
@@ -77,7 +77,7 @@
 			return;
 		}
 
-		photoCount.set($discretizedArea.length);
+		photoCount.set($discretizedArea.flatMap((innerArr) => innerArr).length);
 
 		if ($selectedUav) {
 			missionDuration.set(
