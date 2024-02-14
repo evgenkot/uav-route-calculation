@@ -45,7 +45,9 @@ pub fn discretize_area(
     photo_height: f64,
     // Direction
     direction_degrees: f64,
-) -> Result<Vec<Vec<(f64, f64)>>, String> {
+    // Verification whether the points are inside the polygon
+    check_inside: bool,
+) -> Result<Vec<Vec<Vec<(f64, f64)>>>, String> {
     // Returns a Result containing either a vector of tuples representing the discretized area or a String error.
     println!("Received polygon coordinates: {:?}", polygons);
 
@@ -110,28 +112,37 @@ pub fn discretize_area(
 
         for i in 0..photo_count_width {
             let x = min_x + (i as f64) * photo_width;
+            let mut line = Vec::new();
             for j in 0..photo_count_height {
                 let y = min_y + (j as f64) * photo_height;
-                // Calculate the corners of the rectangle at (x, y).
-                let corners = vec![
-                    (x, y),
-                    (x + photo_width, y),
-                    (x, y + photo_height),
-                    (x + photo_width, y + photo_height),
-                ];
 
-                // Check if any corner of the rectangle is inside the polygon.
-                let is_any_corner_inside = corners
-                    .iter()
-                    .any(|&corner| is_inside_polygon(corner, &polygon_transformed));
+                if check_inside {
+                    // Calculate the corners of the rectangle at (x, y).
+                    let corners = vec![
+                        (x, y),
+                        (x + photo_width, y),
+                        (x, y + photo_height),
+                        (x + photo_width, y + photo_height),
+                    ];
 
-                // If any corner is inside, calculate the center of the rectangle and add it to the result.
-                if is_any_corner_inside {
+                    // Check if any corner of the rectangle is inside the polygon.
+                    let is_any_corner_inside = corners
+                        .iter()
+                        .any(|&corner| is_inside_polygon(corner, &polygon_transformed));
+
+                    // If any corner is inside, calculate the center of the rectangle and add it to the result.
+                    if is_any_corner_inside {
+                        let center_x = x + half_camera_width;
+                        let center_y = y + half_camera_height;
+                        line.push(coordinate_restore(center_x, center_y, direction_radians));
+                    }
+                } else {
                     let center_x = x + half_camera_width;
                     let center_y = y + half_camera_height;
-                    result.push(coordinate_restore(center_x, center_y, direction_radians));
+                    line.push(coordinate_restore(center_x, center_y, direction_radians));
                 }
             }
+            result.push(line);
         }
         // Push the result vector containing the centers of the rectangles that intersect with the polygon.
         results.push(result);
@@ -290,4 +301,70 @@ pub fn calculate_distance(points: Vec<(f64, f64)>) -> f64 {
         .zip(points.iter().cycle().skip(1))
         .map(|(a, b)| euclidean_distance(a, b))
         .sum()
+}
+
+#[tauri::command]
+pub fn rectangular_areas(
+    points: Vec<Vec<Vec<(f64, f64)>>>,
+    start_point: (f64, f64),
+    // Direction for quick calculation of polygon distance
+    direction_degrees: f64,
+) -> Result<Vec<(f64, f64)>, String> {
+    if points.is_empty() {
+        return Err("The input points must not be empty".to_string());
+    }
+    let mut calculation_result: Vec<(f64, f64)> = Vec::new();
+    let mut multiple_region_result: Vec<Vec<(f64, f64)>> = Vec::new();
+    for region_points in points.clone() {
+        // Check if the input vector is rectangular
+        let height = region_points[0].len();
+        if region_points.iter().any(|row| row.len() != height) {
+            return Err(String::from("Input vector is not rectangular"));
+        }
+
+        let mut region_result: Vec<(f64, f64)> = Vec::new();
+        let mut width = region_points.len();
+
+        for i in 0..width {
+            region_result.push(region_points[i][0]);
+        }
+
+        for j in 1..height {
+            region_result.push(region_points[width - 1][j]);
+        }
+
+        let ramps = (width - 2) / 2;
+
+        for n in 0..ramps {
+            for j in (1..height).rev() {
+                region_result.push(region_points[width - 2 - 2 * n][j]);
+            }
+
+            for j in 1..height {
+                region_result.push(region_points[width - 3 - 2 * n][j]);
+            }
+        }
+
+        if width % 2 == 1 {
+            let coils = (height - 1) / 2;
+
+            for n in 0..coils {
+                region_result.push(region_points[1][height - 1 - n * 2]);
+                region_result.push(region_points[0][height - 1 - n * 2]);
+                region_result.push(region_points[0][height - 2 - n * 2]);
+                region_result.push(region_points[1][height - 2 - n * 2]);
+            }
+
+            if height % 2 == 0 {
+                region_result.push(region_points[1][1]);
+                region_result.push(region_points[0][1]);
+            }
+        } else {
+            for j in (1..height).rev() {
+                region_result.push(region_points[0][j]);
+            }
+        }
+        multiple_region_result.push(region_result)
+    }
+    Ok(multiple_region_result.into_iter().flatten().collect())
 }

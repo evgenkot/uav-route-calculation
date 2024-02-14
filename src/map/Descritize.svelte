@@ -15,7 +15,10 @@
 		altitudeSelected,
 		discretizedArea,
 		startingPoint,
-		discretizationDirection
+		discretizationDirection,
+		Algorithm,
+		selectedAlgorithm
+
 	} from './store';
 	import { transform } from 'ol/proj';
 	import { Point, type Polygon } from 'ol/geom';
@@ -140,16 +143,17 @@
 				polygons: vertices,
 				photoWidth: photoWidth,
 				photoHeight: photoHeight,
-				directionDegrees: $discretizationDirection
-			});
-			$discretizedArea = result as number[][][];
+				directionDegrees: $discretizationDirection,
+				checkInside: $selectedAlgorithm != Algorithm.RectangularAreas
+			});		
+			$discretizedArea = result as number[][][][];
 			console.log(discretizedArea);
 		} catch (error) {
 			alert('Error calling discretize_area. ' + error);
 			return;
 		}
 
-		updateDiscretizedLayer($discretizedArea.flatMap((innerArr) => innerArr));
+		updateDiscretizedLayer($discretizedArea.flatMap((innerArr) => innerArr).flatMap((innerArr) => innerArr));
 		areaDiscretized.set(true);
 	}
 </script>

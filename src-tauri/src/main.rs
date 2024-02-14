@@ -34,6 +34,7 @@ fn main() {
             algorithms::discretize_area,
             algorithms::nearest_neighbor,
             algorithms::brute_force,
+            algorithms::rectangular_areas,
             algorithms::calculate_distance,
         ])
         .run(tauri::generate_context!())

@@ -43,6 +43,18 @@
 			Brute Force
 		</label>
 	</div>
+	<div>
+		<label>
+			<input
+				type="radio"
+				name="algorithm"
+				value="RectangularAreas"
+				bind:group={currentSelectedAlgorithm}
+				on:change={handleChange}
+			/>
+			Rectangular Areas
+		</label>
+	</div>
 </div>
 
 {/if}

@@ -29,6 +29,7 @@ export const overlapValue = writable<number>(0);
 export enum Algorithm {
 	NearestNeighbor = "NearestNeighbor",
 	BruteForce = "BruteForce",
+	RectangularAreas = "RectangularAreas"
 }
 export const selectedAlgorithm = writable<Algorithm>(Algorithm.NearestNeighbor);
 
@@ -117,6 +118,6 @@ export const isDrawing = writable<Boolean>(false);
 
 export const discretizationDirection = writable<number>(0);
 
-export const discretizedArea = writable<number[][][]>([]);
+export const discretizedArea = writable<number[][][][]>([]);
 export const startingPoint = writable<number[] | null>(null);
 export const planResult = writable<number[][]>([]);

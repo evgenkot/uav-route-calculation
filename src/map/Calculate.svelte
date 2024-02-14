@@ -21,6 +21,7 @@
 		areaSelected,
 		startSelected,
 		altitudeSelected,
+		discretizationDirection,
 
 	} from './store';
 	import { transform } from 'ol/proj';
@@ -42,7 +43,7 @@
 			switch ($selectedAlgorithm) {
 				case Algorithm.NearestNeighbor: {
 					result = await invoke('nearest_neighbor', {
-						points: $discretizedArea.flatMap((innerArr) => innerArr),
+						points: $discretizedArea.flatMap((innerArr) => innerArr).flatMap((innerArr) => innerArr),
 						startPoint: $startingPoint
 					});
 					break;
@@ -51,12 +52,20 @@
 					const shouldExecute = await confirmBruteForce();
 					if (shouldExecute) {
 						result = await invoke('brute_force', {
-							points: $discretizedArea.flatMap((innerArr) => innerArr),
+							points: $discretizedArea.flatMap((innerArr) => innerArr).flatMap((innerArr) => innerArr),
 							startPoint: $startingPoint
 						});
 					} else {
 						return;
 					}
+					break;
+				}
+				case Algorithm.RectangularAreas: {
+					result = await invoke('rectangular_areas', {
+						points: $discretizedArea,
+						startPoint: $startingPoint,
+						directionDegrees: $discretizationDirection,
+					});
 					break;
 				}
 				default:
@@ -77,7 +86,7 @@
 			return;
 		}
 
-		photoCount.set($discretizedArea.flatMap((innerArr) => innerArr).length);
+		photoCount.set($discretizedArea.flatMap((innerArr) => innerArr).flatMap((innerArr) => innerArr).length);
 
 		if ($selectedUav) {
 			missionDuration.set(
