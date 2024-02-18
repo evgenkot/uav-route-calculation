@@ -313,17 +313,71 @@ pub fn rectangular_areas(
     if points.is_empty() {
         return Err("The input points must not be empty".to_string());
     }
+    let direction_radians = direction_degrees * PI / 180.0;
     let mut calculation_result: Vec<(f64, f64)> = Vec::new();
     let mut multiple_region_result: Vec<Vec<(f64, f64)>> = Vec::new();
+
+    let region_count = points.len();
+    let mut weights: Vec<Vec<Option<(f64, Direction)>>> =
+        vec![vec![None; region_count]; region_count];
+
+    for i in 0..region_count - 1 {
+        let i_height = points[i][0].len();
+        let i_width = points[i].len();
+        for j in i + 1..region_count {
+            let j_height = points[j][0].len();
+            let j_width = points[j].len();
+            let (weight, direction) = shortest_path(
+                (
+                    coordinate_transformation(
+                        points[i][0][i_height - 1].0,
+                        points[i][0][i_height - 1].1,
+                        direction_radians,
+                    ),
+                    coordinate_transformation(
+                        points[i][i_width - 1][0].0,
+                        points[i][i_width - 1][0].1,
+                        direction_radians,
+                    ),
+                ),
+                (
+                    coordinate_transformation(
+                        points[j][0][j_height - 1].0,
+                        points[j][0][j_height - 1].1,
+                        direction_radians,
+                    ),
+                    coordinate_transformation(
+                        points[j][j_width - 1][0].0,
+                        points[j][j_width - 1][0].1,
+                        direction_radians,
+                    ),
+                ),
+            );
+
+            weights[i][j] = Some((weight, direction.clone()));
+            weights[j][i] = Some((weight.abs(), direction.opposite().clone()));
+        }
+    }
+
+    // for i in 0..region_count
+
+    println!("Weights {:?}", weights);
+
     for region_points in points.clone() {
         // Check if the input vector is rectangular
         let height = region_points[0].len();
+        let width = region_points.len();
+
         if region_points.iter().any(|row| row.len() != height) {
             return Err(String::from("Input vector is not rectangular"));
         }
 
+        if width < 2 {
+            multiple_region_result.push(region_points.into_iter().flatten().collect());
+            break;
+        }
+
         let mut region_result: Vec<(f64, f64)> = Vec::new();
-        let mut width = region_points.len();
 
         for i in 0..width {
             region_result.push(region_points[i][0]);
@@ -367,4 +421,84 @@ pub fn rectangular_areas(
         multiple_region_result.push(region_result)
     }
     Ok(multiple_region_result.into_iter().flatten().collect())
+}
+
+#[derive(Debug, Clone)]
+enum Direction {
+    U,
+    D,
+    L,
+    R,
+    UL,
+    UR,
+    DL,
+    DR,
+}
+
+impl Direction {
+    pub fn opposite(&self) -> Direction {
+        match self {
+            Direction::U => Direction::D,
+            Direction::D => Direction::U,
+            Direction::L => Direction::R,
+            Direction::R => Direction::L,
+            Direction::UL => Direction::DR,
+            Direction::UR => Direction::DL,
+            Direction::DL => Direction::UR,
+            Direction::DR => Direction::UL,
+        }
+    }
+}
+
+fn find_direction(a: ((f64, f64), (f64, f64)), b: ((f64, f64), (f64, f64))) -> Direction {
+    let ((a_left, a_top), (a_right, a_bottom)) = a;
+    let ((b_left, b_top), (b_right, b_bottom)) = b;
+
+    if b_right < a_left {
+        if a_top < b_bottom {
+            Direction::UL
+        } else if b_top < a_bottom {
+            Direction::DL
+        } else {
+            Direction::L
+        }
+    } else if a_right < b_left {
+        if a_top < b_bottom {
+            Direction::UR
+        } else if b_top < a_bottom {
+            Direction::DR
+        } else {
+            Direction::R
+        }
+    } else {
+        if a_top < b_bottom {
+            Direction::U
+        } else {
+            Direction::D
+        }
+    }
+}
+
+// Method to calculate the shortest path between two rectangles
+fn shortest_path(a: ((f64, f64), (f64, f64)), b: ((f64, f64), (f64, f64))) -> (f64, Direction) {
+    let direction = find_direction(a, b);
+
+    let ((a_left, a_top), (a_right, a_bottom)) = a;
+    let ((b_left, b_top), (b_right, b_bottom)) = b;
+
+    (
+        match direction {
+            Direction::U => b_bottom - a_top,
+            Direction::D => a_bottom - b_top,
+            Direction::L => a_left - b_right,
+            Direction::R => b_left - a_right,
+            // 0011 1011
+            // 0001 1001
+            Direction::UL => euclidean_distance(&(a_top, a_left), &(b_bottom, b_right)),
+            Direction::UR => euclidean_distance(&(a_top, a_right), &(b_bottom, b_left)),
+            Direction::DL => euclidean_distance(&(a_bottom, a_left), &(b_top, b_right)),
+            Direction::DR => euclidean_distance(&(a_bottom, a_right), &(b_top, b_left)),
+        },
+        direction,
+    )
 }
