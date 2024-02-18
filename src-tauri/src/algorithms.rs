@@ -358,8 +358,32 @@ pub fn rectangular_areas(
             weights[j][i] = Some((weight.abs(), direction.opposite().clone()));
         }
     }
-
-    // for i in 0..region_count
+    let mut last_row: Vec<Option<(f64, Direction)>> = vec![None; region_count + 1];
+    for i in 0..region_count {
+        let i_height = points[i][0].len();
+        let i_width = points[i].len();
+        let (weight, direction) = shortest_path(
+            (
+                coordinate_transformation(start_point.0, start_point.1, direction_radians),
+                coordinate_transformation(start_point.0, start_point.1, direction_radians),
+            ),
+            (
+                coordinate_transformation(
+                    points[i][0][i_height - 1].0,
+                    points[i][0][i_height - 1].1,
+                    direction_radians,
+                ),
+                coordinate_transformation(
+                    points[i][i_width - 1][0].0,
+                    points[i][i_width - 1][0].1,
+                    direction_radians,
+                ),
+            ),
+        );
+        last_row[i] = Some((weight, direction.clone()));
+        weights[i].push(Some((weight.abs(), direction.opposite().clone())));
+    }
+    weights.push(last_row);
 
     println!("Weights {:?}", weights);
 
