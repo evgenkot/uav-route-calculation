@@ -198,7 +198,7 @@ pub fn euclidean_distance(a: &(f64, f64), b: &(f64, f64)) -> f64 {
 // }
 
 use std::sync::{Arc, Mutex};
-use std::thread;
+use std::{result, thread, vec};
 
 // Main function to find the shortest path using the brute force approach.
 #[tauri::command]
@@ -358,32 +358,32 @@ pub fn rectangular_areas(
             weights[j][i] = Some((weight.abs(), direction.opposite().clone()));
         }
     }
-    let mut last_row: Vec<Option<(f64, Direction)>> = vec![None; region_count + 1];
-    for i in 0..region_count {
-        let i_height = points[i][0].len();
-        let i_width = points[i].len();
-        let (weight, direction) = shortest_path(
-            (
-                coordinate_transformation(start_point.0, start_point.1, direction_radians),
-                coordinate_transformation(start_point.0, start_point.1, direction_radians),
-            ),
-            (
-                coordinate_transformation(
-                    points[i][0][i_height - 1].0,
-                    points[i][0][i_height - 1].1,
-                    direction_radians,
-                ),
-                coordinate_transformation(
-                    points[i][i_width - 1][0].0,
-                    points[i][i_width - 1][0].1,
-                    direction_radians,
-                ),
-            ),
-        );
-        last_row[i] = Some((weight, direction.clone()));
-        weights[i].push(Some((weight.abs(), direction.opposite().clone())));
-    }
-    weights.push(last_row);
+    // let mut last_row: Vec<Option<(f64, Direction)>> = vec![None; region_count + 1];
+    // for i in 0..region_count {
+    //     let i_height = points[i][0].len();
+    //     let i_width = points[i].len();
+    //     let (weight, direction) = shortest_path(
+    //         (
+    //             coordinate_transformation(start_point.0, start_point.1, direction_radians),
+    //             coordinate_transformation(start_point.0, start_point.1, direction_radians),
+    //         ),
+    //         (
+    //             coordinate_transformation(
+    //                 points[i][0][i_height - 1].0,
+    //                 points[i][0][i_height - 1].1,
+    //                 direction_radians,
+    //             ),
+    //             coordinate_transformation(
+    //                 points[i][i_width - 1][0].0,
+    //                 points[i][i_width - 1][0].1,
+    //                 direction_radians,
+    //             ),
+    //         ),
+    //     );
+    //     last_row[i] = Some((weight, direction.clone()));
+    //     weights[i].push(Some((weight.abs(), direction.opposite().clone())));
+    // }
+    // weights.push(last_row);
 
     println!("Weights {:?}", weights);
 
@@ -442,8 +442,31 @@ pub fn rectangular_areas(
                 region_result.push(region_points[0][j]);
             }
         }
+
+        // if height > 1 {
+        //     region_result.push(region_points[0][0]);
+        // }
         multiple_region_result.push(region_result)
     }
+
+    // multiple_region_result.push(vec![start_point]);
+
+    // let order = brute_force_graph(weights);
+    
+    // let mut result: Vec<Vec<(f64, f64)>> = Vec::with_capacity(multiple_region_result.len());
+    // println!("{:?}", order);
+    // for &index in &order {
+    //     result.push(multiple_region_result[index].clone());
+    // }
+    let mst = boruvka_mst(weights);
+    println!("MST {:?}", mst);
+    
+    let mst_result: Vec<Vec<(f64, f64)>> = vec![];
+    for n in 0..multiple_region_result.len() {
+
+    }
+
+
     Ok(multiple_region_result.into_iter().flatten().collect())
 }
 
@@ -525,4 +548,75 @@ fn shortest_path(a: ((f64, f64), (f64, f64)), b: ((f64, f64), (f64, f64))) -> (f
         },
         direction,
     )
+}
+
+fn find(parent: &mut [usize], i: usize) -> usize {
+    if parent[i] == i {
+        i
+    } else {
+        parent[i] = find(parent, parent[i]);
+        parent[i]
+    }
+}
+
+fn union_set(parent: &mut [usize], rank: &mut [usize], x: usize, y: usize) {
+    let xroot = find(parent, x);
+    let yroot = find(parent, y);
+
+    if rank[xroot] < rank[yroot] {
+        parent[xroot] = yroot;
+    } else if rank[xroot] > rank[yroot] {
+        parent[yroot] = xroot;
+    } else {
+        parent[yroot] = xroot;
+        rank[xroot] += 1;
+    }
+}
+
+fn boruvka_mst(weights: Vec<Vec<Option<(f64, Direction)>>>) -> Vec<Vec<usize>> {
+    let mut parent: Vec<usize> = (0..weights.len()).collect();
+    let mut rank: Vec<usize> = vec![0; weights.len()];
+    let mut cheapest: Vec<Option<(usize, usize, f64)>> = vec![None; weights.len()];
+    let mut num_trees = weights.len();
+    let mut mst_weight = 0.0;
+
+    let mut result = vec![vec![]; weights.len()];
+
+    while num_trees > 1 {
+        for u in 0..weights.len() {
+            for v in 0..weights[u].len() {
+                if let Some((w, _)) = weights[u][v] {
+                    let set1 = find(&mut parent, u);
+                    let set2 = find(&mut parent, v);
+                    if set1 != set2 {
+                        if cheapest[set1].is_none() || cheapest[set1].unwrap().2 > w {
+                            cheapest[set1] = Some((u, v, w));
+                        }
+                        if cheapest[set2].is_none() || cheapest[set2].unwrap().2 > w {
+                            cheapest[set2] = Some((u, v, w));
+                        }
+                    }
+                }
+            }
+        }
+
+        for node in 0..weights.len() {
+            if let Some((u, v, w)) = cheapest[node] {
+                let set1 = find(&mut parent, u);
+                let set2 = find(&mut parent, v);
+                if set1 != set2 {
+                    mst_weight += w;
+                    union_set(&mut parent, &mut rank, set1, set2);
+                    result[u].push(v);
+                    result[v].push(u); // For undirected graph
+                    num_trees -= 1;
+                }
+            }
+        }
+
+        cheapest.iter_mut().for_each(|x| *x = None);
+    }
+
+    println!("Weight of MST is {}", mst_weight);
+    result
 }
