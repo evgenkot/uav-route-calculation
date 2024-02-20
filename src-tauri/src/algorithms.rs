@@ -385,7 +385,7 @@ pub fn rectangular_areas(
     // }
     // weights.push(last_row);
 
-    println!("Weights {:?}", weights);
+    // println!("Weights {:?}", weights);
 
     for region_points in points.clone() {
         // Check if the input vector is rectangular
@@ -452,22 +452,159 @@ pub fn rectangular_areas(
     // multiple_region_result.push(vec![start_point]);
 
     // let order = brute_force_graph(weights);
-    
+
     // let mut result: Vec<Vec<(f64, f64)>> = Vec::with_capacity(multiple_region_result.len());
     // println!("{:?}", order);
     // for &index in &order {
     //     result.push(multiple_region_result[index].clone());
     // }
-    let mst = boruvka_mst(weights);
-    println!("MST {:?}", mst);
-    
-    let mst_result: Vec<Vec<(f64, f64)>> = vec![];
-    for n in 0..multiple_region_result.len() {
+    let mst = boruvka_mst(weights.clone());
+    println!("points {:?}", points);
+    println!("start_point {:?}", start_point);
+    println!("weights {:?}", weights);
+    println!("mst {:?}", mst);
+    println!("multiple_region_result {:?}", multiple_region_result);
 
+    // let mut result_pieces: Vec<Vec<Vec<(f64, f64)>>>= vec![];
+    // for rs in multiple_region_result
+
+    // let mst_result: Vec<Vec<(f64, f64)>> = vec![];
+    // for i in 0..multiple_region_result.len() {
+
+    //     for j in mst[i].clone() {
+    //         match weights[i][j] {
+    //             Some(edge) => match edge.1 {
+    //                 Direction::U => ,
+    //                 Direction::D => ,
+    //                 Direction::L => ,
+    //                 Direction::R => ,
+    //                 Direction::UL => ,
+    //                 Direction::UR => ,
+    //                 Direction::DL => ,
+    //                 Direction::DR => ,
+    //             },
+    //             None => (),
+    //         }
+    //     }
+    // }
+
+    let mut result_vec: Vec<(f64, f64)> = multiple_region_result[0].clone();
+    let mut done: Vec<usize> = vec![];
+
+    for (i, connections) in mst.iter().enumerate() {
+        for &j in connections {
+            if done.iter().position(|&x| x == j).is_none() {
+                println!("connecting {} to {}", i, j);
+                match weights[i][j].clone() {
+                    Some(edge) => match edge.1 {
+                        Direction::U => (),
+                        Direction::D => (),
+                        Direction::L => (),
+                        Direction::R => (),
+                        Direction::UL => result_vec.insert_tuple_after_element(
+                            multiple_region_result[j].clone(),
+                            points[j][points[j].len() - 1][0],
+                            points[i][0][points[i][0].len() - 1],
+                        ),
+                        Direction::UR => result_vec.insert_tuple_after_element(
+                            multiple_region_result[j].clone(),
+                            points[j][0][0],
+                            points[i][points[i].len() - 1][points[i][0].len() - 1],
+                        ),
+                        Direction::DL => result_vec.insert_tuple_after_element(
+                            multiple_region_result[j].clone(),
+                            points[j][points[j].len() - 1][points[j][0].len() - 1],
+                            points[i][0][0],
+                        ),
+                        Direction::DR => result_vec.insert_tuple_after_element(
+                            multiple_region_result[j].clone(),
+                            points[j][0][points[j][0].len() - 1],
+                            points[i][points[i].len() - 1][0],
+                        ),
+                    },
+                    None => (),
+                }
+            }
+        }
+        done.push(i);
+    }
+    // for i in 0..multiple_region_result.len() {
+    //     for connection in mst.clone() {
+    //         for j in connection {
+    //             if done.iter().position(|&x| x == j) == None {
+    //                 println!("connecting {i} to {j}");
+    //                 match weights[i][j].clone() {
+    //                     Some(edge) => match edge.1 {
+    //                         Direction::U => (),
+    //                         Direction::D => (),
+    //                         Direction::L => (),
+    //                         Direction::R => (),
+    //                         Direction::UL => result_vec.insert_tuple_after_element(
+    //                             multiple_region_result[j].clone(),
+    //                             points[j][points[j].len() - 1][0],
+    //                             points[i][0][points[i][0].len() - 1],
+    //                         ),
+    //                         Direction::UR => result_vec.insert_tuple_after_element(
+    //                             multiple_region_result[j].clone(),
+    //                             points[j][0][0],
+    //                             points[i][points[i].len() - 1][points[i][0].len() - 1],
+    //                         ),
+    //                         Direction::DL => result_vec.insert_tuple_after_element(
+    //                             multiple_region_result[j].clone(),
+    //                             points[j][points[j].len() - 1][points[j][0].len() - 1],
+    //                             points[i][0][0],
+    //                         ),
+    //                         Direction::DR => result_vec.insert_tuple_after_element(
+    //                             multiple_region_result[j].clone(),
+    //                             points[j][0][points[j][0].len() - 1],
+    //                             points[i][points[i].len() - 1][0],
+    //                         ),
+    //                     },
+    //                     None => (),
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     done.push(i);
+    // }
+    println!("res: {:?}", result_vec);
+
+    // let mut vec1 = vec![(1.0, 2.0), (2.0, 3.0), (3.0, 4.0), (4.0, 5.0), (5.0, 6.0)];
+    // let vec2 = vec![(5.0, 6.0), (6.0, 7.0), (7.0, 8.0), (8.0, 9.0), (9.0, 10.0)];
+    // let element_f = (7.0, 8.0);
+    // let index_insert_f = (1.0, 2.0);
+
+    // vec1.insert_tuple_after_element(vec2, element_f, index_insert_f);
+    // println!("{:?}", vec1);
+
+    trait InsertTupleAfterElement {
+        fn insert_tuple_after_element(
+            &mut self,
+            vec2: Vec<(f64, f64)>,
+            element: (f64, f64),
+            at_element: (f64, f64),
+        );
     }
 
+    impl InsertTupleAfterElement for Vec<(f64, f64)> {
+        fn insert_tuple_after_element(
+            &mut self,
+            vec2: Vec<(f64, f64)>,
+            element: (f64, f64),
+            at_element: (f64, f64),
+        ) {
+            let index = vec2.iter().position(|&x| x == element).unwrap();
+            let index_insert = self.iter().position(|&x| x == at_element).unwrap() + 1;
+            let (left, right) = vec2.split_at(index);
+            self.splice(index_insert..index_insert, right.to_vec());
+            self.splice(
+                index_insert + right.len()..index_insert + right.len(),
+                left.to_vec(),
+            );
+        }
+    }
 
-    Ok(multiple_region_result.into_iter().flatten().collect())
+    Ok(result_vec)
 }
 
 #[derive(Debug, Clone)]
