@@ -497,10 +497,56 @@ pub fn rectangular_areas(
                 println!("connecting {} to {}", i, j);
                 match weights[i][j].clone() {
                     Some(edge) => match edge.1 {
-                        Direction::U => (),
-                        Direction::D => (),
-                        Direction::L => (),
-                        Direction::R => (),
+                        Direction::U => {
+                            let points2: Vec<(f64, f64)> =
+                                points[j].iter().map(|row| row[0]).collect();
+
+                            let points1: Vec<(f64, f64)> = points[i]
+                                .iter()
+                                .filter_map(|row| row.last().copied())
+                                .collect();
+
+                            let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
+                            result_vec.insert_tuple_after_element(
+                                multiple_region_result[j].clone(),
+                                p2,
+                                p1,
+                            )
+                        }
+                        Direction::D => {
+                            let points2: Vec<(f64, f64)> = points[j]
+                                .iter()
+                                .filter_map(|row| row.last().copied())
+                                .collect();
+                            let points1: Vec<(f64, f64)> =
+                                points[i].iter().map(|row| row[0]).collect();
+                            let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
+                            result_vec.insert_tuple_after_element(
+                                multiple_region_result[j].clone(),
+                                p2,
+                                p1,
+                            )
+                        }
+                        Direction::L => {
+                            let points2: Vec<(f64, f64)> = points[j].last().unwrap().clone();
+                            let points1: Vec<(f64, f64)> = points[i][0].clone();
+                            let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
+                            result_vec.insert_tuple_after_element(
+                                multiple_region_result[j].clone(),
+                                p2,
+                                p1,
+                            )
+                        }
+                        Direction::R => {
+                            let points2: Vec<(f64, f64)> = points[j][0].clone();
+                            let points1: Vec<(f64, f64)> = points[i].last().unwrap().clone();
+                            let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
+                            result_vec.insert_tuple_after_element(
+                                multiple_region_result[j].clone(),
+                                p2,
+                                p1,
+                            )
+                        }
                         Direction::UL => result_vec.insert_tuple_after_element(
                             multiple_region_result[j].clone(),
                             points[j][points[j].len() - 1][0],
@@ -528,54 +574,8 @@ pub fn rectangular_areas(
         }
         done.push(i);
     }
-    // for i in 0..multiple_region_result.len() {
-    //     for connection in mst.clone() {
-    //         for j in connection {
-    //             if done.iter().position(|&x| x == j) == None {
-    //                 println!("connecting {i} to {j}");
-    //                 match weights[i][j].clone() {
-    //                     Some(edge) => match edge.1 {
-    //                         Direction::U => (),
-    //                         Direction::D => (),
-    //                         Direction::L => (),
-    //                         Direction::R => (),
-    //                         Direction::UL => result_vec.insert_tuple_after_element(
-    //                             multiple_region_result[j].clone(),
-    //                             points[j][points[j].len() - 1][0],
-    //                             points[i][0][points[i][0].len() - 1],
-    //                         ),
-    //                         Direction::UR => result_vec.insert_tuple_after_element(
-    //                             multiple_region_result[j].clone(),
-    //                             points[j][0][0],
-    //                             points[i][points[i].len() - 1][points[i][0].len() - 1],
-    //                         ),
-    //                         Direction::DL => result_vec.insert_tuple_after_element(
-    //                             multiple_region_result[j].clone(),
-    //                             points[j][points[j].len() - 1][points[j][0].len() - 1],
-    //                             points[i][0][0],
-    //                         ),
-    //                         Direction::DR => result_vec.insert_tuple_after_element(
-    //                             multiple_region_result[j].clone(),
-    //                             points[j][0][points[j][0].len() - 1],
-    //                             points[i][points[i].len() - 1][0],
-    //                         ),
-    //                     },
-    //                     None => (),
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     done.push(i);
-    // }
+
     println!("res: {:?}", result_vec);
-
-    // let mut vec1 = vec![(1.0, 2.0), (2.0, 3.0), (3.0, 4.0), (4.0, 5.0), (5.0, 6.0)];
-    // let vec2 = vec![(5.0, 6.0), (6.0, 7.0), (7.0, 8.0), (8.0, 9.0), (9.0, 10.0)];
-    // let element_f = (7.0, 8.0);
-    // let index_insert_f = (1.0, 2.0);
-
-    // vec1.insert_tuple_after_element(vec2, element_f, index_insert_f);
-    // println!("{:?}", vec1);
 
     trait InsertTupleAfterElement {
         fn insert_tuple_after_element(
@@ -632,6 +632,30 @@ impl Direction {
             Direction::DR => Direction::UL,
         }
     }
+}
+
+pub fn find_minimal_pair(
+    points1: &Vec<(f64, f64)>,
+    points2: &Vec<(f64, f64)>,
+) -> Option<((f64, f64), (f64, f64))> {
+    if points1.is_empty() || points2.is_empty() {
+        return None; // If either of the vectors is empty, there's no pair to compare
+    }
+
+    let mut min_distance = std::f64::INFINITY;
+    let mut min_pair = None;
+
+    for point1 in points1 {
+        for point2 in points2 {
+            let distance = euclidean_distance(point1, point2);
+            if distance < min_distance {
+                min_distance = distance;
+                min_pair = Some((*point1, *point2));
+            }
+        }
+    }
+
+    min_pair
 }
 
 fn find_direction(a: ((f64, f64), (f64, f64)), b: ((f64, f64), (f64, f64))) -> Direction {
