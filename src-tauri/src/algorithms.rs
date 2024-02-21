@@ -193,12 +193,8 @@ pub fn euclidean_distance(a: &(f64, f64), b: &(f64, f64)) -> f64 {
     ((x2 - x1).powi(2) + (y2 - y1).powi(2)).sqrt()
 }
 
-// pub fn christofides_algorithm(points: &[(f64, f64)], start_point: &(f64, f64)) -> Vec<(f64, f64)> {
-//     // Implement the christofides_algorithm
-// }
-
 use std::sync::{Arc, Mutex};
-use std::{result, thread, vec};
+use std::{thread, vec};
 
 // Main function to find the shortest path using the brute force approach.
 #[tauri::command]
@@ -358,34 +354,6 @@ pub fn rectangular_areas(
             weights[j][i] = Some((weight.abs(), direction.opposite().clone()));
         }
     }
-    // let mut last_row: Vec<Option<(f64, Direction)>> = vec![None; region_count + 1];
-    // for i in 0..region_count {
-    //     let i_height = points[i][0].len();
-    //     let i_width = points[i].len();
-    //     let (weight, direction) = shortest_path(
-    //         (
-    //             coordinate_transformation(start_point.0, start_point.1, direction_radians),
-    //             coordinate_transformation(start_point.0, start_point.1, direction_radians),
-    //         ),
-    //         (
-    //             coordinate_transformation(
-    //                 points[i][0][i_height - 1].0,
-    //                 points[i][0][i_height - 1].1,
-    //                 direction_radians,
-    //             ),
-    //             coordinate_transformation(
-    //                 points[i][i_width - 1][0].0,
-    //                 points[i][i_width - 1][0].1,
-    //                 direction_radians,
-    //             ),
-    //         ),
-    //     );
-    //     last_row[i] = Some((weight, direction.clone()));
-    //     weights[i].push(Some((weight.abs(), direction.opposite().clone())));
-    // }
-    // weights.push(last_row);
-
-    // println!("Weights {:?}", weights);
 
     for region_points in points.clone() {
         // Check if the input vector is rectangular
@@ -443,21 +411,9 @@ pub fn rectangular_areas(
             }
         }
 
-        // if height > 1 {
-        //     region_result.push(region_points[0][0]);
-        // }
         multiple_region_result.push(region_result)
     }
 
-    // multiple_region_result.push(vec![start_point]);
-
-    // let order = brute_force_graph(weights);
-
-    // let mut result: Vec<Vec<(f64, f64)>> = Vec::with_capacity(multiple_region_result.len());
-    // println!("{:?}", order);
-    // for &index in &order {
-    //     result.push(multiple_region_result[index].clone());
-    // }
     let mst = boruvka_mst(weights.clone());
     println!("points {:?}", points);
     println!("start_point {:?}", start_point);
@@ -465,116 +421,128 @@ pub fn rectangular_areas(
     println!("mst {:?}", mst);
     println!("multiple_region_result {:?}", multiple_region_result);
 
-    // let mut result_pieces: Vec<Vec<Vec<(f64, f64)>>>= vec![];
-    // for rs in multiple_region_result
-
-    // let mst_result: Vec<Vec<(f64, f64)>> = vec![];
-    // for i in 0..multiple_region_result.len() {
-
-    //     for j in mst[i].clone() {
-    //         match weights[i][j] {
-    //             Some(edge) => match edge.1 {
-    //                 Direction::U => ,
-    //                 Direction::D => ,
-    //                 Direction::L => ,
-    //                 Direction::R => ,
-    //                 Direction::UL => ,
-    //                 Direction::UR => ,
-    //                 Direction::DL => ,
-    //                 Direction::DR => ,
-    //             },
-    //             None => (),
-    //         }
-    //     }
-    // }
-
     let mut result_vec: Vec<(f64, f64)> = multiple_region_result[0].clone();
     let mut done: Vec<usize> = vec![];
 
-    for (i, connections) in mst.iter().enumerate() {
-        for &j in connections {
-            if done.iter().position(|&x| x == j).is_none() {
-                println!("connecting {} to {}", i, j);
-                match weights[i][j].clone() {
-                    Some(edge) => match edge.1 {
-                        Direction::U => {
-                            let points2: Vec<(f64, f64)> =
-                                points[j].iter().map(|row| row[0]).collect();
+    let start_node = 0;
+    let mut visited = vec![false; mst.len()];
+    let mut stack = vec![start_node];
+    let mut done = vec![start_node];
+    while let Some(i) = stack.pop() {
+        if !visited[i] {
+            // Process the current node (you can replace this with your specific logic)
+            println!("Visiting node: {}", i);
 
-                            let points1: Vec<(f64, f64)> = points[i]
-                                .iter()
-                                .filter_map(|row| row.last().copied())
-                                .collect();
+            for j in mst[i].clone() {
+                if done.iter().position(|&x| x == j).is_none() {
+                    println!("connecting {} to {}", i, j);
+                    match weights[i][j].clone() {
+                        Some(edge) => match edge.1 {
+                            Direction::U => {
+                                println!("Going up");
+                                let points2: Vec<(f64, f64)> =
+                                    points[j].iter().map(|row| row[0]).collect();
 
-                            let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
-                            result_vec.insert_tuple_after_element(
-                                multiple_region_result[j].clone(),
-                                p2,
-                                p1,
-                            )
-                        }
-                        Direction::D => {
-                            let points2: Vec<(f64, f64)> = points[j]
-                                .iter()
-                                .filter_map(|row| row.last().copied())
-                                .collect();
-                            let points1: Vec<(f64, f64)> =
-                                points[i].iter().map(|row| row[0]).collect();
-                            let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
-                            result_vec.insert_tuple_after_element(
-                                multiple_region_result[j].clone(),
-                                p2,
-                                p1,
-                            )
-                        }
-                        Direction::L => {
-                            let points2: Vec<(f64, f64)> = points[j].last().unwrap().clone();
-                            let points1: Vec<(f64, f64)> = points[i][0].clone();
-                            let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
-                            result_vec.insert_tuple_after_element(
-                                multiple_region_result[j].clone(),
-                                p2,
-                                p1,
-                            )
-                        }
-                        Direction::R => {
-                            let points2: Vec<(f64, f64)> = points[j][0].clone();
-                            let points1: Vec<(f64, f64)> = points[i].last().unwrap().clone();
-                            let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
-                            result_vec.insert_tuple_after_element(
-                                multiple_region_result[j].clone(),
-                                p2,
-                                p1,
-                            )
-                        }
-                        Direction::UL => result_vec.insert_tuple_after_element(
-                            multiple_region_result[j].clone(),
-                            points[j][points[j].len() - 1][0],
-                            points[i][0][points[i][0].len() - 1],
-                        ),
-                        Direction::UR => result_vec.insert_tuple_after_element(
-                            multiple_region_result[j].clone(),
-                            points[j][0][0],
-                            points[i][points[i].len() - 1][points[i][0].len() - 1],
-                        ),
-                        Direction::DL => result_vec.insert_tuple_after_element(
-                            multiple_region_result[j].clone(),
-                            points[j][points[j].len() - 1][points[j][0].len() - 1],
-                            points[i][0][0],
-                        ),
-                        Direction::DR => result_vec.insert_tuple_after_element(
-                            multiple_region_result[j].clone(),
-                            points[j][0][points[j][0].len() - 1],
-                            points[i][points[i].len() - 1][0],
-                        ),
-                    },
-                    None => (),
+                                let points1: Vec<(f64, f64)> = points[i]
+                                    .iter()
+                                    .filter_map(|row| row.last().copied())
+                                    .collect();
+
+                                let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
+                                result_vec.insert_tuple_after_element(
+                                    multiple_region_result[j].clone(),
+                                    p2,
+                                    p1,
+                                )
+                            }
+                            Direction::D => {
+                                println!("Going down");
+                                let points2: Vec<(f64, f64)> = points[j]
+                                    .iter()
+                                    .filter_map(|row| row.last().copied())
+                                    .collect();
+                                let points1: Vec<(f64, f64)> =
+                                    points[i].iter().map(|row| row[0]).collect();
+                                let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
+                                result_vec.insert_tuple_after_element(
+                                    multiple_region_result[j].clone(),
+                                    p2,
+                                    p1,
+                                )
+                            }
+                            Direction::L => {
+                                println!("Going Left");
+                                let points2: Vec<(f64, f64)> = points[j].last().unwrap().clone();
+                                let points1: Vec<(f64, f64)> = points[i][0].clone();
+                                let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
+                                result_vec.insert_tuple_after_element(
+                                    multiple_region_result[j].clone(),
+                                    p2,
+                                    p1,
+                                )
+                            }
+                            Direction::R => {
+                                println!("Going Right");
+                                let points2: Vec<(f64, f64)> = points[j][0].clone();
+                                let points1: Vec<(f64, f64)> = points[i].last().unwrap().clone();
+                                let (p1, p2) = find_minimal_pair(&points1, &points2).unwrap();
+                                result_vec.insert_tuple_after_element(
+                                    multiple_region_result[j].clone(),
+                                    p2,
+                                    p1,
+                                )
+                            }
+                            Direction::UL => {
+                                println!("Going UL");
+                                result_vec.insert_tuple_after_element(
+                                    multiple_region_result[j].clone(),
+                                    points[j][points[j].len() - 1][0],
+                                    points[i][0][points[i][0].len() - 1],
+                                )
+                            }
+                            Direction::UR => {
+                                println!("Going UR");
+                                result_vec.insert_tuple_after_element(
+                                    multiple_region_result[j].clone(),
+                                    points[j][0][0],
+                                    points[i][points[i].len() - 1][points[i][0].len() - 1],
+                                )
+                            }
+                            Direction::DL => {
+                                println!("Going DL");
+                                result_vec.insert_tuple_after_element(
+                                    multiple_region_result[j].clone(),
+                                    points[j][points[j].len() - 1][points[j][0].len() - 1],
+                                    points[i][0][0],
+                                )
+                            }
+                            Direction::DR => {
+                                println!("Going DR");
+                                result_vec.insert_tuple_after_element(
+                                    multiple_region_result[j].clone(),
+                                    points[j][0][points[j][0].len() - 1],
+                                    points[i][points[i].len() - 1][0],
+                                )
+                            }
+                        },
+                        None => (),
+                    }
+                    done.push(j);
+                }
+            }
+
+            // Mark the current node as visited
+            visited[i] = true;
+
+            // Push unvisited neighbors onto the stack
+            for &neighbor in &mst[i] {
+                if !visited[neighbor] {
+                    stack.push(neighbor);
                 }
             }
         }
-        done.push(i);
     }
-
+    
     println!("res: {:?}", result_vec);
 
     trait InsertTupleAfterElement {
