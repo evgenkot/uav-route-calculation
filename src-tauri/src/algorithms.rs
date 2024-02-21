@@ -542,7 +542,23 @@ pub fn rectangular_areas(
             }
         }
     }
-    
+    result_vec.push(result_vec[0].clone());
+
+    let mut closest = result_vec[0];
+    let mut min_distance = euclidean_distance(&start_point, &closest);
+
+    for &point in result_vec.iter().skip(1) {
+        let distance = euclidean_distance(&start_point, &point);
+        if distance < min_distance {
+            min_distance = distance;
+            closest = point;
+        }
+    }
+
+    result_vec.insert(
+        result_vec.iter().position(|&x| x == closest).unwrap(),
+        start_point,
+    );
     println!("res: {:?}", result_vec);
 
     trait InsertTupleAfterElement {
