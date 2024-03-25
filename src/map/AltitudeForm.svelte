@@ -62,8 +62,9 @@
 	}
 </script>
 
-<button on:click={toggleVisible} class="{$altitudeSelected ? 'done' : 'todo'} rmenu-category">{visible ? 'Altitude selection' : 'Show altitude selection'}</button>
-
+<button on:click={toggleVisible} class="{$altitudeSelected ? 'done' : 'todo'} rmenu-category"
+	>{visible ? 'Altitude selection' : 'Show altitude selection'}</button
+><br />
 
 {#if visible}
 	<div class="altitude-menu">
@@ -125,7 +126,6 @@
 		<button on:click={checkAltitude}>Check</button>
 	</div>
 {/if}
-
 
 <style>
 	.done {

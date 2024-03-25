@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Algorithm, selectedAlgorithm} from './store';
+	import { Algorithm, selectedAlgorithm } from './store';
 
 	let visible = true;
 	function toggleVisible() {
@@ -14,49 +14,50 @@
 	}
 </script>
 
-<button on:click={toggleVisible} class="done rmenu-category">{visible ? 'Algorithm selection' : 'Show algorithm selection'}</button>
+<button on:click={toggleVisible} class="done rmenu-category"
+	>{visible ? 'Algorithm selection' : 'Show algorithm selection'}</button
+><br />
 
 {#if visible}
-<div class="algorithm-menu">
-	<div>
-		<label>
-			<input
-				type="radio"
-				name="algorithm"
-				value="NearestNeighbor"
-				bind:group={currentSelectedAlgorithm}
-				on:change={handleChange}
-				checked
-			/>
-			Nearest Neighbor
-		</label>
+	<div class="algorithm-menu">
+		<div>
+			<label>
+				<input
+					type="radio"
+					name="algorithm"
+					value="NearestNeighbor"
+					bind:group={currentSelectedAlgorithm}
+					on:change={handleChange}
+					checked
+				/>
+				Nearest Neighbor
+			</label>
+		</div>
+		<div>
+			<label>
+				<input
+					type="radio"
+					name="algorithm"
+					value="BruteForce"
+					bind:group={currentSelectedAlgorithm}
+					on:change={handleChange}
+				/>
+				Brute Force
+			</label>
+		</div>
+		<div>
+			<label>
+				<input
+					type="radio"
+					name="algorithm"
+					value="RectangularAreas"
+					bind:group={currentSelectedAlgorithm}
+					on:change={handleChange}
+				/>
+				Rectangular Areas
+			</label>
+		</div>
 	</div>
-	<div>
-		<label>
-			<input
-				type="radio"
-				name="algorithm"
-				value="BruteForce"
-				bind:group={currentSelectedAlgorithm}
-				on:change={handleChange}
-			/>
-			Brute Force
-		</label>
-	</div>
-	<div>
-		<label>
-			<input
-				type="radio"
-				name="algorithm"
-				value="RectangularAreas"
-				bind:group={currentSelectedAlgorithm}
-				on:change={handleChange}
-			/>
-			Rectangular Areas
-		</label>
-	</div>
-</div>
-
 {/if}
 
 <style>

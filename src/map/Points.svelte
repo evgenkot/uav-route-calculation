@@ -17,7 +17,6 @@
 		isDrawing
 	} from './store';
 
-
 	// Set the UTM zone based on the starting point coordinates
 	function setZone(coordinates: number[]) {
 		$startSelected = true;
@@ -68,9 +67,9 @@
 <!-- class="toggle-display" -->
 <button
 	on:click={setStartingPoint}
-	disabled={!(!$isDrawing)}
+	disabled={!!$isDrawing}
 	class="{$startSelected ? 'done' : 'todo'} rmenu-category">Set start</button
->
+><br />
 
 <style>
 	.done {

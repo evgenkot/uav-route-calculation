@@ -45,10 +45,9 @@
 	<h1 style={`padding-top: 40px`}>Menu</h1>
 	<AltitudeForm />
 	<AlgorithmSelect />
-	
 	<Draw />
-	<Points />
 	<Descritize />
+	<Points />
 	<Calculate />
 	<Mission />
 </div>

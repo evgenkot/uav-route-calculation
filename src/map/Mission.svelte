@@ -72,8 +72,8 @@
 <div>
 	<h2>Mission Parameters</h2>
 	<ul>
-		<li>Route Length: {routeLengthValue} m.</li>
-		<li>Mission Duration: {missionDurationValue} s.</li>
+		<li>Route Length: {routeLengthValue.toFixed(2)} m.</li>
+		<li>Mission Duration: {missionDurationValue.toFixed(2)} s.</li>
 		<li>Number of Photos: {photoCountValue}</li>
 	</ul>
 	<button on:click={exportToGeoJSON}>Export to GeoJSON</button>

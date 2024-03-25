@@ -18,7 +18,6 @@
 		discretizationDirection,
 		Algorithm,
 		selectedAlgorithm
-
 	} from './store';
 	import { transform } from 'ol/proj';
 	import { Point, type Polygon } from 'ol/geom';
@@ -145,7 +144,7 @@
 				photoHeight: photoHeight,
 				directionDegrees: $discretizationDirection,
 				checkInside: $selectedAlgorithm != Algorithm.RectangularAreas
-			});		
+			});
 			$discretizedArea = result as number[][][][];
 			console.log(discretizedArea);
 		} catch (error) {
@@ -153,18 +152,17 @@
 			return;
 		}
 
-		updateDiscretizedLayer($discretizedArea.flatMap((innerArr) => innerArr).flatMap((innerArr) => innerArr));
+		updateDiscretizedLayer(
+			$discretizedArea.flatMap((innerArr) => innerArr).flatMap((innerArr) => innerArr)
+		);
 		areaDiscretized.set(true);
 	}
 </script>
 
 <button on:click={toggleVisible} class="{areaDiscretized ? 'done' : 'todo'} rmenu-category"
 	>{visible ? 'Area discretization' : 'Show area discretization'}</button
->
+><br />
 {#if visible}
-	<button on:click={discretize} disabled={!($areaSelected && $startSelected && $altitudeSelected)}
-		>Discretize</button
-	>
 	<div class="input-row">
 		<label for="direction-field">Discretization Direction:</label>
 		<input
@@ -176,6 +174,9 @@
 			bind:value={$discretizationDirection}
 		/>
 	</div>
+	<button on:click={discretize} disabled={!($areaSelected && $startSelected && $altitudeSelected)}
+		>Discretize</button
+	><br />
 {/if}
 
 <style>

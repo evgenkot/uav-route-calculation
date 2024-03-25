@@ -10,8 +10,6 @@
 		isDrawing
 	} from './store';
 
-	
-
 	let visible = true;
 	function toggleVisible() {
 		visible = !visible;
@@ -25,7 +23,6 @@
 		console.log('You are now not Drawing');
 	}
 
-
 	function enableDrawing() {
 		$isDrawing = true;
 		$map.addInteraction($drawInteraction);
@@ -35,12 +32,11 @@
 		$areaSelected = false;
 	}
 
-
 	function toggleDrawing() {
 		if ($isDrawing) {
-			disableDrawing();			
+			disableDrawing();
 		} else {
-			enableDrawing();			
+			enableDrawing();
 		}
 	}
 
@@ -59,7 +55,6 @@
 	}
 
 	function checkPolygon() {
-	
 		if ($vectorPolySource.getFeatures().length != 0) {
 			$areaSelected = true;
 		} else {
@@ -69,13 +64,14 @@
 </script>
 
 <!-- class="toggle-display" -->
-<button on:click={toggleVisible} class="{$areaSelected ? 'done' : 'todo'} rmenu-category">{visible ? 'Area selection' : 'Show area selection'}</button>
+<button on:click={toggleVisible} class="{$areaSelected ? 'done' : 'todo'} rmenu-category"
+	>{visible ? 'Area selection' : 'Show area selection'}</button
+><br />
 {#if visible}
 	<div class="block" id="drawBlock">
-		<div class="draw-mode-label">Draw Mode</div>
-		<button on:click={toggleDrawing}>{$isDrawing ? 'Stop' : 'Start'} Drawing</button>
+		<button on:click={toggleDrawing}>{$isDrawing ? 'Stop' : 'Start'} Drawing</button><br />
 		<button on:click={undoPolygon}>Undo Polygon</button>
-		<button on:click={undoPoint}>Undo Point</button>
+		<button on:click={undoPoint}>Undo Point</button><br />
 		<button on:click={checkPolygon}>Check</button>
 	</div>
 {/if}
