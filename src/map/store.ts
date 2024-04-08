@@ -17,6 +17,7 @@ export interface Uav {
 	flight_speed: number;
 	min_altitude: number;
 	max_altitude: number;
+	// camera_id: number | null;
 }
 
 

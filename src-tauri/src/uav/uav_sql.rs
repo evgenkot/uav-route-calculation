@@ -11,7 +11,9 @@ pub fn create_table(conn: &Connection) -> Result<usize> {
                 uav_takeoff_speed REAL NOT NULL CHECK (uav_takeoff_speed >= 0),
                 uav_flight_speed REAL NOT NULL CHECK (uav_flight_speed >= 0),
                 uav_min_altitude REAL DEFAULT 0 NOT NULL CHECK (uav_min_altitude >= 0),
-                uav_max_altitude REAL DEFAULT 0 NOT NULL CHECK (uav_max_altitude >= 0)
+                uav_max_altitude REAL DEFAULT 0 NOT NULL CHECK (uav_max_altitude >= 0),
+                camera_id INTEGER,
+                FOREIGN KEY (camera_id) REFERENCES camera (camera_id)
                 )",
         (), // empty list of parameters.
     )
@@ -26,8 +28,9 @@ pub fn insert(uav: &Uav, conn: &Connection) -> Result<usize> {
                 uav_takeoff_speed,
                 uav_flight_speed,
                 uav_min_altitude,
-                uav_max_altitude
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                uav_max_altitude,
+                camera_id
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
         (
             &uav.name,
             &uav.max_payload_mass,
@@ -36,6 +39,7 @@ pub fn insert(uav: &Uav, conn: &Connection) -> Result<usize> {
             &uav.flight_speed,
             &uav.min_altitude,
             &uav.max_altitude,
+            &uav.camera_id,
         ),
     )
 }
@@ -50,8 +54,9 @@ pub fn update(uav: &Uav, conn: &Connection) -> Result<usize> {
                     uav_takeoff_speed = ?4,
                     uav_flight_speed = ?5,
                     uav_min_altitude = ?6,
-                    uav_max_altitude = ?7
-                WHERE uav_id = ?8",
+                    uav_max_altitude = ?7,
+                    camera_id = ?8
+                WHERE uav_id = ?9",
         (
             &uav.name,
             &uav.max_payload_mass,
@@ -60,6 +65,7 @@ pub fn update(uav: &Uav, conn: &Connection) -> Result<usize> {
             &uav.flight_speed,
             &uav.min_altitude,
             &uav.max_altitude,
+            &uav.camera_id,
             &uav.id,
         ),
     )
@@ -83,7 +89,8 @@ pub fn get_uavs(conn: &Connection) -> Result<Vec<Result<Uav>>> {
                     uav_takeoff_speed,
                     uav_flight_speed,
                     uav_min_altitude,
-                    uav_max_altitude 
+                    uav_max_altitude,
+                    camera_id
                 FROM uav",
     )?;
 
@@ -97,6 +104,7 @@ pub fn get_uavs(conn: &Connection) -> Result<Vec<Result<Uav>>> {
             flight_speed: row.get(5)?,
             min_altitude: row.get(6)?,
             max_altitude: row.get(7)?,
+            camera_id: row.get(8)?,
         })
     })?;
 

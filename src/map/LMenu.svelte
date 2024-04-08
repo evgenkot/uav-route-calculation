@@ -25,7 +25,6 @@
 		
 	<h1 style={`padding-top: 40px`}>Menu</h1>
 	<UAVForm/>
-	<CameraForm/>
 </div>
 
 <div class="toggle-container">

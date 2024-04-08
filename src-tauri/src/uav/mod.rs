@@ -13,6 +13,7 @@ pub struct Uav {
     pub flight_speed: f64,     // average flight speed in meters per second
     pub min_altitude: f64,     // minimum safe flight altitude in meters
     pub max_altitude: f64,     // maximum safe flight altitude in meters
+    pub camera_id: Option<u64>,     // id of the camera installed on the uav
 }
 
 impl Uav {
@@ -24,6 +25,7 @@ impl Uav {
         flight_speed: f64,
         min_altitude: f64,
         max_altitude: f64,
+        camera_id: Option<u64>,
     ) -> Uav {
         Uav {
             id: 0,
@@ -34,6 +36,7 @@ impl Uav {
             flight_speed,
             min_altitude,
             max_altitude,
+            camera_id,
         }
     }
 
@@ -55,6 +58,7 @@ impl Uav {
             flight_speed,
             min_altitude,
             max_altitude,
+            None,
         )
     }
 
@@ -67,5 +71,9 @@ impl Uav {
         println!("flight_speed: {}", &self.flight_speed);
         println!("min_altitude: {}", &self.min_altitude);
         println!("max_altitude: {}", &self.max_altitude);
+        match &self.camera_id {
+            Some(id) => println!("camera_id: {}", id),
+            None => println!("camera_id: None"),
+        }
     }
 }
