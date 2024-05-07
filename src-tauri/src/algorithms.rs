@@ -355,6 +355,7 @@ pub fn rectangular_areas(
         }
     }
 
+    // Route inside rectangle
     for region_points in points.clone() {
         // Check if the input vector is rectangular
         let height = region_points[0].len();
@@ -430,7 +431,6 @@ pub fn rectangular_areas(
     let mut done = vec![start_node];
     while let Some(i) = stack.pop() {
         if !visited[i] {
-            // Process the current node (you can replace this with your specific logic)
             println!("Visiting node: {}", i);
 
             for j in mst[i].clone() {
@@ -645,8 +645,7 @@ pub fn find_minimal_pair(
 fn find_direction(a: ((f64, f64), (f64, f64)), b: ((f64, f64), (f64, f64))) -> Direction {
     let ((a_left, a_top), (a_right, a_bottom)) = a;
     let ((b_left, b_top), (b_right, b_bottom)) = b;
-
-    if b_right < a_left {
+    let direction = if b_right < a_left {
         if a_top < b_bottom {
             Direction::UL
         } else if b_top < a_bottom {
@@ -668,7 +667,8 @@ fn find_direction(a: ((f64, f64), (f64, f64)), b: ((f64, f64), (f64, f64))) -> D
         } else {
             Direction::D
         }
-    }
+    };
+    direction    
 }
 
 // Method to calculate the shortest path between two rectangles
