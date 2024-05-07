@@ -13,10 +13,19 @@
 			const result = await invoke<Uav[]>('get_all_uavs_vec');
 			uavs = result;
 			selectedUav.set(uavs.length > 0 ? uavs[0] : null);
+			setProperCamera();
 			console.log(uavs);
 		} catch (error) {
 			console.error('Failed to fetch UAVs:', error);
 		}
+	}
+
+	function setProperCamera() {
+		selectedCamera.set(
+			$selectedUav?.camera_id !== null
+				? cameras.find((camera) => camera.id === $selectedUav?.camera_id) || null
+				: null
+		);
 	}
 
 	async function fetchCameras() {
@@ -145,7 +154,9 @@
 			),
 			max_altitude: parseFloat(
 				(document.getElementById('uav_max_altitude') as HTMLInputElement).value
-			)
+			),
+
+			camera_id: $selectedCamera?.id ?? null
 		};
 
 		if (isUavValid(uav)) {
@@ -226,7 +237,8 @@
 			),
 			max_altitude: parseFloat(
 				(document.getElementById('uav_max_altitude') as HTMLInputElement).value
-			)
+			),
+			camera_id: $selectedCamera?.id ?? null
 		};
 
 		if (isUavValid(uav)) {
@@ -280,7 +292,8 @@
 			takeoff_speed: 0,
 			flight_speed: 0,
 			min_altitude: 0,
-			max_altitude: 0
+			max_altitude: 0,
+			camera_id: 0
 		};
 		let response = await invoke<string>('delete_uav', { uav });
 		if (response != 'Ok') {
@@ -335,7 +348,8 @@
 				$selectedUav?.min_altitude.toString() || '';
 			(document.getElementById('uav_max_altitude') as HTMLInputElement).value =
 				$selectedUav?.max_altitude.toString() || '';
-			uavOnEdit = false;
+			setProperCamera();
+			uavOnEdit = false;	
 		}
 	}
 
@@ -398,7 +412,7 @@
 </script>
 
 <div class="uav-select-fetch-wrapper">
-	<select bind:value={$selectedUav} on:change={() => {}} disabled={uavOnEdit}>
+	<select bind:value={$selectedUav} on:change={setProperCamera} disabled={uavOnEdit}>
 		{#each uavs as uav (uav.id)}
 			<option value={uav}>{uav.name}</option>
 		{/each}
@@ -497,14 +511,19 @@
 	</div>
 
 	<div class="camera-select-fetch-wrapper">
-		<select bind:value={$selectedCamera} on:change={() => {}} disabled={cameraOnEdit}>
+		<select
+			bind:value={$selectedCamera}
+			on:change={onUavFieldChange}
+			disabled={cameraOnEdit || !isEditModeUAV}
+		>
+			<option value={null}>None</option>
 			{#each cameras as camera (camera.id)}
 				<option value={camera}>{camera.name}</option>
 			{/each}
 		</select>
 		<button on:click={fetchCameras} class="fetch-camera">Fetch</button>
 	</div>
-	
+
 	<button on:click={toggleCameraBlock} class="toggle-display">Camera detatils</button>
 	<div class="block" id="camera" style="display:none;">
 		<input
@@ -514,7 +533,7 @@
 			disabled={cameraOnEdit}
 		/>
 		<label for="edit-mode-camera" class="edit-mode-label">Edit Mode</label>
-	
+
 		<div class="parameters">
 			<label for="camera_id" class="label">ID:</label>
 			<input
@@ -524,7 +543,7 @@
 				value={$selectedCamera ? $selectedCamera.id : ''}
 				readonly
 			/>
-	
+
 			<label for="camera_name" class="label">Name:</label>
 			<input
 				type="text"
@@ -534,7 +553,7 @@
 				readonly={!isEditModeCamera}
 				on:input={onCameraFieldChange}
 			/>
-	
+
 			<label for="camera_mass" class="label">Mass (grams):</label>
 			<input
 				type="number"
@@ -544,7 +563,7 @@
 				readonly={!isEditModeCamera}
 				on:input={onCameraFieldChange}
 			/>
-	
+
 			<label for="camera_fov_x" class="label">X-axis FOV (degrees):</label>
 			<input
 				type="number"
@@ -554,7 +573,7 @@
 				readonly={!isEditModeCamera}
 				on:input={onCameraFieldChange}
 			/>
-	
+
 			<label for="camera_resolution_x" class="label">Resolution X:</label>
 			<input
 				type="number"
@@ -564,7 +583,7 @@
 				readonly={!isEditModeCamera}
 				on:input={onCameraFieldChange}
 			/>
-	
+
 			<label for="camera_resolution_y" class="label">Resolution Y:</label>
 			<input
 				type="number"
@@ -575,7 +594,7 @@
 				on:input={onCameraFieldChange}
 			/>
 		</div>
-	
+
 		<div class="uav-edit-toolbar">
 			<button
 				class="update-camera"
@@ -594,12 +613,15 @@
 			>
 				Delete
 			</button>
-			<button class="undo-camera" on:click={undoCamera} disabled={!cameraOnEdit || !isEditModeCamera}>
+			<button
+				class="undo-camera"
+				on:click={undoCamera}
+				disabled={!cameraOnEdit || !isEditModeCamera}
+			>
 				Undo
 			</button>
 		</div>
 	</div>
-	
 
 	<div class="uav-edit-toolbar">
 		<button
