@@ -186,6 +186,7 @@ pub fn nearest_neighbor(
     result.push(start_point);
     Ok(result)
 }
+
 // Helper function to calculate the Euclidean distance between two points
 pub fn euclidean_distance(a: &(f64, f64), b: &(f64, f64)) -> f64 {
     let (x1, y1) = *a;
@@ -323,7 +324,7 @@ pub fn rectangular_areas(
         for j in i + 1..region_count {
             let j_height = points[j][0].len();
             let j_width = points[j].len();
-            let (weight, direction) = shortest_path(
+            let (weight, direction) = rectangles_shortest_path(
                 (
                     coordinate_transformation(
                         points[i][0][i_height - 1].0,
@@ -432,7 +433,6 @@ pub fn rectangular_areas(
     while let Some(i) = stack.pop() {
         if !visited[i] {
             println!("Visiting node: {}", i);
-
             for j in mst[i].clone() {
                 if done.iter().position(|&x| x == j).is_none() {
                     println!("connecting {} to {}", i, j);
@@ -668,11 +668,14 @@ fn find_direction(a: ((f64, f64), (f64, f64)), b: ((f64, f64), (f64, f64))) -> D
             Direction::D
         }
     };
-    direction    
+    direction
 }
 
 // Method to calculate the shortest path between two rectangles
-fn shortest_path(a: ((f64, f64), (f64, f64)), b: ((f64, f64), (f64, f64))) -> (f64, Direction) {
+fn rectangles_shortest_path(
+    a: ((f64, f64), (f64, f64)),
+    b: ((f64, f64), (f64, f64)),
+) -> (f64, Direction) {
     let direction = find_direction(a, b);
 
     let ((a_left, a_top), (a_right, a_bottom)) = a;
