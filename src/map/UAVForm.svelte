@@ -348,7 +348,7 @@
 			(document.getElementById('uav_max_altitude') as HTMLInputElement).value =
 				$selectedUav?.max_altitude.toString() || '';
 			setProperCamera();
-			uavOnEdit = false;	
+			uavOnEdit = false;
 		}
 	}
 
@@ -411,7 +411,7 @@
 </script>
 
 <div class="uav-select-fetch-wrapper">
-	<select bind:value={$selectedUav} on:change={setProperCamera} disabled={uavOnEdit}>
+	<select bind:value={$selectedUav} on:change={setProperCamera} disabled={uavOnEdit || isEditModeUAV}>
 		{#each uavs as uav (uav.id)}
 			<option value={uav}>{uav.name}</option>
 		{/each}
@@ -425,7 +425,7 @@
 		type="checkbox"
 		on:change={toggleEditModeUAV}
 		class="edit-mode-checkbox"
-		disabled={uavOnEdit}
+		disabled={uavOnEdit || isEditModeCamera}
 	/>
 	<label for="edit-mode-uav" class="edit-mode-label">Edit Mode</label>
 	<div class="parameters">
@@ -513,7 +513,7 @@
 		<select
 			bind:value={$selectedCamera}
 			on:change={onUavFieldChange}
-			disabled={cameraOnEdit || !isEditModeUAV}
+			disabled={cameraOnEdit || isEditModeCamera || !isEditModeUAV}
 		>
 			<option value={null}>None</option>
 			{#each cameras as camera (camera.id)}
@@ -529,7 +529,7 @@
 			type="checkbox"
 			on:change={toggleEditModeCamera}
 			class="edit-mode-checkbox"
-			disabled={cameraOnEdit}
+			disabled={cameraOnEdit || !isEditModeUAV}
 		/>
 		<label for="edit-mode-camera" class="edit-mode-label">Edit Mode</label>
 
@@ -594,7 +594,7 @@
 			/>
 		</div>
 
-		<div class="uav-edit-toolbar">
+		<div class="camera-edit-toolbar">
 			<button
 				class="update-camera"
 				on:click={updateCamera}
@@ -626,15 +626,26 @@
 		<button
 			class="update-uav"
 			on:click={updateUav}
-			disabled={!uavOnEdit || uavs.length == 0 || !isEditModeUAV}>Update</button
+			disabled={!uavOnEdit || uavs.length == 0 || !isEditModeUAV || isEditModeCamera}>Update</button
 		>
-		<button class="new-uav" on:click={newUav} disabled={!uavOnEdit || !isEditModeUAV}>New</button>
+		<button
+			class="new-uav"
+			on:click={newUav}
+			disabled={!uavOnEdit || !isEditModeUAV || isEditModeCamera}>New</button
+		>
 		<button
 			class="delete-uav"
 			on:click={deleteUav}
-			disabled={uavOnEdit || uavs.length == 0 || !$selectedUav || !isEditModeUAV}>Delete</button
+			disabled={uavOnEdit ||
+				uavs.length == 0 ||
+				!$selectedUav ||
+				!isEditModeUAV ||
+				isEditModeCamera}>Delete</button
 		>
-		<button class="undo-uav" on:click={undoUav} disabled={!uavOnEdit || !isEditModeUAV}>Undo</button
+		<button
+			class="undo-uav"
+			on:click={undoUav}
+			disabled={!uavOnEdit || !isEditModeUAV || isEditModeCamera}>Undo</button
 		>
 	</div>
 </div>
