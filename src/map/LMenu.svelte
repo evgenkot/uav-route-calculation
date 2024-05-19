@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import UAVForm from './UAVForm.svelte';
-	import CameraForm from './CameraForm.svelte';
 
 	let isActive = false;
 	let sidenavWidth = 0;

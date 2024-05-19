@@ -302,7 +302,6 @@
 			const index = uavs.findIndex((item) => item.id === uav.id);
 
 			// Update the local UAV list
-
 			fetchUavs();
 
 			selectedUav.set(uavs.length > 0 ? uavs[0] : null);

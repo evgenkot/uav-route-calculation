@@ -13,9 +13,11 @@ pub fn create_table(conn: &Connection) -> Result<usize> {
                 uav_min_altitude REAL DEFAULT 0 NOT NULL CHECK (uav_min_altitude >= 0),
                 uav_max_altitude REAL DEFAULT 0 NOT NULL CHECK (uav_max_altitude >= 0),
                 camera_id INTEGER,
-                FOREIGN KEY (camera_id) REFERENCES camera (camera_id)
+                    FOREIGN KEY (camera_id) 
+                    REFERENCES camera (camera_id) 
+                    ON DELETE SET NULL
                 )",
-        (), // empty list of parameters.
+        (),
     )
 }
 

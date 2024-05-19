@@ -44,7 +44,7 @@
 		startPointSource,
 		vectorPolySource,
 		discretizedAreaLayer,
-		planLayer,
+		planLayer
 	} from './store';
 	import { Algorithm } from './store';
 
@@ -220,7 +220,7 @@
 		);
 
 		const planResultLineFeature = new Feature(planResultLine);
-		planSource.addFeature(planResultLineFeature); 	
+		planSource.addFeature(planResultLineFeature);
 	}
 
 	// Update the discretized area layer with the discretized area points
@@ -242,7 +242,6 @@
 
 		discretizedAreaSource.addFeatures(discretizedAreaFeatures);
 	}
-
 
 	// Function to calculate the flight plan using the selected algorithm
 	async function calculate() {
@@ -378,32 +377,10 @@
 </script>
 
 <div id={viewMap} class="map" />
-<div class="toolbar">
-	<!-- <button on:click={undoPolygon}>Undo Polygon</button>
-	<button on:click={undoPoint}>Undo Point</button> -->
-	<!-- <button on:click={enableNavigation}>Navigation</button> -->
-	<!-- <button on:click={enableDrawing}>Draw</button> -->
-	<!-- <button on:click={calculate}>Calculate</button> -->
-</div>
 
 <style>
 	@import '../styles/map-style.css';
 	@import '../global.css';
-	.toolbar {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		height: 50px;
-		display: flex;
-		align-items: center;
-		justify-content: space-evenly;
-		pointer-events: none;
-	}
-	.toolbar button {
-		pointer-events: auto;
-		z-index: 1;
-	}
 	.map {
 		margin: 0;
 		padding: 0;

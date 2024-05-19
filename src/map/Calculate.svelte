@@ -11,7 +11,6 @@
 		selectedAlgorithm,
 		selectedUav,
 		utmZone,
-		discretizedAreaLayer,
 		discretizedArea,
 		startingPoint,
 		planResult,
@@ -22,7 +21,7 @@
 		discretizationDirection
 	} from './store';
 	import { transform } from 'ol/proj';
-	import { LineString, Point, type Polygon } from 'ol/geom';
+	import { LineString } from 'ol/geom';
 	import { Feature } from 'ol';
 
 	async function calculate() {
@@ -105,38 +104,6 @@
 		console.log('discretizedArea', $discretizedArea);
 		console.log('startingPoint', startingPoint);
 		updatePlanLayer($planResult);
-	}
-
-	// Update the results layer with the discretized area and the calculated flight plan
-	function updateResultsLayer($discretizedArea: number[][], $planResult: number[][]) {
-		const discretizedAreaSource = $discretizedAreaLayer.getSource();
-		const planSource = $planLayer.getSource();
-
-		if (discretizedAreaSource === null || planSource === null) {
-			alert('Layer sources not found');
-			return;
-		}
-
-		discretizedAreaSource.clear();
-		planSource.clear();
-
-		const discretizedAreaFeatures = $discretizedArea.map((coord) => {
-			const wgs84Coord = transform(coord, $utmZone, 'EPSG:4326');
-			const webMercatorCoord = transform(wgs84Coord, 'EPSG:4326', 'EPSG:3857');
-			return new Feature(new Point(webMercatorCoord));
-		});
-
-		const planResultLine = new LineString(
-			$planResult.map((coord) => {
-				const wgs84Coord = transform(coord, $utmZone, 'EPSG:4326');
-				const webMercatorCoord = transform(wgs84Coord, 'EPSG:4326', 'EPSG:3857');
-				return webMercatorCoord;
-			})
-		);
-
-		const planResultLineFeature = new Feature(planResultLine);
-		discretizedAreaSource.addFeatures(discretizedAreaFeatures);
-		planSource.addFeature(planResultLineFeature);
 	}
 
 	// Update the plan layer with the calculated flight plan
