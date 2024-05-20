@@ -135,13 +135,3 @@
 	disabled={!($areaDiscretized && $areaSelected && $startSelected && $altitudeSelected)}
 	>Calculate</button
 >
-
-<style>
-	.done {
-		background: hsl(115, 100%, 68%);
-	}
-
-	.todo {
-		background: hwb(14 30% 0%);
-	}
-</style>

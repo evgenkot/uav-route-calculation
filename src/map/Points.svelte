@@ -64,7 +64,6 @@
 	}
 </script>
 
-<!-- class="toggle-display" -->
 <button
 	on:click={setStartingPoint}
 	disabled={!!$isDrawing}
