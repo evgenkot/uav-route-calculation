@@ -157,7 +157,7 @@ pub fn nearest_neighbor(
     start_point: (f64, f64),
 ) -> Result<Vec<(f64, f64)>, String> {
     if points.is_empty() {
-        return Err("The input points must not be empty".to_string());
+        return Err("The input points must not be empty.".to_string());
     }
 
     let mut remaining_points: Vec<(f64, f64)> = points;
@@ -308,7 +308,7 @@ pub fn rectangular_areas(
     direction_degrees: f64,
 ) -> Result<Vec<(f64, f64)>, String> {
     if points.is_empty() {
-        return Err("The input points must not be empty".to_string());
+        return Err("The input points must not be empty.".to_string());
     }
     let direction_radians = direction_degrees * PI / 180.0;
     let mut calculation_result: Vec<(f64, f64)> = Vec::new();
@@ -324,7 +324,8 @@ pub fn rectangular_areas(
         for j in i + 1..region_count {
             let j_height = points[j][0].len();
             let j_width = points[j].len();
-            let (weight, direction) = rectangles_shortest_path(
+
+            let (a, b) = (
                 (
                     coordinate_transformation(
                         points[i][0][i_height - 1].0,
@@ -351,6 +352,21 @@ pub fn rectangular_areas(
                 ),
             );
 
+            let ((a_left, a_top), (a_right, a_bottom)) = a;
+            let ((b_left, b_top), (b_right, b_bottom)) = b;
+
+            for inner_point in [(b_left, b_top), (b_right, b_bottom), (b_left, b_bottom), (b_right, b_top)].into_iter() {
+                if inner_point.0 >= a_left
+                    && inner_point.0 <= a_right
+                    && inner_point.1 >= a_bottom
+                    && inner_point.1 <= a_top
+                {
+                    return Err(String::from("The rectangles are intersecting."));
+                }
+            }
+
+            let (weight, direction) = rectangles_shortest_path(a, b);
+
             weights[i][j] = Some((weight, direction.clone()));
             weights[j][i] = Some((weight.abs(), direction.opposite().clone()));
         }
@@ -363,7 +379,7 @@ pub fn rectangular_areas(
         let width = region_points.len();
 
         if region_points.iter().any(|row| row.len() != height) {
-            return Err(String::from("Input vector is not rectangular"));
+            return Err(String::from("Input vector is not rectangular."));
         }
 
         if width < 2 {
