@@ -2,7 +2,7 @@ use crate::uav::Uav;
 use rusqlite::{Connection, Result};
 
 pub fn create_table(conn: &Connection) -> Result<usize> {
-    conn.execute(
+    let db_create = conn.execute(
         "CREATE TABLE IF NOT EXISTS uav (
                 uav_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 uav_name TEXT NOT NULL,
@@ -18,7 +18,19 @@ pub fn create_table(conn: &Connection) -> Result<usize> {
                     ON DELETE SET NULL
                 )",
         (),
-    )
+    );
+
+    let index_create = conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS camera_id_index
+        ON uav(camera_id)",
+        (),
+    );
+
+    match (db_create, index_create) {
+        (Ok(val1), Ok(val2)) => Ok(val1 + val2),
+        (Err(err), _) => Err(err),
+        (_, Err(err)) => Err(err),
+    }
 }
 
 pub fn insert(uav: &Uav, conn: &Connection) -> Result<usize> {
