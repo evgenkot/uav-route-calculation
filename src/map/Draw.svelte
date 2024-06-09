@@ -63,13 +63,12 @@
 	}
 </script>
 
-<!-- class="toggle-display" -->
 <button on:click={toggleVisible} class="{$areaSelected ? 'done' : 'todo'} rmenu-category"
 	>{visible ? 'Area selection' : 'Show area selection'}</button
 ><br />
 {#if visible}
 	<div class="block" id="drawBlock">
-		<button on:click={toggleDrawing}>{$isDrawing ? 'Stop' : 'Start'} Drawing</button><br />
+		<button on:click={toggleDrawing} class={$isDrawing ? 'todo' : ''} >{$isDrawing ? 'Stop' : 'Start'} Drawing</button><br />
 		<button on:click={undoPolygon}>Undo Polygon</button>
 		<button on:click={undoPoint}>Undo Point</button><br />
 		<button on:click={checkPolygon}>Check</button>
