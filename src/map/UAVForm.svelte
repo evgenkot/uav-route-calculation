@@ -7,6 +7,17 @@
 
 	let uavs: Uav[] = [];
 	let cameras: Camera[] = [];
+	
+	let uavOnEdit = false;
+	let cameraOnEdit = false;
+
+	function onUavFieldChange() {
+		uavOnEdit = true;
+	}
+
+	function onCameraFieldChange() {
+		cameraOnEdit = true;
+	}
 
 	async function fetchUavs() {
 		try {
@@ -29,25 +40,21 @@
 	}
 
 	async function fetchCameras() {
+		const currentUavId = parseInt((document.getElementById('uav_id') as HTMLInputElement).value);
 		try {
 			const result = await invoke<Camera[]>('get_all_cameras_vec');
-			cameras = result;
+			const uavCameraIds = uavs
+				.map((mapUav) => mapUav.camera_id)
+				.filter((filterUavId) => filterUavId != currentUavId);
+
+			cameras = result.filter((camera) => !uavCameraIds.includes(camera.id));
+
 			selectedCamera.set(cameras.length > 0 ? cameras[0] : null);
 			console.log(cameras);
 		} catch (error) {
 			console.error('Failed to fetch cameras:', error);
 		}
-	}
-
-	let uavOnEdit = false;
-	let cameraOnEdit = false;
-
-	function onUavFieldChange() {
-		uavOnEdit = true;
-	}
-
-	function onCameraFieldChange() {
-		cameraOnEdit = true;
+		setProperCamera();
 	}
 
 	function isUavValid(uav: Uav): boolean {
@@ -95,6 +102,16 @@
 		if (uav.min_altitude >= uav.max_altitude) {
 			alert('Minimum altitude should be less than the maximum altitude');
 			return false;
+		}
+
+		// Check if camera is already set to another UAV
+		if (uav.camera_id != null) {
+			for (const current_uav of uavs) {
+				if ((current_uav.camera_id = uav.camera_id)) {
+					alert('The camera is already mounted on another UAV');
+					return false;
+				}
+			}
 		}
 
 		return true;
@@ -277,6 +294,7 @@
 				await fetchCameras();
 				selectedCamera.set(cameras.length > 0 ? cameras[cameras.length - 1] : null);
 				cameraOnEdit = false;
+				onUavFieldChange();
 			}
 		} else {
 			console.error('Invalid Camera data');
@@ -303,6 +321,7 @@
 
 			// Update the local UAV list
 			fetchUavs();
+			fetchCameras();
 
 			selectedUav.set(uavs.length > 0 ? uavs[0] : null);
 			uavOnEdit = false;
@@ -402,16 +421,17 @@
 	}
 
 	onMount(() => {
-		fetchCameras();
-	});
-
-	onMount(() => {
 		fetchUavs();
+		fetchCameras();
 	});
 </script>
 
 <div class="uav-select-fetch-wrapper">
-	<select bind:value={$selectedUav} on:change={setProperCamera} disabled={uavOnEdit || isEditModeUAV}>
+	<select
+		bind:value={$selectedUav}
+		on:change={fetchCameras}
+		disabled={uavOnEdit || isEditModeUAV}
+	>
 		{#each uavs as uav (uav.id)}
 			<option value={uav}>{uav.name}</option>
 		{/each}
