@@ -76,5 +76,5 @@
 		<li>Mission Duration: {missionDurationValue.toFixed(2)} s.</li>
 		<li>Number of Photos: {photoCountValue}</li>
 	</ul>
-	<button on:click={exportToGeoJSON}>Export to GeoJSON</button>
+	<button on:click={exportToGeoJSON} disabled={$planInMeters?.length == 0}>Export to GeoJSON</button>
 </div>
