@@ -7,7 +7,7 @@
 
 	let uavs: Uav[] = [];
 	let cameras: Camera[] = [];
-	
+
 	let uavOnEdit = false;
 	let cameraOnEdit = false;
 
@@ -24,11 +24,16 @@
 			const result = await invoke<Uav[]>('get_all_uavs_vec');
 			uavs = result;
 			selectedUav.set(uavs.length > 0 ? uavs[0] : null);
-			setProperCamera();
+			fetchCameras();
 			console.log(uavs);
 		} catch (error) {
 			console.error('Failed to fetch UAVs:', error);
 		}
+	}
+
+	function setUav() {
+		console.log("selected Uav:", $selectedUav);
+		fetchCameras();
 	}
 
 	function setProperCamera() {
@@ -40,7 +45,7 @@
 	}
 
 	async function fetchCameras() {
-		const currentUavId = parseInt((document.getElementById('uav_id') as HTMLInputElement).value);
+		const currentUavId = $selectedUav?.id;
 		try {
 			const result = await invoke<Camera[]>('get_all_cameras_vec');
 			const uavCameraIds = uavs
@@ -50,11 +55,10 @@
 			cameras = result.filter((camera) => !uavCameraIds.includes(camera.id));
 
 			selectedCamera.set(cameras.length > 0 ? cameras[0] : null);
-			console.log(cameras);
+			setProperCamera();
 		} catch (error) {
 			console.error('Failed to fetch cameras:', error);
 		}
-		setProperCamera();
 	}
 
 	function isUavValid(uav: Uav): boolean {
@@ -422,16 +426,11 @@
 
 	onMount(() => {
 		fetchUavs();
-		fetchCameras();
 	});
 </script>
 
 <div class="uav-select-fetch-wrapper">
-	<select
-		bind:value={$selectedUav}
-		on:change={fetchCameras}
-		disabled={uavOnEdit || isEditModeUAV}
-	>
+	<select bind:value={$selectedUav} on:change={setUav} disabled={uavOnEdit || isEditModeUAV}>
 		{#each uavs as uav (uav.id)}
 			<option value={uav}>{uav.name}</option>
 		{/each}
