@@ -109,9 +109,9 @@
 		}
 
 		// Check if camera is already set to another UAV
-		if (uav.camera_id != null) {
+		if ($selectedUav?.camera_id != null) {
 			for (const current_uav of uavs) {
-				if ((current_uav.camera_id = uav.camera_id)) {
+				if ((current_uav.camera_id = uav.camera_id)) {					
 					alert('The camera is already mounted on another UAV');
 					return false;
 				}
