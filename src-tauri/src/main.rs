@@ -36,6 +36,7 @@ fn main() {
             algorithms::brute_force,
             algorithms::rectangular_areas,
             algorithms::calculate_distance,
+            algorithms::search_long_distance,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -91,6 +91,15 @@
 	}
 
 	async function discretize() {
+		async function confirmDescretize(): Promise<boolean> {
+			return new Promise((resolve) => {
+				const shouldExecute = window.confirm(
+					'You are going to use Discretize on large area, it will take a long time and this can lead to a decrease in performance.'
+				);
+				resolve(shouldExecute);
+			});
+		}
+
 		const vertices = getVertices();
 		startingPoint.set(getStartingPointCoordinates());
 
@@ -136,6 +145,25 @@
 		altitudeValue;
 		const photoWidth = tg($selectedCamera.fov_x * 0.5) * 2 * alt * (1 - overlap);
 		const photoHeight = (photoWidth * $selectedCamera.resolution_y) / $selectedCamera.resolution_x;
+		try {
+			const result = await invoke('search_long_distance', {
+				points: vertices.flatMap((innerArr) => innerArr),
+				startPoint: $startingPoint
+			});
+
+			console.log(result);
+			console.log((photoWidth + photoWidth) * 50);
+
+			if ((result as number) > (photoWidth + photoWidth) * 50) {
+				const shouldExecute = await confirmDescretize();
+				if (!shouldExecute) {
+					return;
+				}
+			}
+		} catch (error) {
+			alert('Error calling search long distance check.' + error);
+			return;
+		}
 
 		try {
 			const result = await invoke('discretize_area', {

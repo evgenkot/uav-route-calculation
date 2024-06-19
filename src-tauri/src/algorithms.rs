@@ -784,3 +784,19 @@ fn boruvka_mst(weights: Vec<Vec<Option<(f64, Direction)>>>) -> Vec<Vec<usize>> {
     println!("Weight of MST is {}", mst_weight);
     result
 }
+
+#[tauri::command]
+pub fn search_long_distance(
+    points: Vec<(f64, f64)>,
+    start_point: (f64, f64),
+) -> Result<f64, String> {
+    if points.is_empty() {
+        return Err("No points provided".to_string());
+    }
+
+    let max_distance = points.iter()
+        .map(|&point| euclidean_distance(&start_point, &point))
+        .fold(f64::NEG_INFINITY, |max_dist, dist| f64::max(max_dist, dist));
+
+    Ok(max_distance) 
+}
